@@ -10,8 +10,8 @@ nodes:
       - { label: 'Yes', next: services }
       - { label: 'No', next: scan }
   scan:
-    prompt: Scan everything first.
-    links: [recon/scanning#port-scanning]
+    prompt: Scan all TCP ports and sample UDP, then identify the services.
+    links: [recon/scanning#host-discovery, recon/scanning#port-scanning, recon/scanning#udp-scanning, recon/scanning#service-detection, recon/scanning#save-nmap-output]
     options:
       - { label: Done, next: services }
   services:
@@ -20,8 +20,19 @@ nodes:
       - { label: 'Yes', next: web }
       - { label: 'No', next: other }
   web:
-    prompt: Enumerate the web service.
+    prompt: Enumerate the web service, then return to the remaining services.
     links: [web/web-enumeration#content-discovery, web/web-enumeration#virtual-hosts]
+    options:
+      - { label: Continue, next: other }
   other:
     prompt: Enumerate each service in turn.
-    links: [services/common-services]
+    links: [services/common-services#ftp, services/common-services#ssh, services/common-services#smb, services/common-services#http, services/common-services#databases]
+    options:
+      - { label: Obtained a shell, next: foothold }
+      - { label: Still no path, next: stuck }
+  foothold:
+    prompt: Stabilize access and enumerate privilege escalation paths.
+    links: [methodology/checklist#initial-access, methodology/checklist#privilege-escalation, methodology/checklist#post-exploitation]
+  stuck:
+    prompt: Revisit untested leads and record the next concrete check.
+    links: [methodology/checklist#recon, methodology/checklist#stuck-with-no-new-leads]
