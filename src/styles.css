@@ -1,0 +1,214 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  min-width: 320px;
+}
+
+@media (min-width: 1024px) {
+  html {
+    scrollbar-gutter: stable;
+  }
+}
+
+:root {
+  --prism-text: #24292f;
+  --prism-comment: #636d77;
+  --prism-keyword: #cf222e;
+  --prism-string: #0a7a3d;
+  --prism-function: #7f4bdb;
+  --prism-number: #0550ae;
+  --prism-tag: #116329;
+  --prism-attr: #953800;
+  --prism-punctuation: #57606a;
+}
+
+html.dark {
+  --prism-text: #e6edf3;
+  --prism-comment: #8d96a0;
+  --prism-keyword: #ff7b72;
+  --prism-string: #7ee787;
+  --prism-function: #d2a8ff;
+  --prism-number: #79c0ff;
+  --prism-tag: #7ee787;
+  --prism-attr: #ffa657;
+  --prism-punctuation: #8d96a0;
+}
+
+@layer components {
+  /* ---------- Markdown prose ---------- */
+  .prose-cheat {
+    @apply text-[15px] leading-7 text-teal-on-surface;
+  }
+  .prose-cheat > * + * {
+    @apply mt-4;
+  }
+  .prose-cheat h2 {
+    @apply mt-12 scroll-mt-20 border-b border-teal-outline-variant/30 pb-2 font-teal-headline text-2xl font-bold tracking-tight;
+  }
+  .prose-cheat h3 {
+    @apply mt-8 scroll-mt-20 font-teal-headline text-lg font-bold;
+  }
+  .prose-cheat h4 {
+    @apply mt-6 scroll-mt-20 font-semibold;
+  }
+  .prose-cheat > h2:first-child,
+  .prose-cheat > h3:first-child {
+    @apply mt-0;
+  }
+  .prose-cheat ul:not(.task-list) {
+    @apply list-disc space-y-1 pl-6 marker:text-teal-on-surface-variant;
+  }
+  .prose-cheat ol {
+    @apply list-decimal space-y-1 pl-6 marker:text-teal-on-surface-variant;
+  }
+  .prose-cheat li > ul,
+  .prose-cheat li > ol {
+    @apply mt-1;
+  }
+  .prose-cheat .task-list {
+    @apply space-y-2 pl-0;
+  }
+  .prose-cheat .task-list .task-list {
+    @apply mt-2 pl-7;
+  }
+  .prose-cheat blockquote {
+    @apply rounded-r-lg border-l-4 border-teal-primary/60 bg-teal-primary/5 px-4 py-2 text-teal-on-surface-variant;
+  }
+  .prose-cheat hr {
+    @apply my-10 border-teal-outline-variant/40;
+  }
+  .prose-cheat strong {
+    @apply font-bold;
+  }
+  .prose-link {
+    @apply font-medium text-teal-primary underline decoration-teal-primary/40 underline-offset-2 hover:decoration-teal-primary;
+  }
+  .inline-code {
+    @apply rounded-md border border-teal-outline-variant/40 bg-teal-surface-container-high px-1.5 py-0.5 font-mono text-[0.85em];
+  }
+  .table-wrap {
+    @apply overflow-x-auto rounded-xl border border-teal-outline-variant/40;
+  }
+  .table-wrap table {
+    @apply w-full border-collapse text-left text-sm;
+  }
+  .table-wrap th {
+    @apply bg-teal-surface-container px-3 py-2 font-semibold;
+  }
+  .table-wrap td {
+    @apply border-t border-teal-outline-variant/30 px-3 py-2 align-top;
+  }
+
+  /* ---------- Code ---------- */
+  .prism-code {
+    color: var(--prism-text);
+    font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+    tab-size: 4;
+  }
+  .prism-code code {
+    display: block;
+    width: max-content;
+    min-width: 100%;
+  }
+  .var-set {
+    @apply rounded-sm bg-teal-primary/10 text-teal-primary;
+    box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--teal-color-primary) 50%, transparent);
+  }
+  .var-unset {
+    @apply rounded-sm bg-teal-warning/15 font-semibold text-teal-warning;
+  }
+
+  /* ---------- Cards & links ---------- */
+  .card-link {
+    @apply flex items-center gap-4 rounded-xl border border-teal-outline-variant/40 bg-teal-surface-container-low px-4 py-3 transition-colors hover:border-teal-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-primary;
+  }
+  .section-card {
+    @apply rounded-2xl border border-teal-outline-variant/40 bg-teal-surface-container-low p-5;
+  }
+  .chip-link {
+    @apply inline-flex rounded-full border border-teal-outline-variant/50 bg-teal-surface-container-low px-3 py-1 text-sm font-medium transition-colors hover:border-teal-primary/50 hover:text-teal-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-primary;
+  }
+  .pager-link {
+    @apply flex flex-col gap-1 rounded-xl border border-teal-outline-variant/40 px-4 py-3 transition-colors hover:border-teal-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-primary;
+  }
+}
+
+.prism-code .token.comment,
+.prism-code .token.prolog,
+.prism-code .token.doctype,
+.prism-code .token.cdata {
+  color: var(--prism-comment);
+}
+.prism-code .token.punctuation,
+.prism-code .token.operator {
+  color: var(--prism-punctuation);
+}
+.prism-code .token.property,
+.prism-code .token.tag,
+.prism-code .token.constant,
+.prism-code .token.symbol {
+  color: var(--prism-tag);
+}
+.prism-code .token.boolean,
+.prism-code .token.number {
+  color: var(--prism-number);
+}
+.prism-code .token.attr-name,
+.prism-code .token.builtin,
+.prism-code .token.char,
+.prism-code .token.inserted,
+.prism-code .token.selector,
+.prism-code .token.string {
+  color: var(--prism-string);
+}
+.prism-code .token.atrule,
+.prism-code .token.attr-value,
+.prism-code .token.keyword {
+  color: var(--prism-keyword);
+}
+.prism-code .token.class-name,
+.prism-code .token.function {
+  color: var(--prism-function);
+}
+.prism-code .token.important,
+.prism-code .token.regex,
+.prism-code .token.variable {
+  color: var(--prism-attr);
+}
+
+/* A heading reached from search briefly glows so the eye lands on it. */
+@keyframes heading-flash {
+  from {
+    background-color: color-mix(in srgb, var(--teal-color-primary) 18%, transparent);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+.heading-flash {
+  animation: heading-flash 1.6s ease-out;
+  border-radius: 0.375rem;
+}
+@media (prefers-reduced-motion: reduce) {
+  .heading-flash {
+    animation: none;
+  }
+}
+
+:focus-visible {
+  scroll-margin: 6rem;
+}
+
+/*
+ * Teal layers popovers (Select, Menu, Popover, Combobox: --teal-z-popover 40)
+ * under the dialog overlay (50), so a Select inside a Dialog renders but every
+ * click lands on the overlay and dismisses the dialog. Radix portals popper
+ * content to <body> and copies the z-index inline onto its wrapper, so lift
+ * those wrappers above dialogs (51) and below toasts (60). Tooltips share
+ * teal-popper-content but not teal-overlay-surface, and keep their own layer.
+ */
+[data-radix-popper-content-wrapper]:has(> .teal-popper-content.teal-overlay-surface) {
+  z-index: 55 !important;
+}
