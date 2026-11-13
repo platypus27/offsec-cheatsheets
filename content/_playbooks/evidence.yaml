@@ -1,0 +1,29 @@
+title: Proof and submission
+description: Capture target evidence before assembling and verifying the report.
+start: proof
+nodes:
+  proof:
+    prompt: Have you captured and submitted the required proof for the target?
+    links: [methodology/checklist#proof, reporting/report#evidence]
+    options:
+      - { label: 'Yes', next: report }
+      - { label: 'No', next: capture }
+  capture:
+    prompt: Capture proof and target identity while interactive access is available.
+    links: [reporting/report#evidence]
+    options:
+      - { label: Recorded, next: proof }
+  report:
+    prompt: Can a reader reproduce the path from your report?
+    links: [reporting/report#structure, reporting/report#templates]
+    options:
+      - { label: 'Yes', next: submission }
+      - { label: 'No', next: fill }
+  fill:
+    prompt: Fill missing commands, evidence and exploit modifications.
+    links: [reporting/report#structure]
+    options:
+      - { label: Ready, next: report }
+  submission:
+    prompt: Check the actual deadlines, current guide, packaging and upload confirmation.
+    links: [exam-day/exam-day#before-the-exam, exam-day/exam-day#time-plan, exam-day/exam-day#breaks, exam-day/exam-day#submission]
