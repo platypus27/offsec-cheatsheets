@@ -1,0 +1,5 @@
+- id: alpha-svc
+  title: Alpha service
+  match: { ports: [8080], services: [quokka] }
+  suggest: [alpha/first#command-block]
+  note: Fixture rule.

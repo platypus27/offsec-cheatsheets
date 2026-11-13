@@ -1,0 +1,14 @@
+title: Fixture route
+description: Two-step fixture tree.
+start: first
+nodes:
+  first:
+    prompt: Go left or right?
+    options:
+      - { label: Left, next: left }
+      - { label: Right, next: right }
+  left:
+    prompt: Left end
+    links: [beta/second#zebra-target]
+  right:
+    prompt: Right end
