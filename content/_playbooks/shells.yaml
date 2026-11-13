@@ -1,0 +1,47 @@
+title: Shell and file transfer
+description: Establish access, improve the terminal, then verify transferred files.
+start: access
+nodes:
+  access:
+    prompt: Do you already have a working shell?
+    options:
+      - { label: 'Yes', next: terminal }
+      - { label: No, target can run Bash, next: reverse }
+      - { label: No, known remote logon credentials, next: remote }
+  reverse:
+    prompt: Start a listener, then connect from the target.
+    links: [shells/shells#listeners, shells/shells#bash-reverse-shell]
+    options:
+      - { label: Connected, next: terminal }
+      - { label: Failed, next: failure }
+  remote:
+    prompt: Use the service and account rights actually available.
+    links: [services/common-services#ssh, services/remote-access#winrm, services/remote-access#rdp]
+    options:
+      - { label: Connected, next: terminal }
+      - { label: Failed, next: failure }
+  failure:
+    prompt: Check listener, reachability and runtime separately.
+    links: [shells/shells#shell-connection-failure]
+  terminal:
+    prompt: Is this a basic Unix shell with Python available?
+    options:
+      - { label: 'Yes', next: upgrade }
+      - { label: 'No', next: transfer }
+  upgrade:
+    prompt: Spawn a pseudo-terminal when supported.
+    links: [shells/shells#upgrading-a-shell]
+    options:
+      - { label: Ready, next: transfer }
+  transfer:
+    prompt: Which system needs the prepared file?
+    links: [shells/file-transfers#serving-files]
+    options:
+      - { label: Linux, next: linux }
+      - { label: Windows, next: windows }
+  linux:
+    prompt: Download, then compare the file hash.
+    links: [shells/file-transfers#downloading-on-linux, shells/file-transfers#verify-a-transferred-file]
+  windows:
+    prompt: Download from PowerShell, then compare the file hash.
+    links: [shells/file-transfers#downloading-on-windows, shells/file-transfers#verify-a-transferred-file]
