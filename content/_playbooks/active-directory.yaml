@@ -1,0 +1,56 @@
+title: Active Directory
+description: Identify the domain, enumerate with the access you have, then validate a path.
+start: credentials
+nodes:
+  credentials:
+    prompt: Do you have a valid domain credential?
+    links: [active-directory/ad-enumeration#domain-overview]
+    options:
+      - { label: 'Yes', next: dns }
+      - { label: 'No', next: unauthenticated }
+  unauthenticated:
+    prompt: Have you identified any domain usernames?
+    links: [services/common-services#smb]
+    options:
+      - { label: 'Yes', next: asrep }
+      - { label: 'No', next: identify }
+  identify:
+    prompt: Identify the DNS domain, DC and usernames before selecting an AD attack.
+    links: [active-directory/ad-enumeration#domain-overview, active-directory/ad-enumeration#dns-srv-records]
+  asrep:
+    prompt: Check known usernames for disabled Kerberos preauthentication.
+    links: [active-directory/kerberos#as-rep-roasting]
+    options:
+      - { label: Obtained a valid credential, next: dns }
+      - { label: No usable result, next: identify }
+  dns:
+    prompt: Do DC naming, resolution and Kerberos time checks pass?
+    links: [active-directory/ad-enumeration#dns-srv-records, active-directory/kerberos#kerberos-dns-or-clock-failure]
+    options:
+      - { label: 'Yes', next: enumerate }
+      - { label: 'No', next: repair }
+  repair:
+    prompt: Resolve the naming or time failure before retrying authentication.
+    links: [active-directory/kerberos#kerberos-dns-or-clock-failure]
+    options:
+      - { label: Ready, next: dns }
+  enumerate:
+    prompt: Enumerate users, groups, policy, shares and BloodHound CE paths.
+    links: [active-directory/ad-enumeration#domain-users, active-directory/ad-enumeration#domain-groups, active-directory/ad-enumeration#password-policy, active-directory/ad-enumeration#bloodhound-ce-collection]
+    options:
+      - { label: SPN or roastable user, next: roast }
+      - { label: ACL or delegation path, next: path }
+      - { label: Certificate enrollment path, next: certificates }
+      - { label: Credential for another host, next: reuse }
+  roast:
+    prompt: Request eligible material and select the hash mode from its marker.
+    links: [active-directory/kerberos#as-rep-roasting, active-directory/kerberos#kerberoasting, active-directory/kerberos#kerberos-hash-modes]
+  path:
+    prompt: Check effective permissions and delegation prerequisites before changes.
+    links: [active-directory/attack-paths#acl-abuse, active-directory/attack-paths#delegation-prerequisites]
+  certificates:
+    prompt: Check enrollment, collection gaps and strong certificate mapping.
+    links: [active-directory/attack-paths#ad-cs-enrollment-prerequisites, active-directory/attack-paths#certificate-strong-mapping-after-2025]
+  reuse:
+    prompt: Validate the credential authority and resulting access on one intended host.
+    links: [active-directory/credential-access#domain-or-local-login, active-directory/credential-access#reuse-one-known-credential]

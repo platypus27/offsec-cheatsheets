@@ -23,6 +23,7 @@
   match: { ports: [1433, 3306, 5432], services: [mysql, ms-sql, postgresql] }
   suggest: [services/common-services#databases]
 - id: domain-controller
-  title: Looks like a domain controller
+  title: Check for an AD domain controller
   match: { ports: [88, 389, 636], services: [kerberos, ldap] }
-  suggest: [active-directory/ad-enumeration]
+  suggest: [active-directory/ad-enumeration#domain-overview, active-directory/ad-enumeration#dns-srv-records, active-directory/ad-enumeration#bloodhound-ce-collection, active-directory/kerberos#as-rep-roasting, active-directory/kerberos#kerberoasting]
+  note: Confirm the domain and DC role; a port match alone is not proof.
