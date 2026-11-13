@@ -1,0 +1,39 @@
+title: Web enumeration
+description: Follow observed app behavior from discovery to a verified test result.
+start: inspect
+nodes:
+  inspect:
+    prompt: Have you inspected headers, redirects, source and the app itself?
+    links: [web/web-enumeration#technology-fingerprinting]
+    options:
+      - { label: Ready, next: names }
+  names:
+    prompt: Does the app depend on another hostname?
+    options:
+      - { label: 'Yes', next: vhosts }
+      - { label: 'No', next: content }
+  vhosts:
+    prompt: Compare virtual hosts and verify HTTPS hostname routing where relevant.
+    links: [web/web-enumeration#virtual-hosts, web/web-enumeration#https-hostname-and-sni]
+    options:
+      - { label: Ready, next: content }
+  content:
+    prompt: Discover relevant paths and confirm results against missing-page behavior.
+    links: [web/web-enumeration#content-discovery]
+    options:
+      - { label: Input or query parameter, next: inputs }
+      - { label: File selection feature, next: lfi }
+      - { label: Upload feature, next: upload }
+      - { label: Found credentials, next: credentials }
+  inputs:
+    prompt: Confirm a parameter, then compare controlled SQL conditions if relevant.
+    links: [web/input-tests#parameter-discovery, web/input-tests#sql-injection-comparison]
+  lfi:
+    prompt: Test the observed file parameter and verify returned file content.
+    links: [web/input-tests#local-file-inclusion]
+  upload:
+    prompt: Verify storage, retrieval and execution as separate outcomes.
+    links: [web/input-tests#file-upload-checks]
+  credentials:
+    prompt: Check one credential on an intended service using its correct authority.
+    links: [active-directory/credential-access#reuse-one-known-credential]
