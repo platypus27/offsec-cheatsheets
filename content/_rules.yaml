@@ -1,7 +1,7 @@
 # Suggestion rules for the output parser and target pages.
 # Each rule matches open ports by number, service-name substring, or version
 # regex (case-insensitive), and suggests pages or headings from your notes as
-# section/page#heading-id. Replace these starters with your own.
+# section/page#heading-id. A number or name match is a lead, not service proof.
 - id: ftp
   title: FTP
   match: { ports: [21], services: [ftp] }
@@ -9,21 +9,50 @@
 - id: ssh
   title: SSH
   match: { ports: [22], services: [ssh] }
-  suggest: [services/common-services#ssh]
+  suggest: [services/common-services#ssh, pivoting/tunnelling#port-forwarding]
 - id: smb
   title: SMB
   match: { ports: [139, 445], services: [microsoft-ds, netbios-ssn] }
-  suggest: [services/common-services#smb]
+  suggest: [services/common-services#smb, active-directory/credential-access#domain-or-local-login, active-directory/attack-paths#smb-signing-prerequisites]
 - id: http
   title: Web server
-  match: { ports: [80, 443, 8080, 8443], services: [http] }
-  suggest: [services/common-services#http, web/web-enumeration]
-- id: databases
-  title: Database
-  match: { ports: [1433, 3306, 5432], services: [mysql, ms-sql, postgresql] }
-  suggest: [services/common-services#databases]
+  match: { ports: [80, 443, 8000, 8080, 8443], services: [http] }
+  suggest: [web/web-enumeration#technology-fingerprinting, web/web-enumeration#content-discovery, web/web-enumeration#virtual-hosts]
+- id: dns
+  title: DNS
+  match: { ports: [53], services: [domain, dns] }
+  suggest: [services/network-services#dns-zone-transfer, active-directory/ad-enumeration#dns-srv-records]
+- id: snmp
+  title: SNMP
+  match: { ports: [161], services: [snmp] }
+  suggest: [services/network-services#snmp-community-walk]
+- id: nfs
+  title: RPC or NFS
+  match: { ports: [111, 2049], services: [rpcbind, nfs] }
+  suggest: [services/network-services#nfs-exports]
+  note: RPC port 111 alone does not prove an NFS export exists.
+- id: mssql
+  title: MSSQL
+  match: { ports: [1433], services: [ms-sql] }
+  suggest: [services/databases#mssql]
+- id: mysql
+  title: MySQL
+  match: { ports: [3306], services: [mysql] }
+  suggest: [services/databases#mysql]
+- id: postgresql
+  title: PostgreSQL
+  match: { ports: [5432], services: [postgresql] }
+  suggest: [services/databases#postgresql]
+- id: winrm
+  title: WinRM
+  match: { ports: [5985, 5986], services: [wsman, winrm] }
+  suggest: [services/remote-access#winrm, windows/windows-privesc#situational-awareness]
+- id: rdp
+  title: RDP
+  match: { ports: [3389], services: [ms-wbt-server, rdp] }
+  suggest: [services/remote-access#rdp]
 - id: domain-controller
   title: Check for an AD domain controller
   match: { ports: [88, 389, 636], services: [kerberos, ldap] }
-  suggest: [active-directory/ad-enumeration#domain-overview, active-directory/ad-enumeration#dns-srv-records, active-directory/ad-enumeration#bloodhound-ce-collection, active-directory/kerberos#as-rep-roasting, active-directory/kerberos#kerberoasting]
+  suggest: [active-directory/ad-enumeration#domain-overview, active-directory/ad-enumeration#dns-srv-records, active-directory/ad-enumeration#domain-users, active-directory/ad-enumeration#domain-groups, active-directory/ad-enumeration#password-policy, active-directory/ad-enumeration#bloodhound-ce-collection, active-directory/kerberos#as-rep-roasting, active-directory/kerberos#kerberoasting, active-directory/attack-paths#ldap-signing-and-channel-binding]
   note: Confirm the domain and DC role; a port match alone is not proof.
