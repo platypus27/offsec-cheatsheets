@@ -36,7 +36,7 @@ nodes:
       - { label: Ready, next: dns }
   enumerate:
     prompt: Which AD lead did you find?
-    links: [active-directory/ad-enumeration#domain-users, active-directory/ad-enumeration#domain-groups, active-directory/ad-enumeration#password-policy, services/common-services#smb, active-directory/ad-enumeration#bloodhound-ce-collection]
+    links: [active-directory/ad-enumeration#domain-users, active-directory/ad-enumeration#domain-groups, active-directory/ad-enumeration#password-policy, services/common-services#sysvol, active-directory/ad-enumeration#bloodhound-ce-collection]
     options:
       - { label: Roasting, next: roast }
       - { label: ACL / delegation, next: path }
@@ -53,4 +53,4 @@ nodes:
     links: [active-directory/attack-paths#ad-cs-enrollment-prerequisites, active-directory/attack-paths#certificate-strong-mapping-after-2025]
   reuse:
     prompt: Validate the credential authority and resulting access on one intended host.
-    links: [active-directory/credential-access#domain-or-local-login, active-directory/credential-access#reuse-one-known-credential]
+    links: [active-directory/credential-access#domain-or-local-login, active-directory/credential-access#reuse-one-known-credential, active-directory/credential-access#kerberos-authentication, active-directory/credential-access#remote-windows-command]

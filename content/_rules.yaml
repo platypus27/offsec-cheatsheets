@@ -13,7 +13,7 @@
 - id: smb
   title: SMB
   match: { ports: [139, 445], services: [microsoft-ds, netbios-ssn] }
-  suggest: [services/common-services#smb, active-directory/credential-access#domain-or-local-login, active-directory/attack-paths#smb-signing-prerequisites]
+  suggest: [services/common-services#smb, services/common-services#sysvol, active-directory/credential-access#domain-or-local-login, active-directory/attack-paths#smb-signing-prerequisites]
 - id: http
   title: Web server
   match: { ports: [80, 443, 8000, 8080, 8443], services: [http] }
@@ -54,5 +54,9 @@
 - id: domain-controller
   title: Check for an AD domain controller
   match: { ports: [88, 389, 636], services: [kerberos, ldap] }
-  suggest: [active-directory/ad-enumeration#domain-overview, active-directory/ad-enumeration#dns-srv-records, active-directory/ad-enumeration#domain-users, active-directory/ad-enumeration#domain-groups, active-directory/ad-enumeration#password-policy, active-directory/ad-enumeration#bloodhound-ce-collection, active-directory/kerberos#as-rep-roasting, active-directory/kerberos#kerberoasting, active-directory/attack-paths#ldap-signing-and-channel-binding]
+  suggest: [active-directory/ad-enumeration#domain-overview, active-directory/ad-enumeration#bloodhound-ce-collection, active-directory/attack-paths#ldap-signing-and-channel-binding]
   note: Confirm the domain and DC role; a port match alone is not proof.
+- id: kerberos
+  title: Kerberos
+  match: { ports: [88], services: [kerberos] }
+  suggest: [active-directory/kerberos#as-rep-roasting, active-directory/kerberos#kerberoasting, active-directory/kerberos#kerberos-dns-or-clock-failure]

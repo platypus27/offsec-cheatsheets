@@ -31,7 +31,11 @@ smbclient -L '{{RHOST}}' -N
 smbclient -L '{{RHOST}}' -U '{{DOMAIN}}/{{USER}}%{{PASS}}'
 ```
 
-Use an enumerated share name when connecting. For AD policy and scripts:
+Use an enumerated share name when connecting. [Source](https://www.samba.org/samba/docs/current/man-html/smbclient.1.html).
+
+## SYSVOL
+
+Read AD policy and logon scripts with a domain account:
 
 ```bash
 smbclient '//{{RHOST}}/SYSVOL' -U '{{DOMAIN}}/{{USER}}%{{PASS}}'
@@ -45,4 +49,4 @@ Follow [fingerprinting](web/web-enumeration#technology-fingerprinting), [content
 
 ## Databases
 
-Choose the detected engine: [MSSQL](services/databases#mssql), [MySQL](services/databases#mysql) or [PostgreSQL](services/databases#postgresql). Check [WinRM](services/remote-access#winrm) or [RDP](services/remote-access#rdp) for remote logon.
+Choose the detected engine: [MSSQL](services/databases#mssql), [MySQL](services/databases#mysql) or [PostgreSQL](services/databases#postgresql).
