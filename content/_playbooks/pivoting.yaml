@@ -1,0 +1,31 @@
+title: Reach an internal service
+description: Choose a tunnel direction and test the application through it.
+start: ssh
+nodes:
+  ssh:
+    prompt: Can you establish SSH to the pivot with forwarding permitted?
+    options:
+      - { label: 'Yes', next: forwarding }
+      - { label: No, pivot can connect back, next: reverse }
+      - { label: Neither confirmed, next: diagnose }
+  forwarding:
+    prompt: Do you need one pivot-local service or SOCKS-aware client access?
+    options:
+      - { label: One loopback service, next: local }
+      - { label: SOCKS client access, next: socks }
+  local:
+    prompt: Forward the remote loopback service and test with its local client.
+    links: [pivoting/tunnelling#port-forwarding]
+  socks:
+    prompt: Start SSH dynamic forwarding and configure the local client.
+    links: [pivoting/tunnelling#socks-proxies]
+    options:
+      - { label: Verify, next: diagnose }
+  reverse:
+    prompt: Use Chisel reverse SOCKS with separate control and proxy ports.
+    links: [pivoting/tunnelling#chisel-reverse-socks]
+    options:
+      - { label: Verify, next: diagnose }
+  diagnose:
+    prompt: Check control connection, listener, destination reachability and application response.
+    links: [pivoting/tunnelling#tunnel-troubleshooting]
