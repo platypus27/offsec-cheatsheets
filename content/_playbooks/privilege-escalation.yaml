@@ -1,0 +1,42 @@
+title: Local privilege escalation
+description: Enumerate the current context, then validate a concrete privileged execution path.
+start: platform
+nodes:
+  platform:
+    prompt: Which target OS are you working on?
+    options:
+      - { label: Linux, next: linux }
+      - { label: Windows, next: windows }
+  linux:
+    prompt: Which Linux lead needs checking?
+    links: [linux/linux-privesc#situational-awareness, linux/linux-privesc#automated-enumeration]
+    options:
+      - { label: Sudo rule, next: sudo }
+      - { label: SUID or capabilities, next: binaries }
+      - { label: Scheduled execution, next: jobs }
+  sudo:
+    prompt: Check exact run-as rights and command restrictions.
+    links: [linux/linux-privesc#sudo-permissions, linux/linux-privesc#sudo-find-shell]
+  binaries:
+    prompt: Confirm executable ownership and the specific privileged behavior.
+    links: [linux/linux-privesc#suid-binaries, linux/linux-privesc#file-capabilities]
+  jobs:
+    prompt: Check job user, executed path, dependency permissions and trigger.
+    links: [linux/linux-privesc#cron-jobs, linux/linux-privesc#systemd-timers]
+  windows:
+    prompt: Which Windows lead needs checking?
+    links: [windows/windows-privesc#situational-awareness, windows/windows-privesc#token-privileges, windows/windows-privesc#automated-enumeration]
+    options:
+      - { label: Service, next: service }
+      - { label: Scheduled task, next: task }
+      - { label: Token privilege, next: token }
+  service:
+    prompt: Validate the service account, path, permissions and trigger.
+    links: [windows/windows-privesc#service-paths-and-accounts, windows/windows-privesc#file-and-directory-acls]
+  task:
+    prompt: Validate the scheduled action and writable dependencies.
+    links: [windows/windows-privesc#scheduled-tasks, windows/windows-privesc#file-and-directory-acls]
+  token:
+    prompt: Match the privilege to a supported path for the actual target build.
+    links: [windows/windows-privesc#token-privileges]
+    body: 'TODO: verify the required token context and tool version before selecting an exploit.'
