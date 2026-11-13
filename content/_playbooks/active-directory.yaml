@@ -3,13 +3,13 @@ description: Identify the domain, enumerate with the access you have, then valid
 start: credentials
 nodes:
   credentials:
-    prompt: Do you have a valid domain credential?
+    prompt: Valid domain credentials?
     links: [active-directory/ad-enumeration#domain-overview]
     options:
       - { label: 'Yes', next: dns }
       - { label: 'No', next: unauthenticated }
   unauthenticated:
-    prompt: Have you identified any domain usernames?
+    prompt: Known domain usernames?
     links: [services/common-services#smb]
     options:
       - { label: 'Yes', next: asrep }
@@ -24,7 +24,7 @@ nodes:
       - { label: Obtained a valid credential, next: dns }
       - { label: No usable result, next: identify }
   dns:
-    prompt: Do DC naming, resolution and Kerberos time checks pass?
+    prompt: DNS and Kerberos checks pass?
     links: [active-directory/ad-enumeration#dns-srv-records, active-directory/kerberos#kerberos-dns-or-clock-failure]
     options:
       - { label: 'Yes', next: enumerate }
@@ -35,13 +35,13 @@ nodes:
     options:
       - { label: Ready, next: dns }
   enumerate:
-    prompt: Enumerate users, groups, policy, shares and BloodHound CE paths.
-    links: [active-directory/ad-enumeration#domain-users, active-directory/ad-enumeration#domain-groups, active-directory/ad-enumeration#password-policy, active-directory/ad-enumeration#bloodhound-ce-collection]
+    prompt: Which AD lead did you find?
+    links: [active-directory/ad-enumeration#domain-users, active-directory/ad-enumeration#domain-groups, active-directory/ad-enumeration#password-policy, services/common-services#smb, active-directory/ad-enumeration#bloodhound-ce-collection]
     options:
-      - { label: SPN or roastable user, next: roast }
-      - { label: ACL or delegation path, next: path }
-      - { label: Certificate enrollment path, next: certificates }
-      - { label: Credential for another host, next: reuse }
+      - { label: Roasting, next: roast }
+      - { label: ACL / delegation, next: path }
+      - { label: Certificates, next: certificates }
+      - { label: Credentials, next: reuse }
   roast:
     prompt: Request eligible material and select the hash mode from its marker.
     links: [active-directory/kerberos#as-rep-roasting, active-directory/kerberos#kerberoasting, active-directory/kerberos#kerberos-hash-modes]

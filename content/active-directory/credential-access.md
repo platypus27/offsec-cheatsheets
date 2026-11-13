@@ -37,7 +37,7 @@ NetExec's admin indicator is a lead; check the command result itself. [Source](h
 
 ## Kerberos authentication
 
-Set RHOST to the target FQDN and DC to the KDC hostname.
+Set RHOST to the target FQDN and DC to the KDC address.
 
 ```bash
 nxc smb {{RHOST}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' -k --kdcHost {{DC}}
