@@ -59,7 +59,7 @@ nxc ldap {{DC}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' --bloodhound --colle
 ```
 
 - [ ] Use CE ingestion and review collection errors before trusting missing paths.
-- [ ] All contacts member hosts; it excludes LoggedOn and is not equivalent to every SharpHound collection.
+- [ ] Verify All's methods for the installed NetExec version; it can contact member hosts and differs from SharpHound.
 - [ ] Use [attack-path prerequisites](active-directory/attack-paths#acl-abuse) before acting on a graph edge.
 
-[NetExec CE default](https://www.netexec.wiki/ldap-protocol/bloodhound-ingestor), [Python collector limits](https://github.com/dirkjanm/BloodHound.py).
+[NetExec CE default](https://www.netexec.wiki/ldap-protocol/bloodhound-ingestor), [current method resolver](https://github.com/Pennyw0rth/NetExec/blob/main/nxc/protocols/ldap/bloodhound.py), [Python collector limits](https://github.com/dirkjanm/BloodHound.py).
