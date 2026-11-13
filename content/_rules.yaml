@@ -1,0 +1,28 @@
+# Suggestion rules for the output parser and target pages.
+# Each rule matches open ports by number, service-name substring, or version
+# regex (case-insensitive), and suggests pages or headings from your notes as
+# section/page#heading-id. Replace these starters with your own.
+- id: ftp
+  title: FTP
+  match: { ports: [21], services: [ftp] }
+  suggest: [services/common-services#ftp]
+- id: ssh
+  title: SSH
+  match: { ports: [22], services: [ssh] }
+  suggest: [services/common-services#ssh]
+- id: smb
+  title: SMB
+  match: { ports: [139, 445], services: [microsoft-ds, netbios-ssn] }
+  suggest: [services/common-services#smb]
+- id: http
+  title: Web server
+  match: { ports: [80, 443, 8080, 8443], services: [http] }
+  suggest: [services/common-services#http, web/web-enumeration]
+- id: databases
+  title: Database
+  match: { ports: [1433, 3306, 5432], services: [mysql, ms-sql, postgresql] }
+  suggest: [services/common-services#databases]
+- id: domain-controller
+  title: Looks like a domain controller
+  match: { ports: [88, 389, 636], services: [kerberos, ldap] }
+  suggest: [active-directory/ad-enumeration]

@@ -1,0 +1,27 @@
+# A decision tree. Each node has a prompt, optional body and note links
+# (section/page#heading-id), and options that lead to other nodes.
+title: No foothold yet
+description: Work back through enumeration when nothing has worked.
+start: scanned
+nodes:
+  scanned:
+    prompt: Have you scanned every TCP port, and the top UDP ports?
+    options:
+      - { label: 'Yes', next: services }
+      - { label: 'No', next: scan }
+  scan:
+    prompt: Scan everything first.
+    links: [recon/scanning#port-scanning]
+    options:
+      - { label: Done, next: services }
+  services:
+    prompt: Is there a web service?
+    options:
+      - { label: 'Yes', next: web }
+      - { label: 'No', next: other }
+  web:
+    prompt: Enumerate the web service.
+    links: [web/web-enumeration#content-discovery, web/web-enumeration#virtual-hosts]
+  other:
+    prompt: Enumerate each service in turn.
+    links: [services/common-services]
