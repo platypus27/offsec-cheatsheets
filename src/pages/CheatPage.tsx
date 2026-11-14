@@ -11,13 +11,18 @@ import { NotFound } from './NotFound'
 function PrevNext({ prev, next }: { prev?: Page; next?: Page }) {
   if (!prev && !next) return null
   return (
-    <nav aria-label="Pages" className="mt-14 grid gap-3 border-t border-teal-outline-variant/30 pt-6 sm:grid-cols-2">
+    <nav
+      aria-label="Pages"
+      className="mt-14 grid gap-3 border-t border-teal-outline-variant/30 pt-6 sm:grid-cols-2"
+    >
       {prev ? (
         <Link to={pageHref(prev.slug)} className="pager-link group">
           <span className="flex items-center gap-1 text-xs text-teal-on-surface-variant">
             <ArrowLeft aria-hidden="true" className="size-3.5" /> Previous
           </span>
-          <span className="font-semibold text-teal-on-surface group-hover:text-teal-primary">{prev.title}</span>
+          <span className="font-semibold text-teal-on-surface group-hover:text-teal-primary">
+            {prev.title}
+          </span>
         </Link>
       ) : (
         <span />
@@ -27,7 +32,9 @@ function PrevNext({ prev, next }: { prev?: Page; next?: Page }) {
           <span className="flex items-center gap-1 text-xs text-teal-on-surface-variant">
             Next <ArrowRight aria-hidden="true" className="size-3.5" />
           </span>
-          <span className="font-semibold text-teal-on-surface group-hover:text-teal-primary">{next.title}</span>
+          <span className="font-semibold text-teal-on-surface group-hover:text-teal-primary">
+            {next.title}
+          </span>
         </Link>
       ) : null}
     </nav>
@@ -52,7 +59,8 @@ function useActiveHeading(ids: string[]): string | undefined {
       // At the very bottom the last headings can never reach the line, so
       // light the final one - but only on pages long enough to scroll.
       const { scrollHeight } = document.documentElement
-      if (scrollHeight > window.innerHeight && window.innerHeight + window.scrollY >= scrollHeight - 4) current = list[list.length - 1]
+      if (scrollHeight > window.innerHeight && window.innerHeight + window.scrollY >= scrollHeight - 4)
+        current = list[list.length - 1]
       setActive(current)
     }
     const onScroll = () => {
@@ -78,8 +86,13 @@ function OnThisPage({ page }: { page: Page }) {
   if (page.headings.length < 2) return null
   return (
     <aside className="hidden w-60 shrink-0 xl:block">
-      <nav aria-label="On this page" className="sticky top-20 max-h-[calc(100dvh-6rem)] overflow-y-auto pb-8 pr-2">
-        <p className="mb-2 text-xs font-bold uppercase tracking-wider text-teal-on-surface-variant">On this page</p>
+      <nav
+        aria-label="On this page"
+        className="sticky top-20 max-h-[calc(100dvh-6rem)] overflow-y-auto pb-8 pr-2"
+      >
+        <p className="mb-2 text-xs font-bold uppercase tracking-wider text-teal-on-surface-variant">
+          On this page
+        </p>
         <ul>
           {page.headings.map((heading) => (
             <li key={heading.id}>
@@ -173,7 +186,9 @@ export function CheatPage({ content }: { content: Content }) {
         />
         <header className="mb-8 mt-4 flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
-            <h1 className="font-teal-headline text-3xl font-extrabold tracking-tight text-teal-on-surface sm:text-4xl">{page.title}</h1>
+            <h1 className="font-teal-headline text-3xl font-extrabold tracking-tight text-teal-on-surface sm:text-4xl">
+              {page.title}
+            </h1>
             {page.tags.length > 0 ? (
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {page.tags.map((tag) => (
@@ -185,7 +200,11 @@ export function CheatPage({ content }: { content: Content }) {
           <div className="flex flex-wrap items-center gap-2">
             <ChecklistProgress page={page} />
             <Button variant="secondary" size="sm" aria-pressed={pinned} onClick={() => togglePin(page.slug)}>
-              {pinned ? <PinOff aria-hidden="true" className="size-3.5" /> : <Pin aria-hidden="true" className="size-3.5" />}
+              {pinned ? (
+                <PinOff aria-hidden="true" className="size-3.5" />
+              ) : (
+                <Pin aria-hidden="true" className="size-3.5" />
+              )}
               {pinned ? 'Unpin' : 'Pin'}
             </Button>
           </div>

@@ -6,6 +6,7 @@ import remarkParse from 'remark-parse'
 import { unified } from 'unified'
 import { visit } from 'unist-util-visit'
 import { parse as parseYaml } from 'yaml'
+import { asRecord } from './guards'
 
 export interface Heading {
   id: string
@@ -62,7 +63,8 @@ export interface Content {
 const UNORDERED = Number.MAX_SAFE_INTEGER
 
 /** Storage key for a task: the label plus its occurrence index, so repeated labels stay independent. */
-export const taskKey = (pageSlug: string, label: string, occurrence: number) => `${pageSlug}::${label}::${occurrence}`
+export const taskKey = (pageSlug: string, label: string, occurrence: number) =>
+  `${pageSlug}::${label}::${occurrence}`
 export const RESERVED_SECTIONS = new Set(['tools'])
 export const taskPrefix = (pageSlug: string) => `${pageSlug}::`
 const FRONTMATTER = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/
@@ -81,7 +83,7 @@ function humanize(name: string): string {
 function readYaml(source: string): Record<string, unknown> {
   try {
     const data: unknown = parseYaml(source)
-    return data && typeof data === 'object' && !Array.isArray(data) ? (data as Record<string, unknown>) : {}
+    return asRecord(data)
   } catch {
     return {}
   }
@@ -94,7 +96,8 @@ function splitFrontmatter(raw: string): { data: Record<string, unknown>; body: s
 }
 
 const stringField = (value: unknown) => (typeof value === 'string' && value.trim() ? value.trim() : undefined)
-const numberField = (value: unknown) => (typeof value === 'number' && Number.isFinite(value) ? value : UNORDERED)
+const numberField = (value: unknown) =>
+  typeof value === 'number' && Number.isFinite(value) ? value : UNORDERED
 const tagsField = (value: unknown) =>
   Array.isArray(value) ? value.filter((tag): tag is string => typeof tag === 'string') : []
 
@@ -169,7 +172,12 @@ export function parsePage(path: string, raw: string): Page {
       const label = taskLabel(node)
       const seen = occurrences.get(label) ?? 0
       occurrences.set(label, seen + 1)
-      tasks.push({ key: taskKey(slug, label, seen), label, line: node.position.start.line, defaultChecked: node.checked })
+      tasks.push({
+        key: taskKey(slug, label, seen),
+        label,
+        line: node.position.start.line,
+        defaultChecked: node.checked,
+      })
     }
   })
 

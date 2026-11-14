@@ -41,8 +41,20 @@ describe('parseScan', () => {
     expect(box).toMatchObject({ address: '10.10.10.5', hostname: 'box.lab' })
     expect(box!.ports).toEqual([
       { port: 21, protocol: 'tcp', state: 'open', service: 'ftp', version: 'vsftpd 3.0.3' },
-      { port: 22, protocol: 'tcp', state: 'open', service: 'ssh', version: 'OpenSSH 8.2p1 Ubuntu 4ubuntu0.5 (Ubuntu Linux; protocol 2.0)' },
-      { port: 80, protocol: 'tcp', state: 'open', service: 'http', version: 'Apache httpd 2.4.41 ((Ubuntu))' },
+      {
+        port: 22,
+        protocol: 'tcp',
+        state: 'open',
+        service: 'ssh',
+        version: 'OpenSSH 8.2p1 Ubuntu 4ubuntu0.5 (Ubuntu Linux; protocol 2.0)',
+      },
+      {
+        port: 80,
+        protocol: 'tcp',
+        state: 'open',
+        service: 'http',
+        version: 'Apache httpd 2.4.41 ((Ubuntu))',
+      },
       { port: 139, protocol: 'tcp', state: 'filtered', service: 'netbios-ssn', version: '' },
       { port: 445, protocol: 'tcp', state: 'open', service: 'microsoft-ds?', version: '' },
     ])
@@ -59,7 +71,13 @@ describe('parseScan', () => {
         hostname: 'dc01.corp.local',
         ports: [
           { port: 53, protocol: 'tcp', state: 'open', service: 'domain', version: 'Simple DNS Plus' },
-          { port: 88, protocol: 'tcp', state: 'open', service: 'kerberos-sec', version: 'Microsoft Windows Kerberos' },
+          {
+            port: 88,
+            protocol: 'tcp',
+            state: 'open',
+            service: 'kerberos-sec',
+            version: 'Microsoft Windows Kerberos',
+          },
           { port: 445, protocol: 'tcp', state: 'closed', service: 'microsoft-ds', version: '' },
         ],
       },
@@ -80,14 +98,20 @@ describe('parseScan', () => {
   })
 
   it('skips XML ports without a port number', () => {
-    const result = parseScan('<nmaprun><host><address addr="1.2.3.4" addrtype="ipv4"/><ports><port protocol="tcp"><state state="open"/></port></ports></host></nmaprun>')
+    const result = parseScan(
+      '<nmaprun><host><address addr="1.2.3.4" addrtype="ipv4"/><ports><port protocol="tcp"><state state="open"/></port></ports></host></nmaprun>',
+    )
     expect(result.hosts[0]!.ports).toEqual([])
   })
 
   it('accepts a bare port table without a host header', () => {
     const result = parseScan('PORT   STATE SERVICE\n3306/tcp open  mysql\n')
     expect(result.hosts).toEqual([
-      { address: '', hostname: undefined, ports: [{ port: 3306, protocol: 'tcp', state: 'open', service: 'mysql', version: '' }] },
+      {
+        address: '',
+        hostname: undefined,
+        ports: [{ port: 3306, protocol: 'tcp', state: 'open', service: 'mysql', version: '' }],
+      },
     ])
   })
 

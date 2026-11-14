@@ -3,9 +3,9 @@ import { findPlaceholders, substitute } from './variables'
 
 describe('substitute', () => {
   it('replaces set placeholders and leaves unset ones visible', () => {
-    expect(substitute('nc {{ RHOST }} {{LPORT}} {{LHOST}}', { RHOST: '10.0.0.5', LPORT: '', LHOST: '  ' })).toBe(
-      'nc 10.0.0.5 {{LPORT}} {{LHOST}}',
-    )
+    expect(
+      substitute('nc {{ RHOST }} {{LPORT}} {{LHOST}}', { RHOST: '10.0.0.5', LPORT: '', LHOST: '  ' }),
+    ).toBe('nc 10.0.0.5 {{LPORT}} {{LHOST}}')
   })
 
   it('does not reinterpret replacement patterns inside values', () => {

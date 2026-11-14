@@ -2,7 +2,13 @@ import { describe, expect, it } from 'vitest'
 import { effectiveVariables, isTargets, mergePorts, newTarget, upsertFromScan } from './targets'
 import type { ScannedPort } from './nmap'
 
-const p = (port: number, service = 'x', version = '', state = 'open'): ScannedPort => ({ port, protocol: 'tcp', state, service, version })
+const p = (port: number, service = 'x', version = '', state = 'open'): ScannedPort => ({
+  port,
+  protocol: 'tcp',
+  state,
+  service,
+  version,
+})
 
 describe('targets', () => {
   it('creates targets with unique ids and trimmed fields', () => {
@@ -24,7 +30,10 @@ describe('targets', () => {
   })
 
   it('merges ports by number and protocol, letting newer scan detail win', () => {
-    const merged = mergePorts([p(22, 'ssh', 'OpenSSH 8'), p(80, 'http')], [p(80, 'http', 'Apache 2.4'), p(445, 'smb'), { ...p(22), protocol: 'udp' }])
+    const merged = mergePorts(
+      [p(22, 'ssh', 'OpenSSH 8'), p(80, 'http')],
+      [p(80, 'http', 'Apache 2.4'), p(445, 'smb'), { ...p(22), protocol: 'udp' }],
+    )
     expect(merged.map((port) => `${port.port}/${port.protocol}:${port.version}`)).toEqual([
       '22/tcp:OpenSSH 8',
       '22/udp:',
@@ -37,7 +46,11 @@ describe('targets', () => {
 
   it('upserts scanned hosts by address', () => {
     const existing = [{ ...newTarget('web', '10.0.0.1'), ports: [p(22)] }]
-    const { targets, targetId } = upsertFromScan(existing, { address: '10.0.0.1', hostname: 'web.lab', ports: [p(80)] })
+    const { targets, targetId } = upsertFromScan(existing, {
+      address: '10.0.0.1',
+      hostname: 'web.lab',
+      ports: [p(80)],
+    })
     expect(targets).toHaveLength(1)
     expect(targetId).toBe(existing[0]!.id)
     expect(targets[0]!.ports.map((port) => port.port)).toEqual([22, 80])

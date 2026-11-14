@@ -8,7 +8,8 @@ import { SectionPage } from './pages/SectionPage'
 import { EncodersPage } from './pages/tools/EncodersPage'
 import { ParserPage } from './pages/tools/ParserPage'
 import { PlaybookPage, PlaybooksPage } from './pages/tools/PlaybooksPage'
-import { TargetPage, TargetsPage } from './pages/tools/TargetsPage'
+import { TargetPage } from './pages/tools/TargetPage'
+import { TargetsPage } from './pages/tools/TargetsPage'
 import type { Tools } from './tools-source'
 
 export function App({ content, tools }: { content: Content; tools: Tools }) {

@@ -1,6 +1,7 @@
 import { parse as parseYaml } from 'yaml'
 import type { Content } from './content'
-import { isStringList, record, refProblem } from './refs'
+import { asRecord, isStringArray } from './guards'
+import { refProblem } from './refs'
 
 export interface PlaybookOption {
   label: string
@@ -36,10 +37,14 @@ export function parsePlaybook(id: string, source: string): { playbook?: Playbook
   try {
     data = parseYaml(source)
   } catch (error) {
-    return { errors: [`Could not read playbook YAML: ${error instanceof Error ? error.message.split('\n')[0] : 'syntax error'}`] }
+    return {
+      errors: [
+        `Could not read playbook YAML: ${error instanceof Error ? error.message.split('\n')[0] : 'syntax error'}`,
+      ],
+    }
   }
-  const root = record(data)
-  const rawNodes = record(root.nodes)
+  const root = asRecord(data)
+  const rawNodes = asRecord(root.nodes)
   if (!text(root.title) || !text(root.start) || Object.keys(rawNodes).length === 0) {
     return { errors: ['A playbook needs "title", "start" and "nodes"'] }
   }
@@ -51,10 +56,10 @@ export function parsePlaybook(id: string, source: string): { playbook?: Playbook
   for (const [nodeId, raw] of Object.entries(rawNodes)) {
     // The answered path is stored in the URL joined by ".", so ids must not contain it.
     if (!NODE_ID.test(nodeId)) errors.push(`Node id "${nodeId}" may only use letters, digits, "-" and "_"`)
-    const node = record(raw)
+    const node = asRecord(raw)
     const options: PlaybookOption[] = []
     ;(Array.isArray(node.options) ? node.options : []).forEach((rawOption, index) => {
-      const option = record(rawOption)
+      const option = asRecord(rawOption)
       const where = `Node ${nodeId}, option ${index + 1}`
       const label = text(option.label)
       const next = text(option.next)
@@ -66,7 +71,7 @@ export function parsePlaybook(id: string, source: string): { playbook?: Playbook
       id: nodeId,
       prompt: text(node.prompt) || nodeId,
       body: text(node.body),
-      links: isStringList(node.links) ? node.links : [],
+      links: isStringArray(node.links) ? node.links : [],
       options,
     }
   }
@@ -88,7 +93,16 @@ export function parsePlaybook(id: string, source: string): { playbook?: Playbook
   }
 
   if (errors.length) return { errors }
-  return { playbook: { id, title: text(root.title), description: text(root.description), start, nodes: { ...nodes } }, errors }
+  return {
+    playbook: {
+      id,
+      title: text(root.title),
+      description: text(root.description),
+      start,
+      nodes: { ...nodes },
+    },
+    errors,
+  }
 }
 
 /** Replays a path of node ids, stopping at the first step that is not a valid transition. */

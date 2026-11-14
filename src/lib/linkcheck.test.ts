@@ -5,7 +5,8 @@ import { findBrokenLinks } from './linkcheck'
 describe('findBrokenLinks', () => {
   it('reports internal links to missing pages, sections and headings only', () => {
     const content = buildContent({
-      'a/one.md': '## Real\n\n[ok](#real) [bad heading](#nope) [ok page](two) [bad page](zzz) [ok section](b/) [bad section](nowhere/) [ext](https://x.y) [img](./x.png)',
+      'a/one.md':
+        '## Real\n\n[ok](#real) [bad heading](#nope) [ok page](two) [bad page](zzz) [ok section](b/) [bad section](nowhere/) [ext](https://x.y) [img](./x.png)',
       'a/two.md': 'x',
       'b/three.md': 'y',
     })
@@ -17,7 +18,10 @@ describe('findBrokenLinks', () => {
   })
 
   it('checks reference-style link definitions too', () => {
-    const content = buildContent({ 'a/one.md': '[ok][good] [bad][gone]\n\n[good]: two\n[gone]: ../b/missing.md#x', 'a/two.md': 'x' })
+    const content = buildContent({
+      'a/one.md': '[ok][good] [bad][gone]\n\n[good]: two\n[gone]: ../b/missing.md#x',
+      'a/two.md': 'x',
+    })
     expect(findBrokenLinks(content)).toEqual(['a/one.md: link "../b/missing.md#x" points at a missing page'])
   })
 })

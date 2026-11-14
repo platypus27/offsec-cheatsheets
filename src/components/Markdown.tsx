@@ -17,7 +17,8 @@ function hastText(node: ElementContent | Element): string {
   return ''
 }
 
-const isList = (child: ReactNode): child is ReactElement => isValidElement(child) && (child.type === 'ul' || child.type === 'ol')
+const isList = (child: ReactNode): child is ReactElement =>
+  isValidElement(child) && (child.type === 'ul' || child.type === 'ol')
 
 /**
  * Loose task items (blank lines between them) wrap their text in <p>, which
@@ -41,7 +42,11 @@ function TaskItem({ task, children }: { task: Task; children: ReactNode }) {
   const nested = Children.toArray(children).filter(isList)
   return (
     <li className="task-item list-none">
-      <Checkbox checked={checked} onCheckedChange={(next) => setCheck(task.key, next === true)} label={inlineContent(children)} />
+      <Checkbox
+        checked={checked}
+        onCheckedChange={(next) => setCheck(task.key, next === true)}
+        label={inlineContent(children)}
+      />
       {nested}
     </li>
   )
@@ -52,11 +57,26 @@ function TaskItem({ task, children }: { task: Task; children: ReactNode }) {
 // the real control, so every source checkbox is dropped.
 const TaskInput = () => null
 
-function MarkdownLink({ href = '', pageSlug, content, children }: { href?: string; pageSlug: string; content: Content; children: ReactNode }) {
+function MarkdownLink({
+  href = '',
+  pageSlug,
+  content,
+  children,
+}: {
+  href?: string
+  pageSlug: string
+  content: Content
+  children: ReactNode
+}) {
   const link = resolveLink(href, pageSlug, content)
   if (link.kind === 'external') {
     return (
-      <a href={link.href} target="_blank" rel="noreferrer" className="prose-link inline-flex items-baseline gap-0.5">
+      <a
+        href={link.href}
+        target="_blank"
+        rel="noreferrer"
+        className="prose-link inline-flex items-baseline gap-0.5"
+      >
         {children}
         <ExternalLink aria-hidden="true" className="size-3 self-center" />
       </a>
@@ -80,7 +100,9 @@ function buildComponents(page: Page, content: Content): Components {
   const tasksByLine = new Map(page.tasks.map((task) => [task.line, task]))
   return {
     pre({ node }) {
-      const code = node?.children.find((child): child is Element => child.type === 'element' && child.tagName === 'code')
+      const code = node?.children.find(
+        (child): child is Element => child.type === 'element' && child.tagName === 'code',
+      )
       const className = code?.properties.className
       const classes = Array.isArray(className) ? className.map(String) : []
       const language = classes.find((name) => name.startsWith('language-'))?.slice('language-'.length)
@@ -106,7 +128,9 @@ function buildComponents(page: Page, content: Content): Components {
       return <li>{children}</li>
     },
     ul({ className, children }) {
-      return <ul className={className?.includes('contains-task-list') ? 'task-list' : undefined}>{children}</ul>
+      return (
+        <ul className={className?.includes('contains-task-list') ? 'task-list' : undefined}>{children}</ul>
+      )
     },
     table({ children }) {
       return (

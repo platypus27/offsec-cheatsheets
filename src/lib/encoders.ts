@@ -34,12 +34,28 @@ function utf16leBytes(input: string): Uint8Array {
   return bytes
 }
 
-const HTML_ESCAPES: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }
+const HTML_ESCAPES: Record<string, string> = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;',
+}
 const NAMED_ENTITIES: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ' }
 
 export const ENCODERS: Encoder[] = [
-  { id: 'base64-encode', label: 'Base64 encode', group: 'Base64', run: (input) => bytesToBase64(utf8.encode(input)) },
-  { id: 'base64-decode', label: 'Base64 decode', group: 'Base64', run: (input) => utf8Strict.decode(base64ToBytes(input)) },
+  {
+    id: 'base64-encode',
+    label: 'Base64 encode',
+    group: 'Base64',
+    run: (input) => bytesToBase64(utf8.encode(input)),
+  },
+  {
+    id: 'base64-decode',
+    label: 'Base64 decode',
+    group: 'Base64',
+    run: (input) => utf8Strict.decode(base64ToBytes(input)),
+  },
   {
     id: 'powershell-encode',
     label: 'PowerShell -EncodedCommand',
@@ -60,13 +76,20 @@ export const ENCODERS: Encoder[] = [
     id: 'url-encode',
     label: 'URL encode',
     group: 'URL',
-    run: (input) => encodeURIComponent(input).replace(/[!'()*]/g, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`),
+    run: (input) =>
+      encodeURIComponent(input).replace(
+        /[!'()*]/g,
+        (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`,
+      ),
   },
   {
     id: 'url-encode-all',
     label: 'URL encode every byte',
     group: 'URL',
-    run: (input) => Array.from(utf8.encode(input), (byte) => `%${byte.toString(16).toUpperCase().padStart(2, '0')}`).join(''),
+    run: (input) =>
+      Array.from(utf8.encode(input), (byte) => `%${byte.toString(16).toUpperCase().padStart(2, '0')}`).join(
+        '',
+      ),
   },
   {
     id: 'url-decode',
@@ -96,7 +119,12 @@ export const ENCODERS: Encoder[] = [
       return utf8Strict.decode(Uint8Array.from(digits.match(/../g) ?? [], (pair) => parseInt(pair, 16)))
     },
   },
-  { id: 'html-encode', label: 'HTML entity encode', group: 'HTML', run: (input) => input.replace(/[&<>"']/g, (char) => HTML_ESCAPES[char] ?? char) },
+  {
+    id: 'html-encode',
+    label: 'HTML entity encode',
+    group: 'HTML',
+    run: (input) => input.replace(/[&<>"']/g, (char) => HTML_ESCAPES[char] ?? char),
+  },
   {
     id: 'html-decode',
     label: 'HTML entity decode',
@@ -105,7 +133,8 @@ export const ENCODERS: Encoder[] = [
     run: (input) =>
       input.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (match, body: string) => {
         if (body[0] === '#') {
-          const code = body[1]?.toLowerCase() === 'x' ? parseInt(body.slice(2), 16) : parseInt(body.slice(1), 10)
+          const code =
+            body[1]?.toLowerCase() === 'x' ? parseInt(body.slice(2), 16) : parseInt(body.slice(1), 10)
           return code <= 0x10ffff ? String.fromCodePoint(code) : match
         }
         return NAMED_ENTITIES[body.toLowerCase()] ?? match
@@ -130,6 +159,12 @@ export function runEncoder(id: string, input: string): EncoderResult {
     return { ok: true, value: encoder.run(input) }
   } catch (error) {
     const message = error instanceof Error && error.message ? error.message : 'Could not convert input'
-    return { ok: false, error: message.includes('decode') || message.includes('atob') ? 'Input is not valid for this decoder' : message }
+    return {
+      ok: false,
+      error:
+        message.includes('decode') || message.includes('atob')
+          ? 'Input is not valid for this decoder'
+          : message,
+    }
   }
 }

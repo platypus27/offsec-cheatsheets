@@ -31,7 +31,7 @@ browser's localStorage only.
 ## Use
 
 ```bash
-npm install
+npm ci
 npm run dev        # http://localhost:4320
 npm run build      # writes dist/index.html, a single self-contained file
 ```
@@ -52,7 +52,12 @@ The section name `tools` and folders starting with `_` are reserved.
 
 ## Develop
 
+Use Node.js 24. See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and review steps,
+and [the architecture map](docs/architecture.md) for where to make changes.
+
 ```bash
+npm run format
+npm run format:check
 npm run lint
 npm run typecheck
 npm test           # unit tests, plus a check that every note link, rule and

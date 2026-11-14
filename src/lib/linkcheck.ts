@@ -23,7 +23,8 @@ export function findBrokenLinks(content: Content): string[] {
       if (!name) {
         if (!content.section(section)) problems.push(`${where} points at a missing section`)
       } else if (!target) problems.push(`${where} points at a missing page`)
-      else if (heading && !target.headings.some((item) => item.id === heading)) problems.push(`${where} points at a missing heading`)
+      else if (heading && !target.headings.some((item) => item.id === heading))
+        problems.push(`${where} points at a missing heading`)
     }
   }
   return problems

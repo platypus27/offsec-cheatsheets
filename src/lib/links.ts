@@ -1,9 +1,7 @@
 import type { Content } from './content'
 
 export type ResolvedLink =
-  | { kind: 'external'; href: string }
-  | { kind: 'asset'; href: string }
-  | { kind: 'internal'; to: string }
+  { kind: 'external'; href: string } | { kind: 'asset'; href: string } | { kind: 'internal'; to: string }
 
 const EXTERNAL = /^[a-z][a-z0-9+.-]*:/i
 

@@ -1,6 +1,7 @@
 import { act, renderHook } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { isStringArray, readJSON, usePersistentState, writeJSON } from './storage'
+import { isStringArray } from './guards'
+import { readJSON, usePersistentState, writeJSON } from './storage'
 
 afterEach(() => vi.restoreAllMocks())
 

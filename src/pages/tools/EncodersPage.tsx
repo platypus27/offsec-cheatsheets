@@ -5,7 +5,8 @@ import { ENCODERS, runEncoder } from '../../lib/encoders'
 import { usePersistentState } from '../../lib/storage'
 import { ToolLayout } from './ToolLayout'
 
-const isEncoderId = (value: unknown): value is string => typeof value === 'string' && ENCODERS.some((item) => item.id === value)
+const isEncoderId = (value: unknown): value is string =>
+  typeof value === 'string' && ENCODERS.some((item) => item.id === value)
 const GROUPS = [...new Set(ENCODERS.map((encoder) => encoder.group))]
 
 export function EncodersPage() {
@@ -30,21 +31,24 @@ export function EncodersPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {GROUPS.map((group) => (
             <div key={group} role="group" aria-label={group}>
-              <span aria-hidden="true" className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-teal-on-surface-variant">
+              <span
+                aria-hidden="true"
+                className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-teal-on-surface-variant"
+              >
                 {group}
               </span>
               <div className="flex flex-wrap gap-2">
-              {ENCODERS.filter((encoder) => encoder.group === group).map((encoder) => (
-                <Button
-                  key={encoder.id}
-                  size="sm"
-                  variant={encoder.id === encoderId ? 'primary' : 'secondary'}
-                  aria-pressed={encoder.id === encoderId}
-                  onClick={() => setEncoderId(encoder.id)}
-                >
-                  {encoder.label}
-                </Button>
-              ))}
+                {ENCODERS.filter((encoder) => encoder.group === group).map((encoder) => (
+                  <Button
+                    key={encoder.id}
+                    size="sm"
+                    variant={encoder.id === encoderId ? 'primary' : 'secondary'}
+                    aria-pressed={encoder.id === encoderId}
+                    onClick={() => setEncoderId(encoder.id)}
+                  >
+                    {encoder.label}
+                  </Button>
+                ))}
               </div>
             </div>
           ))}
@@ -59,7 +63,13 @@ export function EncodersPage() {
           className="min-h-48 font-mono text-sm"
         />
         <div className="flex flex-col gap-2">
-          <TextArea label="Output" value={output} readOnly spellCheck={false} className="min-h-48 font-mono text-sm" />
+          <TextArea
+            label="Output"
+            value={output}
+            readOnly
+            spellCheck={false}
+            className="min-h-48 font-mono text-sm"
+          />
           {!result.ok && input ? <Alert variant="danger" title={result.error} /> : null}
           <div className="flex flex-wrap gap-2">
             <Button variant="secondary" size="sm" onClick={copy} disabled={!output}>

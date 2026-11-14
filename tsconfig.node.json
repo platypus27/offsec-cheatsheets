@@ -1,20 +1,8 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "lib": [
-      "ES2023",
-      "DOM"
-    ],
-    "types": [
-      "node",
-      "vite/client",
-      "vitest/globals"
-    ]
+    "lib": ["ES2023", "DOM"],
+    "types": ["node", "vite/client", "vitest/globals"]
   },
-  "include": [
-    "vite.config.ts",
-    "playwright.config.ts",
-    "e2e",
-    "src/content.check.test.ts"
-  ]
+  "include": ["vite.config.ts", "playwright.config.ts", "e2e", "src/content.check.test.ts"]
 }

@@ -35,7 +35,11 @@ describe('createSearch', () => {
 
   it('ranks a heading match above a body-only match', () => {
     const results = search('service detection')
-    expect(results[0]).toMatchObject({ pageSlug: 'recon/scanning', headingId: 'service-detection', sectionTitle: 'Recon' })
+    expect(results[0]).toMatchObject({
+      pageSlug: 'recon/scanning',
+      headingId: 'service-detection',
+      sectionTitle: 'Recon',
+    })
     expect(results.map((result) => result.headingId)).toContain('extension-bypass')
   })
 

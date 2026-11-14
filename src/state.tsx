@@ -1,11 +1,13 @@
 import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react'
 import type { ScannedHost } from './lib/nmap'
-import { isBooleanRecord, isStringArray, usePersistentState, type Guard } from './lib/storage'
+import { isBooleanRecord, isStringArray, type Guard } from './lib/guards'
+import { usePersistentState } from './lib/storage'
 import { effectiveVariables, isTargets, newTarget, upsertFromScan, type Target } from './lib/targets'
 import { isVariables, type Variables } from './lib/variables'
 
 const MAX_RECENTS = 8
-const isNullableString: Guard<string | null> = (value): value is string | null => value === null || typeof value === 'string'
+const isNullableString: Guard<string | null> = (value): value is string | null =>
+  value === null || typeof value === 'string'
 
 interface AppState {
   /** Values filled into commands: globals layered under the active target. */
@@ -52,7 +54,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     [setGlobals],
   )
   const removeVariable = useCallback(
-    (name: string) => setGlobals((prev) => Object.fromEntries(Object.entries(prev).filter(([key]) => key !== name))),
+    (name: string) =>
+      setGlobals((prev) => Object.fromEntries(Object.entries(prev).filter(([key]) => key !== name))),
     [setGlobals],
   )
   const setActiveTarget = useCallback((id: string | null) => setActiveId(id), [setActiveId])
@@ -92,15 +95,19 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   )
   const resetChecks = useCallback(
     (prefix: string) =>
-      setChecks((prev) => Object.fromEntries(Object.entries(prev).filter(([key]) => !key.startsWith(prefix)))),
+      setChecks((prev) =>
+        Object.fromEntries(Object.entries(prev).filter(([key]) => !key.startsWith(prefix))),
+      ),
     [setChecks],
   )
   const togglePin = useCallback(
-    (slug: string) => setPins((prev) => (prev.includes(slug) ? prev.filter((pin) => pin !== slug) : [...prev, slug])),
+    (slug: string) =>
+      setPins((prev) => (prev.includes(slug) ? prev.filter((pin) => pin !== slug) : [...prev, slug])),
     [setPins],
   )
   const addRecent = useCallback(
-    (slug: string) => setRecents((prev) => [slug, ...prev.filter((item) => item !== slug)].slice(0, MAX_RECENTS)),
+    (slug: string) =>
+      setRecents((prev) => [slug, ...prev.filter((item) => item !== slug)].slice(0, MAX_RECENTS)),
     [setRecents],
   )
 

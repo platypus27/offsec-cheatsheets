@@ -53,9 +53,9 @@ nodes:
       'Node a, option 1: next node "missing" does not exist',
       'Node a, option 2: needs a label',
     ])
-    expect(parsePlaybook('x', 'title: X\nstart: a\nnodes:\n  a: { prompt: A }\n  b: { prompt: B }').errors).toEqual([
-      'Node b is unreachable from the start node',
-    ])
+    expect(
+      parsePlaybook('x', 'title: X\nstart: a\nnodes:\n  a: { prompt: A }\n  b: { prompt: B }').errors,
+    ).toEqual(['Node b is unreachable from the start node'])
     expect(parsePlaybook('x', '[]').errors).toEqual(['A playbook needs "title", "start" and "nodes"'])
   })
 
@@ -64,14 +64,20 @@ nodes:
       'Start node "toString" does not exist',
     ])
     expect(
-      parsePlaybook('x', 'title: X\nstart: a\nnodes:\n  a:\n    prompt: A\n    options:\n      - { label: Go, next: constructor }').errors,
+      parsePlaybook(
+        'x',
+        'title: X\nstart: a\nnodes:\n  a:\n    prompt: A\n    options:\n      - { label: Go, next: constructor }',
+      ).errors,
     ).toEqual(['Node a, option 1: next node "constructor" does not exist'])
   })
 
   it('rejects node ids that cannot be stored in the URL path', () => {
-    expect(parsePlaybook('x', 'title: X\nstart: a\nnodes:\n  a:\n    options: [{ label: Go, next: smb.null }]\n  smb.null: { prompt: B }').errors).toEqual([
-      'Node id "smb.null" may only use letters, digits, "-" and "_"',
-    ])
+    expect(
+      parsePlaybook(
+        'x',
+        'title: X\nstart: a\nnodes:\n  a:\n    options: [{ label: Go, next: smb.null }]\n  smb.null: { prompt: B }',
+      ).errors,
+    ).toEqual(['Node id "smb.null" may only use letters, digits, "-" and "_"'])
   })
 })
 
@@ -92,7 +98,10 @@ describe('walk', () => {
 describe('validatePlaybookLinks', () => {
   it('flags links to missing pages or headings', () => {
     const { playbook } = parsePlaybook('foothold', source)
-    const content = buildContent({ 'recon/scanning.md': '## Host discovery\n', 'web/web-enumeration.md': 'x' })
+    const content = buildContent({
+      'recon/scanning.md': '## Host discovery\n',
+      'web/web-enumeration.md': 'x',
+    })
     expect(validatePlaybookLinks(playbook!, content)).toEqual([
       'Playbook foothold, node scan: "recon/scanning#port-scanning" has no such heading',
     ])

@@ -1,3 +1,5 @@
+import { isRecord } from './guards'
+
 export type Variables = Record<string, string>
 
 /** The one definition of `{{NAME}}` placeholder syntax; display and copy both go through it. */
@@ -32,9 +34,7 @@ export const VARIABLE_NAME = /^[A-Z][A-Z0-9_]*$/
 
 export function isVariables(value: unknown): value is Variables {
   return (
-    !!value &&
-    typeof value === 'object' &&
-    !Array.isArray(value) &&
+    isRecord(value) &&
     Object.entries(value).every(([key, item]) => VARIABLE_NAME.test(key) && typeof item === 'string')
   )
 }

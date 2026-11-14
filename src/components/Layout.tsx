@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { Crosshair, Keyboard, Menu as MenuIcon, Pin, Search, Terminal, X } from 'lucide-react'
 import {
   IconButton,
-
   Sidebar,
   SidebarContent,
   SidebarHeader,
@@ -32,18 +31,25 @@ const isMac = typeof navigator !== 'undefined' && /mac|iphone|ipad/i.test(naviga
 
 function Brand({ onNavigate }: { onNavigate?: () => void }) {
   return (
-    <NavLink to="/" onClick={onNavigate} className="flex items-center gap-2.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-primary">
+    <NavLink
+      to="/"
+      onClick={onNavigate}
+      className="flex items-center gap-2.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-primary"
+    >
       <span className="flex size-8 items-center justify-center rounded-lg bg-teal-primary text-teal-on-primary">
         <Terminal aria-hidden="true" className="size-4" />
       </span>
       <span className="flex min-w-0 flex-col gap-1.5">
-        <span className="font-teal-headline text-base font-extrabold leading-none text-teal-on-surface">OffSec Cheatsheets</span>
-        <span className="text-[10px] font-bold uppercase tracking-widest text-teal-primary">OSCP / PEN-200</span>
+        <span className="font-teal-headline text-base font-extrabold leading-none text-teal-on-surface">
+          OffSec Cheatsheets
+        </span>
+        <span className="text-[10px] font-bold uppercase tracking-widest text-teal-primary">
+          OSCP / PEN-200
+        </span>
       </span>
     </NavLink>
   )
 }
-
 
 function Navigation({ content, open, onClose }: { content: Content; open: boolean; onClose: () => void }) {
   const { pathname } = useLocation()
@@ -58,7 +64,13 @@ function Navigation({ content, open, onClose }: { content: Content; open: boolea
   return (
     <>
       {open ? (
-        <button type="button" aria-label="Close navigation" tabIndex={-1} className="fixed inset-0 z-30 bg-black/40 lg:hidden" onClick={onClose} />
+        <button
+          type="button"
+          aria-label="Close navigation"
+          tabIndex={-1}
+          className="fixed inset-0 z-30 bg-black/40 lg:hidden"
+          onClick={onClose}
+        />
       ) : null}
       <Sidebar
         aria-label="Cheatsheet sections"
@@ -126,7 +138,9 @@ function Navigation({ content, open, onClose }: { content: Content; open: boolea
 function VariablesButton({ onClick }: { onClick: () => void }) {
   const { variables, activeTarget } = useAppState()
   const target = variables.RHOST?.trim()
-  const label = activeTarget ? `${activeTarget.name}${target && target !== activeTarget.name ? ` ${target}` : ''}` : target
+  const label = activeTarget
+    ? `${activeTarget.name}${target && target !== activeTarget.name ? ` ${target}` : ''}`
+    : target
   return (
     <button
       type="button"
@@ -136,7 +150,9 @@ function VariablesButton({ onClick }: { onClick: () => void }) {
     >
       <Crosshair aria-hidden="true" className="size-4" />
       {label ? (
-        <span className="hidden max-w-48 truncate font-mono text-xs font-semibold text-teal-primary sm:inline">{label}</span>
+        <span className="hidden max-w-48 truncate font-mono text-xs font-semibold text-teal-primary sm:inline">
+          {label}
+        </span>
       ) : (
         <span className="hidden sm:inline">Variables</span>
       )}
@@ -190,17 +206,24 @@ export function Layout({ content, tools }: { content: Content; tools: Tools }) {
   return (
     <TooltipProvider>
       <div className="min-h-dvh bg-teal-background text-teal-on-surface">
-        <a href="#main-content" onClick={(event) => {
-          event.preventDefault()
-          document.getElementById('main-content')?.focus()
-        }} className="fixed left-3 top-3 z-[100] -translate-y-20 rounded-lg bg-teal-primary px-4 py-2 font-semibold text-teal-on-primary focus:translate-y-0">
+        <a
+          href="#main-content"
+          onClick={(event) => {
+            event.preventDefault()
+            document.getElementById('main-content')?.focus()
+          }}
+          className="fixed left-3 top-3 z-[100] -translate-y-20 rounded-lg bg-teal-primary px-4 py-2 font-semibold text-teal-on-primary focus:translate-y-0"
+        >
           Skip to content
         </a>
         <Navigation content={content} open={navOpen} onClose={() => setNavOpen(false)} />
         <div className="lg:pl-72">
           <TopBar sticky className="app-topbar bg-teal-surface/90 backdrop-blur">
             <TopBarBrand className="lg:hidden">
-              <IconButton label={navOpen ? 'Close navigation' : 'Open navigation'} onClick={() => setNavOpen((value) => !value)}>
+              <IconButton
+                label={navOpen ? 'Close navigation' : 'Open navigation'}
+                onClick={() => setNavOpen((value) => !value)}
+              >
                 {navOpen ? <X /> : <MenuIcon />}
               </IconButton>
             </TopBarBrand>
@@ -227,7 +250,11 @@ export function Layout({ content, tools }: { content: Content; tools: Tools }) {
             </TopBarSearch>
             <TopBarActions>
               <VariablesButton onClick={() => setVariablesOpen(true)} />
-              <IconButton label="Keyboard shortcuts" className="max-sm:hidden" onClick={() => setShortcutsOpen(true)}>
+              <IconButton
+                label="Keyboard shortcuts"
+                className="max-sm:hidden"
+                onClick={() => setShortcutsOpen(true)}
+              >
                 <Keyboard />
               </IconButton>
               <ThemeToggle />

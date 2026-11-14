@@ -8,7 +8,9 @@ const isMobile = (page: Page) => (page.viewportSize()?.width ?? 1280) < 1024
 // axe samples rendered colours, so a dialog still fading in reads as low contrast.
 async function settled(page: Page) {
   // allSettled: an animation that gets cancelled (e.g. a replaced transition) rejects `finished`.
-  await page.evaluate(() => Promise.allSettled(document.getAnimations().map((animation) => animation.finished)))
+  await page.evaluate(() =>
+    Promise.allSettled(document.getAnimations().map((animation) => animation.finished)),
+  )
 }
 
 async function openSearch(page: Page) {
@@ -46,7 +48,9 @@ test('home identifies OSCP and the sidebar navigates', async ({ page }) => {
   await expect(page.getByRole('banner')).toContainText('OSCP')
   if (isMobile(page)) {
     await page.setViewportSize({ width: 320, height: 780 })
-    await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320)
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.scrollWidth))
+      .toBeLessThanOrEqual(320)
   }
   if (isMobile(page)) await page.getByRole('button', { name: 'Open navigation' }).click()
   const nav = page.getByRole('navigation', { name: 'Cheatsheet sections' })
@@ -88,11 +92,17 @@ test('re-selecting the heading you are already on scrolls back to it', async ({ 
   await expect.poll(() => inViewport(page, 'zebra-target')).toBe(true)
 })
 
-test('on-this-page links are real routes that survive a new tab', async ({ page, context, isMobile: mobile }) => {
+test('on-this-page links are real routes that survive a new tab', async ({
+  page,
+  context,
+  isMobile: mobile,
+}) => {
   test.skip(mobile, 'the outline is shown on wide screens only')
   await page.setViewportSize({ width: 1440, height: 900 })
   await page.goto('./#/beta/second')
-  const link = page.getByRole('navigation', { name: 'On this page' }).getByRole('link', { name: 'Zebra target' })
+  const link = page
+    .getByRole('navigation', { name: 'On this page' })
+    .getByRole('link', { name: 'Zebra target' })
   await expect(link).toHaveAttribute('href', '#/beta/second?h=zebra-target')
   await link.click()
   await expect.poll(() => inViewport(page, 'zebra-target')).toBe(true)
@@ -155,14 +165,18 @@ test('variables fill commands and copy the filled-in text', async ({ page, brows
   expect(copied).toBe('connect --host 10.9.8.7 --port {{RPORT}}')
 
   await page.reload()
-  await expect(page.getByRole('region', { name: 'bash code' })).toHaveText('connect --host 10.9.8.7 --port {{RPORT}}')
+  await expect(page.getByRole('region', { name: 'bash code' })).toHaveText(
+    'connect --host 10.9.8.7 --port {{RPORT}}',
+  )
 })
 
 test('a failed copy is reported, not hidden', async ({ page }) => {
   await stubClipboard(page, 'reject')
   await page.goto('./#/alpha/first')
   await page.getByRole('button', { name: 'Copy code' }).click()
-  await expect(page.getByText('Could not copy - select the text and copy manually', { exact: true })).toBeVisible()
+  await expect(
+    page.getByText('Could not copy - select the text and copy manually', { exact: true }),
+  ).toBeVisible()
 })
 
 test('checklists and pins survive a reload', async ({ page }) => {
@@ -175,7 +189,9 @@ test('checklists and pins survive a reload', async ({ page }) => {
   await expect(page.getByRole('checkbox', { name: 'Step two' })).not.toBeChecked()
   await expect(page.getByRole('button', { name: 'Unpin' })).toBeVisible()
   await page.goto('./#/')
-  await expect(page.getByRole('region', { name: 'Pinned' }).getByRole('link', { name: 'First Page' })).toBeVisible()
+  await expect(
+    page.getByRole('region', { name: 'Pinned' }).getByRole('link', { name: 'First Page' }),
+  ).toBeVisible()
 
   await page.goto('./#/alpha/first')
   await page.getByRole('button', { name: 'Reset' }).click()

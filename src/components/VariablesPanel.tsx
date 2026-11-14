@@ -22,12 +22,15 @@ function ActiveTargetPicker({ onNavigate }: { onNavigate: () => void }) {
         onValueChange={(value) => setActiveTarget(value === NO_TARGET ? null : value)}
         options={[
           { value: NO_TARGET, label: 'No active target' },
-          ...targets.map((target) => ({ value: target.id, label: `${target.name}${target.address ? ` (${target.address})` : ''}` })),
+          ...targets.map((target) => ({
+            value: target.id,
+            label: `${target.name}${target.address ? ` (${target.address})` : ''}`,
+          })),
         ]}
       />
       <p className="text-xs text-teal-on-surface-variant">
         {activeTarget
-          ? 'RHOST and this target\'s own variables override the globals below.'
+          ? "RHOST and this target's own variables override the globals below."
           : 'Pick a target to fill RHOST from it.'}{' '}
         <Link to="/tools/targets" onClick={onNavigate} className="prose-link">
           Manage targets
@@ -74,11 +77,20 @@ function CustomVariableForm() {
  * a command is copy-paste ready for the current target.
  */
 export function VariablesPanel({ open, onOpenChange }: VariablesPanelProps) {
-  const { globals: variables, variables: effective, setVariable, removeVariable, activeTarget } = useAppState()
+  const {
+    globals: variables,
+    variables: effective,
+    setVariable,
+    removeVariable,
+    activeTarget,
+  } = useAppState()
   const overridden = (name: string) =>
-    !!activeTarget && ((name === 'RHOST' && !!activeTarget.address) || (activeTarget.vars[name]?.trim() ?? '') !== '')
+    !!activeTarget &&
+    ((name === 'RHOST' && !!activeTarget.address) || (activeTarget.vars[name]?.trim() ?? '') !== '')
   const defaults = new Set(DEFAULT_VARIABLES.map((item) => item.name))
-  const custom = Object.keys(variables).filter((name) => !defaults.has(name)).sort()
+  const custom = Object.keys(variables)
+    .filter((name) => !defaults.has(name))
+    .sort()
 
   return (
     <Dialog
@@ -94,7 +106,11 @@ export function VariablesPanel({ open, onOpenChange }: VariablesPanelProps) {
           <Input
             key={item.name}
             label={<span className="font-mono">{item.name}</span>}
-            description={overridden(item.name) ? `${item.hint} - using ${activeTarget?.name}'s value while it is active` : item.hint}
+            description={
+              overridden(item.name)
+                ? `${item.hint} - using ${activeTarget?.name}'s value while it is active`
+                : item.hint
+            }
             placeholder={overridden(item.name) ? effective[item.name] : undefined}
             value={variables[item.name] ?? ''}
             onChange={(event) => setVariable(item.name, event.target.value)}
