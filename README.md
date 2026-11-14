@@ -63,3 +63,18 @@ npm run verify     # all of the above plus a build
 
 The end-to-end suite builds against `e2e/fixtures/content`, so editing your
 notes never breaks it.
+
+## Contribute
+
+Submit changes through a pull request to the default branch. Every file is
+owned by `@platypus27`, whose approval is required before merging. New reviewable
+commits dismiss prior approvals, and review conversations must be resolved.
+Direct pushes, force pushes and deletion of the default branch are blocked,
+with no bypass actors configured.
+
+GitHub does not allow authors to approve their own pull requests. The sole
+code owner's own pull requests therefore cannot satisfy this review requirement.
+
+The ruleset definition is in `.github/rulesets/default-branch.json`. It is applied
+through GitHub's repository settings; editing the file alone does not change
+the live ruleset.
