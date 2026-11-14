@@ -14,3 +14,13 @@ nodes:
       - { label: Domain recorded, next: services }
   services:
     prompt: Select services found in the scan
+    services:
+      - id: smb
+        title: SMB
+        commands: [workflow/commands#smb-shares]
+      - id: winrm
+        title: WinRM
+        commands: [workflow/commands#winrm-access]
+      - id: ldap
+        title: LDAP
+        commands: [workflow/commands#ldap-users]

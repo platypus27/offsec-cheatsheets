@@ -8,12 +8,20 @@ export interface PlaybookOption {
   next: string
 }
 
+export interface PlaybookService {
+  id: string
+  title: string
+  body: string
+  commands: string[]
+}
+
 export interface PlaybookNode {
   id: string
   prompt: string
   body: string
   links: string[]
   commands: string[]
+  services: PlaybookService[]
   options: PlaybookOption[]
 }
 
@@ -27,6 +35,31 @@ export interface Playbook {
 
 const NODE_ID = /^[A-Za-z0-9_-]+$/
 const text = (value: unknown) => (typeof value === 'string' ? value.trim() : '')
+
+function parseServices(value: unknown, where: string, errors: string[]): PlaybookService[] {
+  if (value === undefined) return []
+  if (!Array.isArray(value)) {
+    errors.push(`${where}: services must be a list`)
+    return []
+  }
+  const ids = new Set<string>()
+  return value.flatMap((raw, index) => {
+    const service = asRecord(raw)
+    const id = text(service.id)
+    const title = text(service.title)
+    const label = `${where}, service ${index + 1}`
+    if (!NODE_ID.test(id) || ids.has(id)) {
+      errors.push(`${label}: needs a unique id using letters, digits, "-" and "_"`)
+      return []
+    }
+    ids.add(id)
+    if (!title || !isStringArray(service.commands) || service.commands.length === 0) {
+      errors.push(`${label}: needs a title and at least one command reference`)
+      return []
+    }
+    return [{ id, title, body: text(service.body), commands: service.commands }]
+  })
+}
 
 /**
  * Reads a decision-tree playbook: nodes with a prompt, optional body and
@@ -77,6 +110,7 @@ export function parsePlaybook(id: string, source: string): { playbook?: Playbook
       body: text(node.body),
       links: isStringArray(node.links) ? node.links : [],
       commands: isStringArray(node.commands) ? node.commands : [],
+      services: parseServices(node.services, `Node ${nodeId}`, errors),
       options,
     }
   }
@@ -132,7 +166,17 @@ export function validatePlaybookLinks(playbook: Playbook, content: Content): str
     ...validateCommandRefs(node.commands, content).map(
       (problem) => `Playbook ${playbook.id}, node ${node.id}: ${problem}`,
     ),
+    ...node.services.flatMap((service) =>
+      validateCommandRefs(service.commands, content).map(
+        (problem) => `Playbook ${playbook.id}, node ${node.id}, service ${service.id}: ${problem}`,
+      ),
+    ),
   ])
+}
+
+/** Availability belongs to one profile and host, not to every machine in a playbook. */
+export function serviceCheckPrefix(playbookId: string, profileId: string, host: string): string {
+  return `playbook-services:${JSON.stringify([playbookId, profileId, host])}:`
 }
 
 /** Resolve the same heading used by note links; never reconstruct or copy its commands. */
