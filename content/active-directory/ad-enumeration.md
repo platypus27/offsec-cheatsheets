@@ -7,17 +7,19 @@ tags: [ad, ldap, smb, netexec, bloodhound]
 ## Domain overview
 
 ```bash
-nxc smb {{RHOST}}
+nxc smb {{MS01}}
+nxc smb {{MS02}}
+nxc smb {{DC01}}
 ```
 
-Record hostname, domain label and signing status. The label may be NetBIOS; it does not prove this host is a DC. [Source](https://www.netexec.wiki/smb-protocol/enumeration/enumerate-hosts).
+Record each host's hostname, domain label and signing status. The label may be NetBIOS; it does not prove a host is a DC. [Source](https://www.netexec.wiki/smb-protocol/enumeration/enumerate-hosts).
 
 ## DNS SRV records
 
-Set DOMAIN to the DNS domain and DC to its DNS server address.
+Set DOMAIN to the DNS domain and DC01 to its DNS server address.
 
 ```bash
-dig @{{DC}} _ldap._tcp.dc._msdcs.{{DOMAIN}} SRV +short
+dig @{{DC01}} _ldap._tcp.dc._msdcs.{{DOMAIN}} SRV +short
 ```
 
 Match returned hostnames to reachable DC addresses. [Microsoft discovery record](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/7fcdce70-5205-44d6-9c3a-260e616a2f04), [dig syntax](https://bind9.readthedocs.io/en/v9.18.33/manpages.html).
@@ -27,7 +29,7 @@ Match returned hostnames to reachable DC addresses. [Microsoft discovery record]
 Requires a valid domain account.
 
 ```bash
-nxc ldap {{DC}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' --users
+nxc ldap {{DC01}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' --users
 ```
 
 [Source](https://www.netexec.wiki/ldap-protocol/enumerate-users).
@@ -35,7 +37,7 @@ nxc ldap {{DC}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' --users
 ## Domain groups
 
 ```bash
-nxc ldap {{DC}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' --groups
+nxc ldap {{DC01}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' --groups
 ```
 
 Append a discovered group name to list its members. Current documentation uses LDAP for this option. [Source](https://www.netexec.wiki/ldap-protocol/enumerate-group-members).
@@ -43,8 +45,8 @@ Append a discovered group name to list its members. Current documentation uses L
 ## Password policy
 
 ```bash
-nxc smb {{DC}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' --pass-pol
-nxc ldap {{DC}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' --pso
+nxc smb {{DC01}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' --pass-pol
+nxc ldap {{DC01}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' --pso
 ```
 
 - [ ] Record lockout threshold and observation window before repeated logins.
@@ -55,7 +57,7 @@ nxc ldap {{DC}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' --pso
 ## BloodHound CE collection
 
 ```bash
-nxc ldap {{DC}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' --bloodhound --collection All --dns-server {{DC}}
+nxc ldap {{DC01}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' --bloodhound --collection All --dns-server {{DC01}}
 ```
 
 - [ ] Use CE ingestion and review collection errors before trusting missing paths.

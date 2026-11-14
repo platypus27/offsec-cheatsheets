@@ -109,7 +109,7 @@ test('AD values stay separate when another box is added and made default', async
   await dialog.getByRole('tab', { name: 'AD', exact: true }).click()
   await dialog.getByRole('textbox', { name: 'RHOST', exact: true }).fill('192.0.2.10')
   await dialog.getByRole('textbox', { name: 'DOMAIN', exact: true }).fill('training.invalid')
-  await dialog.getByRole('textbox', { name: 'DC', exact: true }).fill('192.0.2.1')
+  await dialog.getByRole('textbox', { name: 'DC01', exact: true }).fill('192.0.2.1')
   await dialog.getByRole('textbox', { name: 'USER', exact: true }).fill('lab-user')
   await dialog.getByRole('textbox', { name: 'PASS', exact: true }).fill('example-only')
   await dialog.getByRole('textbox', { name: 'Add a variable', exact: true }).fill('wordlist')
@@ -121,7 +121,7 @@ test('AD values stay separate when another box is added and made default', async
     'aria-selected',
     'true',
   )
-  for (const name of ['RHOST', 'DOMAIN', 'DC', 'USER', 'PASS']) {
+  for (const name of ['RHOST', 'DOMAIN', 'DC01', 'USER', 'PASS']) {
     await expect(dialog.getByRole('textbox', { name, exact: true })).toHaveValue('')
   }
   await expect(dialog.getByRole('textbox', { name: 'WORDLIST', exact: true })).toHaveCount(0)

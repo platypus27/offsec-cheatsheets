@@ -16,7 +16,9 @@ identifies this scope on desktop and mobile, including when opening a note direc
   command, with typo tolerance. A result opens at the exact heading.
 - **Variable profiles**: separate AD and Box 1-3 tabs, with more boxes as needed.
   Make a profile default to fill every displayed and copied command with its
-  saved values. Browsing another tab leaves the working profile unchanged.
+  saved values. Browsing another tab leaves the working profile unchanged. The
+  AD profile names the lab machines directly: `MS01`, `MS02` and `DC01` each
+  hold one machine's address, while `LHOST` stays the single attacker address.
 - **Targets**: per-host address, variables, ports and notes. The active target
   supplies `RHOST` and overrides its profile's variables. Each profile remembers
   its own target choice.

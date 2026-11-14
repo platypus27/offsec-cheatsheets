@@ -4,13 +4,13 @@ start: scan
 nodes:
   scan:
     prompt: Run Nmap first.
-    body: Set RHOST to this host. Run the full TCP scan, then set RPORT to the discovered ports (comma-separated) for service detection. Record open services and listener ports. The SYN scan requires elevated privileges.
+    body: Scan each machine in turn — {{MS01}}, {{MS02}} and {{DC01}} — setting RHOST to the one being scanned. Run the full TCP scan, then set RPORT to the discovered ports (comma-separated) for service detection. Record open services and listener ports per host. The SYN scan requires elevated privileges.
     commands: [recon/scanning#port-scanning, recon/scanning#service-detection]
     options:
       - { label: Scan complete, next: domain }
   domain:
     prompt: Use SMB to identify the host and domain.
-    body: If SMB was found, run this probe. Record hostname, domain label and signing status. The label can be NetBIOS and does not prove a DC role. Save DOMAIN in Variables; set DC only after confirming the controller. Skip the probe when SMB is unavailable.
+    body: If SMB was found, run this probe. Record hostname, domain label and signing status. The label can be NetBIOS and does not prove a DC role. Save DOMAIN in Variables; set DC01 only after confirming the controller. Skip the probe when SMB is unavailable.
     commands: [active-directory/ad-enumeration#domain-overview]
     options:
       - { label: Domain recorded, next: services }
@@ -29,7 +29,7 @@ nodes:
         commands: [services/remote-access#winrm-credential-check, services/remote-access#winrm-verify-identity]
       - id: ldap
         title: LDAP
-        body: Requires a confirmed DC and valid domain credentials. Set DC to that controller and DOMAIN to the domain. Record users and groups; review collection errors before trusting a graph's missing paths.
+        body: Requires a confirmed DC and valid domain credentials. Set DC01 to that controller and DOMAIN to the domain. Record users and groups; review collection errors before trusting a graph's missing paths.
         commands: [active-directory/ad-enumeration#domain-users, active-directory/ad-enumeration#domain-groups, active-directory/ad-enumeration#bloodhound-ce-collection]
       - id: dns
         title: DNS
