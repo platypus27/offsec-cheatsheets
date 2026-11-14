@@ -25,7 +25,7 @@ nodes:
         commands: [active-directory/smb-enumeration#smb-domain-login, active-directory/smb-enumeration#smb-share-permissions, active-directory/smb-enumeration#smb-domain-users]
       - id: winrm
         title: WinRM
-        body: For HTTP on 5985, test the known domain credential and verify the returned identity. Explicit DOMAIN avoids relying on SMB. For HTTPS on 5986 or a non-default listener, use the interactive WinRM step below and set RPORT to that listener.
+        body: Test the known domain credential and verify the returned identity. Current defaults probe HTTP/5985 and HTTPS/5986; check the reported endpoint. Explicit DOMAIN avoids relying on SMB. For a non-default listener, use the interactive WinRM step below and set RPORT to that listener.
         commands: [services/remote-access#winrm-credential-check, services/remote-access#winrm-verify-identity]
       - id: ldap
         title: LDAP
@@ -63,7 +63,11 @@ nodes:
   roast:
     prompt: Check roasting prerequisites and identify the returned hash format.
     body: These methods require confirmed LDAP on DC. AS-REP roasting needs a known username with preauthentication disabled; Kerberoasting needs valid domain credentials and an eligible SPN account. Prepare wordlist.txt. The cracking commands below apply only to etype 23; check the hash marker first.
-    commands: [active-directory/kerberos#as-rep-roasting, active-directory/kerberos#kerberoasting]
+    services:
+      - id: ldap
+        title: LDAP
+        body: Select only after confirming LDAP on DC and the prerequisites above.
+        commands: [active-directory/kerberos#as-rep-roasting, active-directory/kerberos#kerberoasting]
     links: [active-directory/kerberos#kerberos-hash-modes, active-directory/kerberos#kerberos-dns-or-clock-failure]
   path:
     prompt: Check effective permissions and delegation prerequisites before changes.
