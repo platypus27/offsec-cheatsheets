@@ -25,7 +25,7 @@
 - id: snmp
   title: SNMP
   match: { ports: [161], services: [snmp] }
-  suggest: [services/network-services#snmp-community-walk]
+  suggest: [services/network-services#snmp-community-walk, services/network-services#snmp-extend-scripts]
 - id: nfs
   title: RPC or NFS
   match: { ports: [111, 2049], services: [rpcbind, nfs] }
@@ -34,7 +34,7 @@
 - id: mssql
   title: MSSQL
   match: { ports: [1433], services: [ms-sql] }
-  suggest: [services/databases#mssql]
+  suggest: [services/databases#mssql, services/databases#mssql-command-execution]
 - id: mysql
   title: MySQL
   match: { ports: [3306], services: [mysql] }
@@ -46,7 +46,7 @@
 - id: winrm
   title: WinRM
   match: { ports: [5985, 5986], services: [wsman, winrm] }
-  suggest: [services/remote-access#winrm-credential-check, services/remote-access#winrm-verify-identity, services/remote-access#winrm, windows/windows-privesc#situational-awareness]
+  suggest: [services/remote-access#winrm-credential-check, services/remote-access#winrm-verify-identity, services/remote-access#winrm, windows/windows-privesc#situational-awareness, windows/windows-privesc#impersonation-escalation]
 - id: rdp
   title: RDP
   match: { ports: [3389], services: [ms-wbt-server, rdp] }

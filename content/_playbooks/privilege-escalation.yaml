@@ -45,5 +45,5 @@ nodes:
     links: [windows/windows-privesc#scheduled-tasks, windows/windows-privesc#file-and-directory-acls]
   token:
     prompt: Match the privilege to a supported path for the actual target build.
-    links: [windows/windows-privesc#token-privileges]
-    body: 'TODO: verify the required token context and tool version before selecting an exploit.'
+    commands: [windows/windows-privesc#impersonation-escalation]
+    links: [windows/windows-privesc#token-privileges, windows/windows-privesc#impersonation-escalation]

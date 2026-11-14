@@ -24,6 +24,16 @@ snmpwalk -v2c -c '{{PASS}}' {{RHOST}}:{{RPORT}} 1.3.6.1.2.1
 
 Look for host, process and software information. SNMPv2c communities travel in cleartext. TODO: verify target SNMP version and community; do not assume a default. [Net-SNMP manual](https://www.net-snmp.org/docs/man/snmpwalk.html).
 
+## SNMP extend scripts
+
+When the walk shows NET-SNMP extend entries, configured commands may reveal or change credentials:
+
+```bash
+snmpwalk -v2c -c '{{PASS}}' {{RHOST}}:{{RPORT}} 1.3.6.1.4.1.8072.1.3.2
+```
+
+Extend output can contain plaintext commands such as password resets run as the SNMP service account. [Net-SNMP extend](http://www.net-snmp.org/docs/mibs/extend.html).
+
 ## NFS exports
 
 ```bash

@@ -22,6 +22,17 @@ SELECT name FROM sys.databases;
 
 TODO: verify the installed entry point; Kali packages may expose impacket-mssqlclient instead. [Pinned client source](https://github.com/fortra/impacket/blob/impacket_0_13_1/examples/mssqlclient.py), [version query](https://learn.microsoft.com/en-us/sql/t-sql/functions/version-transact-sql), [identity](https://learn.microsoft.com/en-us/sql/t-sql/functions/system-user-transact-sql), [database catalog](https://learn.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-databases-transact-sql).
 
+## MSSQL command execution
+
+Requires sysadmin or equivalent rights. Inside the connected mssqlclient session:
+
+```sql
+enable_xp_cmdshell
+xp_cmdshell whoami
+```
+
+`enable_xp_cmdshell` is an impacket client shortcut; the manual path is `sp_configure` plus reconfigure. When reaching the server through [stacked SQL injection](web/input-tests#sqlmap), adapt the same statements into the query. [Microsoft xp_cmdshell](https://learn.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/xp-cmdshell-transact-sql), [Impacket mssqlclient](https://github.com/fortra/impacket/blob/master/examples/mssqlclient.py).
+
 ## MySQL
 
 Prompts for the password; uppercase -P selects the TCP port.

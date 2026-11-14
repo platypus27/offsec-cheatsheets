@@ -30,6 +30,7 @@ export const DEFAULT_VARIABLES: { name: string; hint: string }[] = [
   { name: 'DC01', hint: 'Domain controller IP' },
   { name: 'USER', hint: 'Username' },
   { name: 'PASS', hint: 'Password' },
+  { name: 'NTHASH', hint: 'NT hash for pass-the-hash' },
 ]
 
 export const VARIABLE_NAME = /^[A-Z][A-Z0-9_]*$/

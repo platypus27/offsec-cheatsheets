@@ -33,6 +33,17 @@ smbclient -L '{{RHOST}}' -U '{{DOMAIN}}/{{USER}}%{{PASS}}'
 
 Use an enumerated share name when connecting. [Source](https://www.samba.org/samba/docs/current/man-html/smbclient.1.html).
 
+## Password brute force
+
+Slow and loud; check the [password policy](active-directory/ad-enumeration#password-policy) for a lockout threshold first and prefer credential reuse.
+
+```bash
+hydra -l '{{USER}}' -P passwords.txt {{RHOST}} ssh -s {{RPORT}}
+hydra -l '{{USER}}' -P passwords.txt ftp://{{RHOST}}
+```
+
+Stop on the first success and re-check the found pair with its [actual authority](active-directory/credential-access#domain-or-local-login). [THC-Hydra](https://github.com/vanhauser-thc/thc-hydra).
+
 ## SYSVOL
 
 Read AD policy and logon scripts with a domain account:

