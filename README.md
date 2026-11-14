@@ -22,7 +22,10 @@ identifies this scope on desktop and mobile, including when opening a note direc
   its own target choice.
 - **Output parser**: paste nmap normal, grepable or XML output to extract ports,
   save hosts as targets, and get note suggestions from your own rules.
-- **Playbooks**: decision trees you write in YAML, with links into your notes.
+- **Playbooks**: YAML decision paths with copyable commands drawn from note
+  headings. The AD path starts with Nmap and SMB domain discovery, then shows
+  enumeration commands for the services you select. Service choices are saved
+  separately for each default profile and target address.
 - **Encoders**: Base64, PowerShell `-EncodedCommand`, URL, hex, HTML entities
   and ROT13, all offline.
 - **Checklists**: Markdown task lists become checkboxes with saved progress.

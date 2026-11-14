@@ -1,11 +1,18 @@
 import { parse as parseYaml } from 'yaml'
-import type { Content } from './content'
+import type { Chunk, Content } from './content'
 import { asRecord, isStringArray } from './guards'
-import { refProblem } from './refs'
+import { refProblem, splitRef } from './refs'
 
 export interface PlaybookOption {
   label: string
   next: string
+}
+
+export interface PlaybookService {
+  id: string
+  title: string
+  body: string
+  commands: string[]
 }
 
 export interface PlaybookNode {
@@ -13,6 +20,8 @@ export interface PlaybookNode {
   prompt: string
   body: string
   links: string[]
+  commands: string[]
+  services: PlaybookService[]
   options: PlaybookOption[]
 }
 
@@ -26,6 +35,31 @@ export interface Playbook {
 
 const NODE_ID = /^[A-Za-z0-9_-]+$/
 const text = (value: unknown) => (typeof value === 'string' ? value.trim() : '')
+
+function parseServices(value: unknown, where: string, errors: string[]): PlaybookService[] {
+  if (value === undefined) return []
+  if (!Array.isArray(value)) {
+    errors.push(`${where}: services must be a list`)
+    return []
+  }
+  const ids = new Set<string>()
+  return value.flatMap((raw, index) => {
+    const service = asRecord(raw)
+    const id = text(service.id)
+    const title = text(service.title)
+    const label = `${where}, service ${index + 1}`
+    if (!NODE_ID.test(id) || ids.has(id)) {
+      errors.push(`${label}: needs a unique id using letters, digits, "-" and "_"`)
+      return []
+    }
+    ids.add(id)
+    if (!title || !isStringArray(service.commands) || service.commands.length === 0) {
+      errors.push(`${label}: needs a title and at least one command reference`)
+      return []
+    }
+    return [{ id, title, body: text(service.body), commands: service.commands }]
+  })
+}
 
 /**
  * Reads a decision-tree playbook: nodes with a prompt, optional body and
@@ -57,6 +91,9 @@ export function parsePlaybook(id: string, source: string): { playbook?: Playbook
     // The answered path is stored in the URL joined by ".", so ids must not contain it.
     if (!NODE_ID.test(nodeId)) errors.push(`Node id "${nodeId}" may only use letters, digits, "-" and "_"`)
     const node = asRecord(raw)
+    if (node.commands !== undefined && !isStringArray(node.commands)) {
+      errors.push(`Node ${nodeId}: commands must be a list of note heading references`)
+    }
     const options: PlaybookOption[] = []
     ;(Array.isArray(node.options) ? node.options : []).forEach((rawOption, index) => {
       const option = asRecord(rawOption)
@@ -72,6 +109,8 @@ export function parsePlaybook(id: string, source: string): { playbook?: Playbook
       prompt: text(node.prompt) || nodeId,
       body: text(node.body),
       links: isStringArray(node.links) ? node.links : [],
+      commands: isStringArray(node.commands) ? node.commands : [],
+      services: parseServices(node.services, `Node ${nodeId}`, errors),
       options,
     }
   }
@@ -119,10 +158,40 @@ export function walk(playbook: Playbook, path: string[]): string[] {
 }
 
 export function validatePlaybookLinks(playbook: Playbook, content: Content): string[] {
-  return Object.values(playbook.nodes).flatMap((node) =>
-    node.links.flatMap((ref) => {
+  return Object.values(playbook.nodes).flatMap((node) => [
+    ...node.links.flatMap((ref) => {
       const problem = refProblem(ref, content)
       return problem ? [`Playbook ${playbook.id}, node ${node.id}: ${problem}`] : []
     }),
-  )
+    ...validateCommandRefs(node.commands, content).map(
+      (problem) => `Playbook ${playbook.id}, node ${node.id}: ${problem}`,
+    ),
+    ...node.services.flatMap((service) =>
+      validateCommandRefs(service.commands, content).map(
+        (problem) => `Playbook ${playbook.id}, node ${node.id}, service ${service.id}: ${problem}`,
+      ),
+    ),
+  ])
+}
+
+/** Availability belongs to one profile and host, not to every machine in a playbook. */
+export function serviceCheckPrefix(playbookId: string, profileId: string, host: string): string {
+  return `playbook-services:${JSON.stringify([playbookId, profileId, host])}:`
+}
+
+/** Resolve the same heading used by note links; never reconstruct or copy its commands. */
+export function commandChunk(ref: string, content: Content): Chunk | undefined {
+  const { slug, headingId } = splitRef(ref)
+  return headingId ? content.page(slug)?.chunks.find((chunk) => chunk.headingId === headingId) : undefined
+}
+
+function validateCommandRefs(refs: string[], content: Content): string[] {
+  return refs.flatMap((ref) => {
+    const problem = refProblem(ref, content)
+    if (problem) return [problem]
+    if (!splitRef(ref).headingId) return [`"${ref}" needs a heading for its commands`]
+    if (!commandChunk(ref, content)?.blocks.some((block) => block.code.trim()))
+      return [`"${ref}" has no fenced commands`]
+    return []
+  })
 }

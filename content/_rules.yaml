@@ -13,7 +13,7 @@
 - id: smb
   title: SMB
   match: { ports: [139, 445], services: [microsoft-ds, netbios-ssn] }
-  suggest: [services/common-services#smb, services/common-services#sysvol, active-directory/credential-access#domain-or-local-login, active-directory/attack-paths#smb-signing-prerequisites]
+  suggest: [active-directory/ad-enumeration#domain-overview, active-directory/smb-enumeration#smb-domain-login, active-directory/smb-enumeration#smb-share-permissions, active-directory/smb-enumeration#smb-domain-users, services/common-services#smb, services/common-services#sysvol, active-directory/attack-paths#smb-signing-prerequisites]
 - id: http
   title: Web server
   match: { ports: [80, 443, 8000, 8080, 8443], services: [http] }
@@ -46,7 +46,7 @@
 - id: winrm
   title: WinRM
   match: { ports: [5985, 5986], services: [wsman, winrm] }
-  suggest: [services/remote-access#winrm, windows/windows-privesc#situational-awareness]
+  suggest: [services/remote-access#winrm-credential-check, services/remote-access#winrm-verify-identity, services/remote-access#winrm, windows/windows-privesc#situational-awareness]
 - id: rdp
   title: RDP
   match: { ports: [3389], services: [ms-wbt-server, rdp] }

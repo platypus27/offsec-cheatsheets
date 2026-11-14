@@ -14,6 +14,11 @@ export interface Heading {
   depth: 2 | 3
 }
 
+export interface FencedCommand {
+  code: string
+  language: string
+}
+
 /** One searchable unit: the prose and code under a single h2/h3 (or the page intro). */
 export interface Chunk {
   id: string
@@ -22,6 +27,7 @@ export interface Chunk {
   heading: string
   text: string
   code: string
+  blocks: FencedCommand[]
 }
 
 /** A Markdown task-list item. `line` ties the rendered checkbox back to it. */
@@ -106,11 +112,13 @@ interface ChunkDraft {
   heading: string
   text: string[]
   code: string[]
+  blocks: FencedCommand[]
 }
 
 function collect(node: RootContent, draft: ChunkDraft) {
   if (node.type === 'code') {
     draft.code.push(node.value)
+    draft.blocks.push({ code: node.value, language: node.lang || 'text' })
     return
   }
   if (node.type === 'heading') {
@@ -161,7 +169,7 @@ export function parsePage(path: string, raw: string): Page {
   let firstH1: string | undefined
   const headings: Heading[] = []
   const drafts: ChunkDraft[] = []
-  let current: ChunkDraft = { headingId: null, heading: '', text: [], code: [] }
+  let current: ChunkDraft = { headingId: null, heading: '', text: [], code: [], blocks: [] }
 
   const ids = new Map<MdHeading, string>()
   const tasks: Task[] = []
@@ -193,7 +201,7 @@ export function parsePage(path: string, raw: string): Page {
       if (heading.depth === 2 || heading.depth === 3) {
         headings.push({ id, text, depth: heading.depth })
         drafts.push(current)
-        current = { headingId: id, heading: text, text: [], code: [] }
+        current = { headingId: id, heading: text, text: [], code: [], blocks: [] }
         continue
       }
     }
@@ -212,6 +220,7 @@ export function parsePage(path: string, raw: string): Page {
       heading: draft.heading || title,
       text: draft.text.join('\n'),
       code: draft.code.join('\n'),
+      blocks: draft.blocks,
     }))
 
   return {

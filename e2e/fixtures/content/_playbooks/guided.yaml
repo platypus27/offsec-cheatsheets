@@ -1,0 +1,32 @@
+title: Guided service fixture
+description: Scan, identify the domain and enumerate confirmed services.
+start: scan
+nodes:
+  scan:
+    prompt: Run Nmap first
+    commands: [workflow/commands#scan-the-target]
+    options:
+      - { label: Scan complete, next: domain }
+  domain:
+    prompt: Identify the domain from SMB
+    commands: [workflow/commands#identify-the-domain]
+    options:
+      - { label: Domain recorded, next: services }
+  services:
+    prompt: Select services found in the scan
+    services:
+      - id: smb
+        title: SMB
+        commands: [workflow/commands#smb-shares]
+      - id: winrm
+        title: WinRM
+        commands: [workflow/commands#winrm-access]
+      - id: ldap
+        title: LDAP
+        commands: [workflow/commands#ldap-users]
+    options:
+      - { label: Download WinPEAS, next: winpeas }
+  winpeas:
+    prompt: Host on Kali and download from target PowerShell
+    body: LHOST must be Kali's address reachable from the target. Use LPORT for the HTTP server port.
+    commands: [workflow/commands#host-winpeas-on-kali, workflow/commands#download-winpeas-in-powershell]

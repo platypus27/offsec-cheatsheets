@@ -36,6 +36,11 @@ There is no backend or runtime content fetch.
   they are retained as legacy data. Other profiles start empty.
 - `src/content-source.ts` is the build-time file adapter. `buildContent` and
   `buildTools` accept source strings, so their logic can be exercised without Vite.
+- Playbook `commands` and service commands reference note headings. The content
+  parser retains each fenced block's language; `PlaybookCommands` resolves those
+  blocks and reuses `CodeBlock` for display and copy. `PlaybookServices` uses the
+  shared check state, scoped by playbook, default profile and effective host.
+  Playbook validation rejects missing headings and headings without commands.
 
 ## Invariants to preserve
 

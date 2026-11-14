@@ -2,9 +2,12 @@ import { ChevronRight, RotateCcw, Undo2 } from 'lucide-react'
 import { Button } from '@kryv/teal'
 import { Link, useParams, useSearchParams } from 'react-router'
 import { NoteLink } from '../../components/NoteLink'
+import { PlaybookCommands } from '../../components/PlaybookCommands'
+import { PlaybookServices } from '../../components/PlaybookServices'
 import { ToolProblems } from '../../components/ToolProblems'
 import type { Content } from '../../lib/content'
-import { walk } from '../../lib/playbooks'
+import { serviceCheckPrefix, walk } from '../../lib/playbooks'
+import { useAppState } from '../../state'
 import type { Tools } from '../../tools-source'
 import { NotFound } from '../NotFound'
 import { ToolLayout } from './ToolLayout'
@@ -50,6 +53,11 @@ export function PlaybooksPage({ tools }: { tools: Tools }) {
 export function PlaybookPage({ content, tools }: { content: Content; tools: Tools }) {
   const { id = '' } = useParams()
   const [params, setParams] = useSearchParams()
+  const { checks, resetChecks, defaultProfile, variables } = useAppState()
+  const servicePrefix = serviceCheckPrefix(id, defaultProfile.id, variables.RHOST?.trim() ?? '')
+  const hasSelections = Object.entries(checks).some(
+    ([key, checked]) => key.startsWith(servicePrefix) && checked,
+  )
   const playbook = tools.playbooks.find((item) => item.id === id)
   if (!playbook) return <NotFound />
 
@@ -70,8 +78,13 @@ export function PlaybookPage({ content, tools }: { content: Content; tools: Tool
             const answer = playbook.nodes[step]!.options.find((option) => option.next === path[index + 1])
             return (
               <li key={`${step}-${index}`} className="flex items-center gap-1">
-                <button type="button" onClick={() => go(path.slice(0, index + 1))} className="chip-link">
-                  {playbook.nodes[step]!.prompt}: <span className="ml-1 font-semibold">{answer?.label}</span>
+                <button
+                  type="button"
+                  onClick={() => go(path.slice(0, index + 1))}
+                  className="chip-link text-left"
+                  aria-label={`${playbook.nodes[step]!.prompt}: ${answer?.label}`}
+                >
+                  {answer?.label}
                 </button>
                 <ChevronRight aria-hidden="true" className="size-3.5 text-teal-on-surface-variant" />
               </li>
@@ -85,6 +98,8 @@ export function PlaybookPage({ content, tools }: { content: Content; tools: Tool
           {node.prompt}
         </h2>
         {node.body ? <p className="mt-3 whitespace-pre-line text-teal-on-surface">{node.body}</p> : null}
+        <PlaybookCommands refs={node.commands} content={content} />
+        <PlaybookServices node={node} prefix={servicePrefix} content={content} />
         {node.links.length > 0 ? (
           <div className="mt-4">
             <p className="mb-1 text-xs font-bold uppercase tracking-wider text-teal-on-surface-variant">
@@ -107,9 +122,9 @@ export function PlaybookPage({ content, tools }: { content: Content; tools: Tool
               </Button>
             ))}
           </div>
-        ) : (
+        ) : node.services.length === 0 ? (
           <p className="mt-6 text-sm font-semibold text-teal-tertiary">End of this branch.</p>
-        )}
+        ) : null}
       </section>
 
       <div className="mt-4 flex gap-2">
@@ -117,7 +132,15 @@ export function PlaybookPage({ content, tools }: { content: Content; tools: Tool
           <Undo2 aria-hidden="true" className="size-3.5" />
           Back
         </Button>
-        <Button variant="ghost" size="sm" disabled={path.length < 2} onClick={() => go([])}>
+        <Button
+          variant="ghost"
+          size="sm"
+          disabled={path.length < 2 && !hasSelections}
+          onClick={() => {
+            resetChecks(servicePrefix)
+            go([])
+          }}
+        >
           <RotateCcw aria-hidden="true" className="size-3.5" />
           Restart
         </Button>
