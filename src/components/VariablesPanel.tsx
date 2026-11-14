@@ -29,18 +29,13 @@ function ProfileEditor({ profile, onNavigate }: { profile: VariableProfile; onNa
               : 'Make this profile default when you start working on it.'}
           </p>
         </div>
-        <Button
-          size="sm"
-          disabled={isDefault}
-          aria-label={isDefault ? `${profile.name} is default` : `Make ${profile.name} default`}
-          onClick={() => setDefaultProfile(profile.id)}
-        >
+        <Button size="sm" disabled={isDefault} onClick={() => setDefaultProfile(profile.id)}>
           {isDefault ? (
             <Check aria-hidden="true" className="size-4" />
           ) : (
             <Crosshair aria-hidden="true" className="size-4" />
           )}
-          {isDefault ? 'Default' : 'Make default'}
+          {isDefault ? 'Default' : `Make ${profile.name} default`}
         </Button>
       </div>
       <div className="grid gap-2 rounded-xl border border-teal-outline-variant/40 bg-teal-surface-container-low p-4">
