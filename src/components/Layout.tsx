@@ -36,7 +36,10 @@ function Brand({ onNavigate }: { onNavigate?: () => void }) {
       <span className="flex size-8 items-center justify-center rounded-lg bg-teal-primary text-teal-on-primary">
         <Terminal aria-hidden="true" className="size-4" />
       </span>
-      <span className="font-teal-headline text-base font-extrabold leading-none text-teal-on-surface">OffSec Cheatsheets</span>
+      <span className="flex min-w-0 flex-col gap-1.5">
+        <span className="font-teal-headline text-base font-extrabold leading-none text-teal-on-surface">OffSec Cheatsheets</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest text-teal-primary">OSCP / PEN-200</span>
+      </span>
     </NavLink>
   )
 }
@@ -201,7 +204,14 @@ export function Layout({ content, tools }: { content: Content; tools: Tools }) {
                 {navOpen ? <X /> : <MenuIcon />}
               </IconButton>
             </TopBarBrand>
-            <TopBarSearch>
+            <span
+              title="Current certification: OSCP (PEN-200)"
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-teal-primary/30 bg-teal-primary/10 px-2.5 py-1.5 text-[11px] font-bold tracking-wider text-teal-primary"
+            >
+              <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />
+              OSCP
+            </span>
+            <TopBarSearch className="min-w-0">
               <button
                 type="button"
                 onClick={() => setSearchOpen(true)}

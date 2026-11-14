@@ -11,7 +11,7 @@ import { ToolLayout } from './ToolLayout'
 
 export function PlaybooksPage({ tools }: { tools: Tools }) {
   return (
-    <ToolLayout title="Playbooks" description="Decision trees from content/_playbooks/*.yaml. Answer each step to reach the notes that apply.">
+    <ToolLayout title="OSCP playbooks" description="OSCP decision paths. Choose a starting point and follow each step to the next check.">
       <ToolProblems problems={tools.problems.filter((problem) => problem.startsWith('_playbooks'))} />
       {tools.playbooks.length === 0 ? (
         <p className="text-teal-on-surface-variant">No playbooks yet. See the authoring guide for the format.</p>

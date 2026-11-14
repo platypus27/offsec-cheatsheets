@@ -39,14 +39,21 @@ async function stubClipboard(page: Page, mode: 'resolve' | 'reject') {
   }, mode)
 }
 
-test('home lists sections and the sidebar navigates', async ({ page }) => {
+test('home identifies OSCP and the sidebar navigates', async ({ page }) => {
   await page.goto('./')
-  await expect(page.getByRole('heading', { level: 1, name: 'OffSec Cheatsheets' })).toBeVisible()
+  await expect(page).toHaveTitle('OSCP Cheatsheet | OffSec')
+  await expect(page.getByRole('heading', { level: 1, name: 'OSCP Cheatsheet' })).toBeVisible()
+  await expect(page.getByRole('banner')).toContainText('OSCP')
+  if (isMobile(page)) {
+    await page.setViewportSize({ width: 320, height: 780 })
+    await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320)
+  }
   if (isMobile(page)) await page.getByRole('button', { name: 'Open navigation' }).click()
   const nav = page.getByRole('navigation', { name: 'Cheatsheet sections' })
   await nav.getByRole('link', { name: 'Second Page' }).click()
   await expect(page).toHaveURL(/#\/beta\/second$/)
   await expect(page.getByRole('heading', { level: 1, name: 'Second Page' })).toBeVisible()
+  await expect(page.getByRole('banner')).toContainText('OSCP')
   if (isMobile(page)) {
     await expect(nav).toBeHidden()
     await page.getByRole('button', { name: 'Open navigation' }).click()

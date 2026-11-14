@@ -32,7 +32,9 @@ export function HomePage({ content }: { content: Content }) {
 
   return (
     <main id="main-content" tabIndex={-1} className="mx-auto max-w-5xl px-4 py-10 outline-none sm:px-8 lg:py-14">
-      <h1 className="font-teal-headline text-3xl font-extrabold tracking-tight sm:text-4xl">OffSec Cheatsheets</h1>
+      <p className="mb-3 text-xs font-bold uppercase tracking-widest text-teal-primary">PEN-200 / Offline reference</p>
+      <h1 className="font-teal-headline text-3xl font-extrabold tracking-tight sm:text-4xl">OSCP Cheatsheet</h1>
+      <p className="mt-3 max-w-2xl text-teal-on-surface-variant">Cheatsheets and playbooks for OSCP. All current content is scoped to this certification.</p>
       <p className="mt-3 flex flex-wrap items-center gap-1.5 text-teal-on-surface-variant">
         <Search aria-hidden="true" className="size-4" /> Press <Key>/</Key> to search every command, <Key>v</Key> to set
         your target, <Key>?</Key> for all shortcuts.

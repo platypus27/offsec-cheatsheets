@@ -4,6 +4,10 @@ A personal, searchable, offline cheatsheet app for OffSec exam prep, built on
 [`@kryv/teal`](https://github.com/platypus27/teal). Notes are plain Markdown;
 the build is a single HTML file that opens straight from disk.
 
+The current cheatsheet and playbooks cover **OSCP (PEN-200) only**. OSWP and
+OSEP content are outside the current reference. The persistent OSCP badge
+identifies this scope on desktop and mobile, including when opening a note directly.
+
 ## Features
 
 - **Navigation**: sidebar by section, breadcrumbs, prev/next, an outline of
