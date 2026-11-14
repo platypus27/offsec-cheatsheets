@@ -85,7 +85,9 @@ target page list the matching notes.
 
 Each file in `content/_playbooks/` is a decision tree. Every node has a
 `prompt`, an optional `body` and note `links`, and `options` that lead to
-other nodes. A node without options ends the branch.
+other nodes. Use `commands` to show every fenced code block from a note heading
+inline, with the same variable filling and Copy buttons as the note. Keep commands
+in the note so corrections reach both views.
 
 ```yaml
 title: No foothold yet
@@ -99,6 +101,29 @@ nodes:
     prompt: Enumerate the web service.
     links: [web/web-enumeration#content-discovery]
 ```
+
+## Playbook service checkboxes
+
+A node can offer independent service checkboxes. Each service needs a unique
+`id`, `title` and at least one command-bearing heading reference. `body` is an
+optional short reminder. Only selected services show commands.
+
+```yaml
+services:
+  - id: smb
+    title: SMB
+    body: Use a known domain account.
+    commands: [active-directory/smb-enumeration#smb-share-permissions]
+  - id: winrm
+    title: WinRM
+    commands: [services/remote-access#winrm-credential-check]
+```
+
+Service choices survive Back and reload in this browser. Choices are separate
+for each playbook, default variable profile and effective RHOST. Restart clears
+them for the current context. A node with neither services nor options ends the
+branch. A command reference must point to a heading with a fenced code block;
+`npm test` checks this along with normal links.
 
 ## Checking your notes
 

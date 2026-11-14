@@ -1,50 +1,70 @@
 title: Active Directory
-description: Identify the domain, enumerate with the access you have, then validate a path.
-start: credentials
+description: Scan, identify the domain, then enumerate services actually available on this host.
+start: scan
 nodes:
-  credentials:
-    prompt: Valid domain credentials?
-    links: [active-directory/ad-enumeration#domain-overview]
+  scan:
+    prompt: Run Nmap first.
+    body: Set RHOST to this host. Run the full TCP scan, then set RPORT to the discovered ports (comma-separated) for service detection. Record open services and listener ports. The SYN scan requires elevated privileges.
+    commands: [recon/scanning#port-scanning, recon/scanning#service-detection]
     options:
-      - { label: 'Yes', next: dns }
-      - { label: 'No', next: unauthenticated }
-  unauthenticated:
-    prompt: Known domain usernames?
-    links: [services/common-services#smb]
+      - { label: Scan complete, next: domain }
+  domain:
+    prompt: Use SMB to identify the host and domain.
+    body: If SMB was found, run this probe. Record hostname, domain label and signing status. The label can be NetBIOS and does not prove a DC role. Save DOMAIN in Variables; set DC only after confirming the controller. Skip the probe when SMB is unavailable.
+    commands: [active-directory/ad-enumeration#domain-overview]
     options:
-      - { label: 'Yes', next: asrep }
-      - { label: 'No', next: identify }
-  identify:
-    prompt: Identify the DNS domain, DC and usernames before selecting an AD attack.
-    links: [active-directory/ad-enumeration#domain-overview, active-directory/ad-enumeration#dns-srv-records]
-  asrep:
-    prompt: Check known usernames for disabled Kerberos preauthentication.
-    links: [active-directory/kerberos#as-rep-roasting]
+      - { label: Domain recorded, next: services }
+      - { label: SMB unavailable, next: services }
+  services:
+    prompt: Select services found in Nmap.
+    body: Select all confirmed services. Set USER and PASS to one known account, including supplied lab credentials. Check the account authority and lockout policy before repeated attempts. LDAP is optional; use it only when confirmed and a DC is known.
+    services:
+      - id: smb
+        title: SMB
+        body: Use DOMAIN from the SMB banner. Test the domain login, list share permissions and enumerate users. A successful SMB login does not establish WinRM or administrator rights.
+        commands: [active-directory/smb-enumeration#smb-domain-login, active-directory/smb-enumeration#smb-share-permissions, active-directory/smb-enumeration#smb-domain-users]
+      - id: winrm
+        title: WinRM
+        body: For HTTP on 5985, test the known domain credential and verify the returned identity. Explicit DOMAIN avoids relying on SMB. For HTTPS on 5986 or a non-default listener, use the interactive WinRM step below and set RPORT to that listener.
+        commands: [services/remote-access#winrm-credential-check, services/remote-access#winrm-verify-identity]
+      - id: ldap
+        title: LDAP
+        body: Requires a confirmed DC and valid domain credentials. Set DC to that controller and DOMAIN to the domain. Record users and groups; review collection errors before trusting a graph's missing paths.
+        commands: [active-directory/ad-enumeration#domain-users, active-directory/ad-enumeration#domain-groups, active-directory/ad-enumeration#bloodhound-ce-collection]
+      - id: dns
+        title: DNS
+        body: Use the DNS domain for DOMAIN and its DNS server address for DC. Match returned controller names to reachable addresses before using LDAP or Kerberos.
+        commands: [active-directory/ad-enumeration#dns-srv-records]
+    links: [services/common-services#smb, active-directory/ad-enumeration#password-policy, active-directory/credential-access#domain-or-local-login]
     options:
-      - { label: Obtained a valid credential, next: dns }
-      - { label: No usable result, next: identify }
-  dns:
-    prompt: DNS and Kerberos checks pass?
-    links: [active-directory/ad-enumeration#dns-srv-records, active-directory/kerberos#kerberos-dns-or-clock-failure]
+      - { label: Open interactive WinRM session, next: winrm }
+      - { label: Already in target PowerShell - download WinPEAS, next: winpeas }
+      - { label: Review a concrete AD lead, next: leads }
+  winrm:
+    prompt: Open WinRM with confirmed credentials and listener.
+    body: Set RPORT to the WinRM listener, usually 5985 for HTTP or 5986 for HTTPS. Add -S for HTTPS. Requires WinRM logon rights; verify the resulting identity. Do not leave RPORT set to the scan's port list.
+    commands: [services/remote-access#winrm]
     options:
-      - { label: 'Yes', next: enumerate }
-      - { label: 'No', next: repair }
-  repair:
-    prompt: Resolve the naming or time failure before retrying authentication.
-    links: [active-directory/kerberos#kerberos-dns-or-clock-failure]
+      - { label: PowerShell session working - download WinPEAS, next: winpeas }
+      - { label: Access failed - return to enumeration, next: services }
+  winpeas:
+    prompt: Host WinPEAS on Kali and pull it from target PowerShell.
+    body: Set LHOST to Kali's address reachable from the target subnet and LPORT to a free HTTP server port, such as 8000. Keep the server running. Use a writable target directory. The x64 binary needs an x64 target and .NET 4.5.2 or newer. Verify the downloaded file before running it.
+    commands: [windows/windows-privesc#host-winpeas-on-kali, windows/windows-privesc#download-winpeas-in-powershell, windows/windows-privesc#run-winpeas]
+    links: [shells/file-transfers#verify-a-transferred-file, windows/windows-privesc#automated-enumeration]
+  leads:
+    prompt: Follow evidence from enumeration.
+    body: Choose only a lead supported by collected results. There is no guaranteed exploitation sequence.
     options:
-      - { label: Ready, next: dns }
-  enumerate:
-    prompt: Which AD lead did you find?
-    links: [active-directory/ad-enumeration#domain-users, active-directory/ad-enumeration#domain-groups, active-directory/ad-enumeration#password-policy, services/common-services#sysvol, active-directory/ad-enumeration#bloodhound-ce-collection]
-    options:
-      - { label: Roasting, next: roast }
-      - { label: ACL / delegation, next: path }
-      - { label: Certificates, next: certificates }
-      - { label: Credentials, next: reuse }
+      - { label: Kerberos roasting lead, next: roast }
+      - { label: ACL or delegation lead, next: path }
+      - { label: Certificate enrollment lead, next: certificates }
+      - { label: New credential, next: reuse }
   roast:
-    prompt: Request eligible material and select the hash mode from its marker.
-    links: [active-directory/kerberos#as-rep-roasting, active-directory/kerberos#kerberoasting, active-directory/kerberos#kerberos-hash-modes]
+    prompt: Check roasting prerequisites and identify the returned hash format.
+    body: These methods require confirmed LDAP on DC. AS-REP roasting needs a known username with preauthentication disabled; Kerberoasting needs valid domain credentials and an eligible SPN account. Prepare wordlist.txt. The cracking commands below apply only to etype 23; check the hash marker first.
+    commands: [active-directory/kerberos#as-rep-roasting, active-directory/kerberos#kerberoasting]
+    links: [active-directory/kerberos#kerberos-hash-modes, active-directory/kerberos#kerberos-dns-or-clock-failure]
   path:
     prompt: Check effective permissions and delegation prerequisites before changes.
     links: [active-directory/attack-paths#acl-abuse, active-directory/attack-paths#delegation-prerequisites]
@@ -53,4 +73,6 @@ nodes:
     links: [active-directory/attack-paths#ad-cs-enrollment-prerequisites, active-directory/attack-paths#certificate-strong-mapping-after-2025]
   reuse:
     prompt: Validate the credential authority and resulting access on one intended host.
-    links: [active-directory/credential-access#domain-or-local-login, active-directory/credential-access#reuse-one-known-credential, active-directory/credential-access#kerberos-authentication, active-directory/credential-access#remote-windows-command]
+    body: Remote SMB execution below requires administrator access and a working execution method. Verify the resulting identity.
+    commands: [active-directory/credential-access#remote-windows-command]
+    links: [active-directory/credential-access#domain-or-local-login, active-directory/credential-access#reuse-one-known-credential, active-directory/credential-access#kerberos-authentication]
