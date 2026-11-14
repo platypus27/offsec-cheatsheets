@@ -1,0 +1,16 @@
+title: Guided service fixture
+description: Scan, identify the domain and enumerate confirmed services.
+start: scan
+nodes:
+  scan:
+    prompt: Run Nmap first
+    commands: [workflow/commands#scan-the-target]
+    options:
+      - { label: Scan complete, next: domain }
+  domain:
+    prompt: Identify the domain from SMB
+    commands: [workflow/commands#identify-the-domain]
+    options:
+      - { label: Domain recorded, next: services }
+  services:
+    prompt: Select services found in the scan

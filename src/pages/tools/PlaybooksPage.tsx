@@ -2,6 +2,7 @@ import { ChevronRight, RotateCcw, Undo2 } from 'lucide-react'
 import { Button } from '@kryv/teal'
 import { Link, useParams, useSearchParams } from 'react-router'
 import { NoteLink } from '../../components/NoteLink'
+import { PlaybookCommands } from '../../components/PlaybookCommands'
 import { ToolProblems } from '../../components/ToolProblems'
 import type { Content } from '../../lib/content'
 import { walk } from '../../lib/playbooks'
@@ -85,6 +86,7 @@ export function PlaybookPage({ content, tools }: { content: Content; tools: Tool
           {node.prompt}
         </h2>
         {node.body ? <p className="mt-3 whitespace-pre-line text-teal-on-surface">{node.body}</p> : null}
+        <PlaybookCommands refs={node.commands} content={content} />
         {node.links.length > 0 ? (
           <div className="mt-4">
             <p className="mb-1 text-xs font-bold uppercase tracking-wider text-teal-on-surface-variant">

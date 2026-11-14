@@ -1,7 +1,7 @@
 import { parse as parseYaml } from 'yaml'
-import type { Content } from './content'
+import type { Chunk, Content } from './content'
 import { asRecord, isStringArray } from './guards'
-import { refProblem } from './refs'
+import { refProblem, splitRef } from './refs'
 
 export interface PlaybookOption {
   label: string
@@ -13,6 +13,7 @@ export interface PlaybookNode {
   prompt: string
   body: string
   links: string[]
+  commands: string[]
   options: PlaybookOption[]
 }
 
@@ -57,6 +58,9 @@ export function parsePlaybook(id: string, source: string): { playbook?: Playbook
     // The answered path is stored in the URL joined by ".", so ids must not contain it.
     if (!NODE_ID.test(nodeId)) errors.push(`Node id "${nodeId}" may only use letters, digits, "-" and "_"`)
     const node = asRecord(raw)
+    if (node.commands !== undefined && !isStringArray(node.commands)) {
+      errors.push(`Node ${nodeId}: commands must be a list of note heading references`)
+    }
     const options: PlaybookOption[] = []
     ;(Array.isArray(node.options) ? node.options : []).forEach((rawOption, index) => {
       const option = asRecord(rawOption)
@@ -72,6 +76,7 @@ export function parsePlaybook(id: string, source: string): { playbook?: Playbook
       prompt: text(node.prompt) || nodeId,
       body: text(node.body),
       links: isStringArray(node.links) ? node.links : [],
+      commands: isStringArray(node.commands) ? node.commands : [],
       options,
     }
   }
@@ -119,10 +124,30 @@ export function walk(playbook: Playbook, path: string[]): string[] {
 }
 
 export function validatePlaybookLinks(playbook: Playbook, content: Content): string[] {
-  return Object.values(playbook.nodes).flatMap((node) =>
-    node.links.flatMap((ref) => {
+  return Object.values(playbook.nodes).flatMap((node) => [
+    ...node.links.flatMap((ref) => {
       const problem = refProblem(ref, content)
       return problem ? [`Playbook ${playbook.id}, node ${node.id}: ${problem}`] : []
     }),
-  )
+    ...validateCommandRefs(node.commands, content).map(
+      (problem) => `Playbook ${playbook.id}, node ${node.id}: ${problem}`,
+    ),
+  ])
+}
+
+/** Resolve the same heading used by note links; never reconstruct or copy its commands. */
+export function commandChunk(ref: string, content: Content): Chunk | undefined {
+  const { slug, headingId } = splitRef(ref)
+  return headingId ? content.page(slug)?.chunks.find((chunk) => chunk.headingId === headingId) : undefined
+}
+
+function validateCommandRefs(refs: string[], content: Content): string[] {
+  return refs.flatMap((ref) => {
+    const problem = refProblem(ref, content)
+    if (problem) return [problem]
+    if (!splitRef(ref).headingId) return [`"${ref}" needs a heading for its commands`]
+    if (!commandChunk(ref, content)?.blocks.some((block) => block.code.trim()))
+      return [`"${ref}" has no fenced commands`]
+    return []
+  })
 }
