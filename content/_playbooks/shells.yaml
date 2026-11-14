@@ -44,4 +44,12 @@ nodes:
     links: [shells/file-transfers#downloading-on-linux, shells/file-transfers#verify-a-transferred-file]
   windows:
     prompt: Download from PowerShell, then compare the file hash.
+    commands: [shells/file-transfers#serving-files, shells/file-transfers#downloading-on-windows, shells/file-transfers#verify-a-transferred-file]
     links: [shells/file-transfers#downloading-on-windows, shells/file-transfers#verify-a-transferred-file]
+    options:
+      - { label: Download WinPEAS from Kali instead, next: winpeas }
+  winpeas:
+    prompt: Pull WinPEAS over HTTP from the target's PowerShell session.
+    body: Run the HTTP server on Kali. Use its address reachable from the target as LHOST and the HTTP server port as LPORT.
+    commands: [windows/windows-privesc#host-winpeas-on-kali, windows/windows-privesc#download-winpeas-in-powershell]
+    links: [windows/windows-privesc#run-winpeas, shells/file-transfers#verify-a-transferred-file]

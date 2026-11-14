@@ -25,11 +25,18 @@ nodes:
     links: [linux/linux-privesc#cron-jobs, linux/linux-privesc#systemd-timers]
   windows:
     prompt: Which Windows lead needs checking?
+    commands: [windows/windows-privesc#situational-awareness, windows/windows-privesc#token-privileges]
     links: [windows/windows-privesc#situational-awareness, windows/windows-privesc#token-privileges, windows/windows-privesc#automated-enumeration]
     options:
+      - { label: Download WinPEAS over HTTP, next: winpeas }
       - { label: Service, next: service }
       - { label: Scheduled task, next: task }
       - { label: Token privilege, next: token }
+  winpeas:
+    prompt: Host WinPEAS on Kali, then download it from target PowerShell.
+    body: Set LHOST to Kali's address reachable from the target and LPORT to a free HTTP server port. Keep the Kali server running. Use a writable target directory and a binary matching the target architecture and runtime.
+    commands: [windows/windows-privesc#host-winpeas-on-kali, windows/windows-privesc#download-winpeas-in-powershell, windows/windows-privesc#run-winpeas]
+    links: [shells/file-transfers#verify-a-transferred-file]
   service:
     prompt: Validate the service account, path, permissions and trigger.
     links: [windows/windows-privesc#service-paths-and-accounts, windows/windows-privesc#file-and-directory-acls]
