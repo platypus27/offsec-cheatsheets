@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Check, Crosshair } from 'lucide-react'
+import { Check, Crosshair, Plus } from 'lucide-react'
 import { Badge, Button, Dialog, Select, Tabs } from '@kryv/teal'
 import { Link } from 'react-router'
 import type { VariableProfile } from '../lib/profiles'
@@ -86,7 +86,7 @@ function ProfileEditor({ profile, onNavigate }: { profile: VariableProfile; onNa
 }
 
 function ProfileTabs({ onNavigate }: { onNavigate: () => void }) {
-  const { profiles, defaultProfile } = useAppState()
+  const { profiles, defaultProfile, addBox } = useAppState()
   const [editingId, setEditingId] = useState(defaultProfile.id)
   return (
     <div className="grid gap-5">
@@ -97,6 +97,9 @@ function ProfileTabs({ onNavigate }: { onNavigate: () => void }) {
         <p role="status" className="text-sm font-semibold">
           Commands use {defaultProfile.name}
         </p>
+        <Button size="sm" variant="secondary" className="sm:ml-auto" onClick={() => setEditingId(addBox())}>
+          <Plus aria-hidden="true" className="size-4" /> Add box
+        </Button>
       </div>
       <Tabs
         aria-label="Variable profiles"

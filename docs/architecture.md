@@ -29,6 +29,11 @@ There is no backend or runtime content fetch.
 - `src/state.tsx` owns shared personal state and derives effective variables.
   Editors such as `TargetVariables` receive values and an update callback instead
   of looking up their parent record again.
+- `src/lib/profiles.ts` defines the variable-profile storage format and validates
+  restored data. Values, per-profile target bindings and the default selection
+  share one versioned `variable-profiles` storage entry. Old `variables` and
+  `active-target` entries seed Box 1 only when no valid profile entry exists;
+  they are retained as legacy data. Other profiles start empty.
 - `src/content-source.ts` is the build-time file adapter. `buildContent` and
   `buildTools` accept source strings, so their logic can be exercised without Vite.
 
@@ -43,8 +48,9 @@ There is no backend or runtime content fetch.
 - **Saved progress:** task keys include page slug, label and occurrence. Renaming
   those changes the saved identity. Preserve storage namespace and keys unless a
   migration is supplied.
-- **Variable precedence:** target address supplies `RHOST`; target variables
-  override globals. Display and copy must resolve values consistently. Substitution
+- **Variable precedence:** the default profile supplies values; its selected target's
+  address supplies `RHOST`, and target variables override profile values. Editing
+  another profile does not change the default. Display and copy must resolve values consistently. Substitution
   is plain text, so it does not provide shell quoting or escaping.
 - **Untrusted text:** keep raw Markdown HTML disabled and escape variable values
   before inserting highlighted HTML. Treat pasted scans and persisted JSON as

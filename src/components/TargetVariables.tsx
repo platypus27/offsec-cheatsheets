@@ -63,7 +63,7 @@ export function TargetVariables({
         </Button>
       </form>
       <p id="target-var-hint" className="-mt-1 text-xs text-teal-on-surface-variant">
-        Overrides the global value while this target is active, e.g. USER or DOMAIN.
+        Overrides the profile value while this target is selected, e.g. USER or DOMAIN.
       </p>
     </div>
   )

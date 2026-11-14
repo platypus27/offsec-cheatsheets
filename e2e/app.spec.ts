@@ -231,6 +231,18 @@ for (const scheme of ['light', 'dark'] as const) {
     await settled(page)
     const results = await new AxeBuilder({ page }).analyze()
     expect(results.violations, 'search').toEqual([])
+    await page.keyboard.press('Escape')
+    if (isMobile(page)) await page.setViewportSize({ width: 320, height: 780 })
+    await page.getByRole('button', { name: /^Edit variables/ }).click()
+    await page.getByRole('tab', { name: 'Box 3', exact: true }).click()
+    await settled(page)
+    const profileResults = await new AxeBuilder({ page }).analyze()
+    expect(profileResults.violations, 'variable profiles').toEqual([])
+    if (isMobile(page)) {
+      await expect
+        .poll(() => page.evaluate(() => document.documentElement.scrollWidth))
+        .toBeLessThanOrEqual(320)
+    }
   })
 }
 

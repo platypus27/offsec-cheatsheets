@@ -35,8 +35,13 @@ Write `{{NAME}}` placeholders in code blocks. Set the values once in the
 **Variables** panel (press `v`) and every block shows and copies the filled-in
 command. Unset placeholders stay highlighted so nothing slips through.
 
-With an active target (see **Tools > Targets**), `{{RHOST}}` comes from the
-target's address and the target's own variables override the global ones.
+Use the **AD** or **Box 1-3** tabs to save separate values. **Add box** creates
+another profile. Choose **Make default** when switching which box you are working
+on; that profile supplies every command. Browsing another tab does not switch
+the default. Profiles and the default choice are saved in this browser.
+
+With a saved target selected for the profile (see **Tools > Targets**), `{{RHOST}}`
+comes from its address and its own variables override the profile values.
 
 ```bash
 nc -lvnp {{LPORT}}

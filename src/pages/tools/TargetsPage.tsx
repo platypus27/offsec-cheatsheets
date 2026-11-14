@@ -49,7 +49,7 @@ export function TargetsPage() {
   return (
     <ToolLayout
       title="Targets"
-      description="Each target keeps its own address, variables, ports and notes. The active target fills {{RHOST}} and its variables into every command."
+      description="Each target keeps its own address, variables, ports and notes. Set active to use it in your default variable profile."
     >
       <AddTargetForm />
       {targets.length === 0 ? (

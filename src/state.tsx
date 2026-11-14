@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
 import type { ScannedHost } from './lib/nmap'
 import { isBooleanRecord, isStringArray, type Guard } from './lib/guards'
+import { createId } from './lib/ids'
 import { readJSON, usePersistentState } from './lib/storage'
 import { initialProfiles, isVariableProfiles, type VariableProfile } from './lib/profiles'
 import { effectiveVariables, isTargets, newTarget, upsertFromScan, type Target } from './lib/targets'
@@ -16,6 +17,7 @@ interface AppState {
   profiles: VariableProfile[]
   defaultProfile: VariableProfile
   setDefaultProfile: (id: string) => void
+  addBox: () => string
   updateProfile: (id: string, patch: Partial<Pick<VariableProfile, 'variables' | 'targetId'>>) => void
   setVariable: (name: string, value: string) => void
   targets: Target[]
@@ -82,6 +84,15 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       ),
     [setProfileState],
   )
+
+  const addBox = useCallback(() => {
+    const id = createId('box')
+    setProfileState((prev) => ({
+      ...prev,
+      items: [...prev.items, { id, name: `Box ${prev.items.length}`, variables: {}, targetId: null }],
+    }))
+    return id
+  }, [setProfileState])
 
   const setVariable = useCallback(
     (name: string, value: string) =>
@@ -162,6 +173,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       profiles,
       defaultProfile,
       setDefaultProfile,
+      addBox,
       updateProfile,
       setVariable,
       targets,
@@ -184,6 +196,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       profiles,
       defaultProfile,
       setDefaultProfile,
+      addBox,
       updateProfile,
       setVariable,
       targets,

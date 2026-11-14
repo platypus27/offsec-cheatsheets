@@ -18,7 +18,7 @@ describe('targets', () => {
     expect(a.id).not.toBe(b.id)
   })
 
-  it('layers globals, then target vars, then the target address as RHOST', () => {
+  it('layers profile values, then target vars, then the target address as RHOST', () => {
     const target = { ...newTarget('dc', '10.0.0.9'), vars: { USER: 'svc', RHOST: 'ignored' } }
     expect(effectiveVariables({ LHOST: '10.8.0.2', USER: 'guest' }, target)).toEqual({
       LHOST: '10.8.0.2',
