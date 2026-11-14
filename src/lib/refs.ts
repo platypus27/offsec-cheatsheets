@@ -15,10 +15,3 @@ export function refProblem(ref: string, content: Content): string | null {
     return `"${ref}" has no such heading`
   return null
 }
-
-export { isStringArray as isStringList } from './storage'
-
-/** Treats any non-object YAML value as an empty record. */
-export function record(value: unknown): Record<string, unknown> {
-  return value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : {}
-}

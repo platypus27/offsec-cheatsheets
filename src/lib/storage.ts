@@ -1,17 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
+import type { Guard } from './guards'
 
 const NAMESPACE = 'offsec-cheatsheets:'
-
-export type Guard<T> = (value: unknown) => value is T
-
-export const isStringArray: Guard<string[]> = (value): value is string[] =>
-  Array.isArray(value) && value.every((item) => typeof item === 'string')
-
-export const isBooleanRecord: Guard<Record<string, boolean>> = (value): value is Record<string, boolean> =>
-  !!value &&
-  typeof value === 'object' &&
-  !Array.isArray(value) &&
-  Object.values(value).every((item) => typeof item === 'boolean')
 
 // Storage can be missing, full, or blocked (private windows, strict file://
 // policies). Every caller gets a sane fallback instead of an exception.

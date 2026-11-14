@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react'
 import type { ScannedHost } from './lib/nmap'
-import { isBooleanRecord, isStringArray, usePersistentState, type Guard } from './lib/storage'
+import { isBooleanRecord, isStringArray, type Guard } from './lib/guards'
+import { usePersistentState } from './lib/storage'
 import { effectiveVariables, isTargets, newTarget, upsertFromScan, type Target } from './lib/targets'
 import { isVariables, type Variables } from './lib/variables'
 

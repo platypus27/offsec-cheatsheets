@@ -6,6 +6,7 @@ import remarkParse from 'remark-parse'
 import { unified } from 'unified'
 import { visit } from 'unist-util-visit'
 import { parse as parseYaml } from 'yaml'
+import { asRecord } from './guards'
 
 export interface Heading {
   id: string
@@ -82,7 +83,7 @@ function humanize(name: string): string {
 function readYaml(source: string): Record<string, unknown> {
   try {
     const data: unknown = parseYaml(source)
-    return data && typeof data === 'object' && !Array.isArray(data) ? (data as Record<string, unknown>) : {}
+    return asRecord(data)
   } catch {
     return {}
   }

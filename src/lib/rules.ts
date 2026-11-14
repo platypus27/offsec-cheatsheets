@@ -1,7 +1,8 @@
 import { parse as parseYaml } from 'yaml'
 import type { Content } from './content'
 import type { ScannedPort } from './nmap'
-import { isStringList, record, refProblem } from './refs'
+import { asRecord, isStringArray } from './guards'
+import { refProblem } from './refs'
 
 export interface Rule {
   id: string
@@ -44,21 +45,21 @@ export function parseRules(source: string): { rules: Rule[]; errors: string[] } 
   const errors: string[] = []
   const seen = new Set<string>()
   data.forEach((raw, index) => {
-    const item = record(raw)
+    const item = asRecord(raw)
     const label = `Rule ${index + 1}`
     const id = typeof item.id === 'string' ? item.id : ''
     if (!ID.test(id)) return errors.push(`${label}: needs an "id" made of letters, digits and dashes`)
     const where = `${label} (${id})`
     if (seen.has(id)) return errors.push(`${where}: duplicate id`)
     seen.add(id)
-    const match = record(item.match)
+    const match = asRecord(item.match)
     const ports = Array.isArray(match.ports)
       ? match.ports.filter((port): port is number => Number.isInteger(port))
       : []
-    const services = isStringList(match.services)
+    const services = isStringArray(match.services)
       ? match.services.map((service) => service.toLowerCase())
       : []
-    const patterns = isStringList(match.versions) ? match.versions : []
+    const patterns = isStringArray(match.versions) ? match.versions : []
     const versions: RegExp[] = []
     for (const pattern of patterns) {
       try {
@@ -70,7 +71,7 @@ export function parseRules(source: string): { rules: Rule[]; errors: string[] } 
     if (ports.length + services.length + versions.length === 0) {
       return errors.push(`${where}: "match" needs at least one of ports, services or versions`)
     }
-    const suggestions = isStringList(item.suggest) ? item.suggest : []
+    const suggestions = isStringArray(item.suggest) ? item.suggest : []
     if (suggestions.length === 0) return errors.push(`${where}: "suggest" needs at least one page`)
     rules.push({
       id,
