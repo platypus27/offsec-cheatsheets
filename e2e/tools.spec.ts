@@ -29,7 +29,7 @@ test('parsing a scan creates a target that fills commands', async ({ page }) => 
     'connect --host 10.20.30.40 --port {{RPORT}}',
   )
   await expect(
-    page.getByRole('button', { name: /^Edit variables, profile Box 1, target zoo\.lab 10\.20\.30\.40$/ }),
+    page.getByRole('button', { name: /^Edit variables, profile Box 1 \/ zoo\.lab 10\.20\.30\.40$/ }),
   ).toBeVisible()
 
   await page.reload()

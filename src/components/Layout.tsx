@@ -145,7 +145,7 @@ function VariablesButton({ onClick }: { onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      aria-label={`Edit variables, profile ${defaultProfile.name}${label ? `, target ${label}` : ''}`}
+      aria-label={`Edit variables, profile ${defaultProfile.name}${label ? ` / ${label}` : ''}`}
       className="flex h-10 items-center gap-1.5 rounded-xl px-2 text-sm text-teal-on-surface-variant transition-colors hover:bg-teal-surface-container-high hover:text-teal-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-primary sm:gap-2 sm:px-3"
     >
       <Crosshair aria-hidden="true" className="hidden size-4 shrink-0 min-[361px]:block" />

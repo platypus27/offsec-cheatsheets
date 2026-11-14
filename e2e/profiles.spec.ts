@@ -1,3 +1,4 @@
+import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
 
 async function openVariables(page: Page) {
@@ -178,6 +179,8 @@ test('making a box default switches filled and copied commands and survives relo
   await expect(dialog.getByRole('status')).toHaveText('Commands use Box 3')
   await dialog.getByRole('button', { name: 'Close', exact: true }).click()
   await expect(command).toHaveText('connect --host 192.0.2.33 --port 443')
+  const filledProfileAccessibility = await new AxeBuilder({ page }).analyze()
+  expect(filledProfileAccessibility.violations).toEqual([])
   if ((page.viewportSize()?.width ?? 1280) < 640) {
     await page.setViewportSize({ width: 320, height: 780 })
     await expect

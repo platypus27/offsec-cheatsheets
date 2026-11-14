@@ -155,9 +155,7 @@ test('variables fill commands and copy the filled-in text', async ({ page, brows
   const block = page.getByRole('region', { name: 'bash code' })
   await expect(block).toHaveText('connect --host 10.9.8.7 --port {{RPORT}}')
   await expect(block.locator('.var-unset')).toHaveText('{{RPORT}}')
-  await expect(
-    page.getByRole('button', { name: 'Edit variables, profile Box 1, target 10.9.8.7' }),
-  ).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Edit variables, profile Box 1 / 10.9.8.7' })).toBeVisible()
 
   await page.getByRole('button', { name: 'Copy code' }).click()
   await expect(page.getByText('Copied to clipboard', { exact: true })).toBeVisible()
