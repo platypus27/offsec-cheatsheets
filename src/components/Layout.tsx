@@ -136,7 +136,7 @@ function Navigation({ content, open, onClose }: { content: Content; open: boolea
 }
 
 function VariablesButton({ onClick }: { onClick: () => void }) {
-  const { variables, activeTarget } = useAppState()
+  const { variables, activeTarget, defaultProfile } = useAppState()
   const target = variables.RHOST?.trim()
   const label = activeTarget
     ? `${activeTarget.name}${target && target !== activeTarget.name ? ` ${target}` : ''}`
@@ -145,17 +145,14 @@ function VariablesButton({ onClick }: { onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      aria-label={label ? `Edit variables, target ${label}` : 'Edit variables'}
+      aria-label={`Edit variables, profile ${defaultProfile.name}${label ? `, target ${label}` : ''}`}
       className="flex h-10 items-center gap-2 rounded-xl px-3 text-sm text-teal-on-surface-variant transition-colors hover:bg-teal-surface-container-high hover:text-teal-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-primary"
     >
       <Crosshair aria-hidden="true" className="size-4" />
-      {label ? (
-        <span className="hidden max-w-48 truncate font-mono text-xs font-semibold text-teal-primary sm:inline">
-          {label}
-        </span>
-      ) : (
-        <span className="hidden sm:inline">Variables</span>
-      )}
+      <span className="hidden max-w-48 truncate text-xs font-semibold text-teal-primary sm:inline">
+        {defaultProfile.name}
+        {label ? ` / ${label}` : ''}
+      </span>
     </button>
   )
 }
