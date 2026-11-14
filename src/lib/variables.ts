@@ -25,7 +25,9 @@ export const DEFAULT_VARIABLES: { name: string; hint: string }[] = [
   { name: 'LHOST', hint: 'Your IP (tun0)' },
   { name: 'LPORT', hint: 'Your listener port' },
   { name: 'DOMAIN', hint: 'AD domain' },
-  { name: 'DC', hint: 'Domain controller IP' },
+  { name: 'MS01', hint: 'Member server IP' },
+  { name: 'MS02', hint: 'Member server IP' },
+  { name: 'DC01', hint: 'Domain controller IP' },
   { name: 'USER', hint: 'Username' },
   { name: 'PASS', hint: 'Password' },
 ]

@@ -35,6 +35,11 @@ Write `{{NAME}}` placeholders in code blocks. Set the values once in the
 **Variables** panel (press `v`) and every block shows and copies the filled-in
 command. Unset placeholders stay highlighted so nothing slips through.
 
+The AD lab machines are named variables: `{{MS01}}`, `{{MS02}}` and `{{DC01}}`
+hold one address each, so a block can target every machine at once. `{{LHOST}}`
+stays the single attacker address. `{{RHOST}}` remains for box work, where it
+follows the selected target.
+
 Use the **AD** or **Box 1-3** tabs to save separate values. **Add box** creates
 another profile. Choose **Make default** when switching which box you are working
 on; that profile supplies every command. Browsing another tab does not switch

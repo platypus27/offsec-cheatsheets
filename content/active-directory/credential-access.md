@@ -10,9 +10,11 @@ Use the account's actual authority. A successful login does not establish admini
 
 ```bash
 # Domain account
-nxc smb {{RHOST}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}'
+nxc smb {{MS01}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}'
+nxc smb {{MS02}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}'
 # Local account
-nxc smb {{RHOST}} -u '{{USER}}' -p '{{PASS}}' --local-auth
+nxc smb {{MS01}} -u '{{USER}}' -p '{{PASS}}' --local-auth
+nxc smb {{MS02}} -u '{{USER}}' -p '{{PASS}}' --local-auth
 ```
 
 [Domain authentication](https://www.netexec.wiki/smb-protocol/authentication/checking-credentials-domain), [local authentication](https://www.netexec.wiki/smb-protocol/authentication/checking-credentials-local).
@@ -30,17 +32,18 @@ nxc smb {{RHOST}} -u '{{USER}}' -p '{{PASS}}' --local-auth
 Requires administrative access and a working remote execution method. Verify the resulting identity.
 
 ```bash
-nxc smb {{RHOST}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' -x whoami
+nxc smb {{MS01}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' -x whoami
+nxc smb {{MS02}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' -x whoami
 ```
 
 NetExec's admin indicator is a lead; check the command result itself. [Source](https://www.netexec.wiki/smb-protocol/command-execution/execute-remote-command).
 
 ## Kerberos authentication
 
-Set RHOST to the target FQDN and DC to the KDC address.
+Set RHOST to the target's FQDN and DC01 to the KDC address.
 
 ```bash
-nxc smb {{RHOST}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' -k --kdcHost {{DC}}
+nxc smb {{RHOST}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' -k --kdcHost {{DC01}}
 ```
 
 Check [DNS and time](active-directory/kerberos#kerberos-dns-or-clock-failure) first. [Source](https://www.netexec.wiki/getting-started/using-kerberos).

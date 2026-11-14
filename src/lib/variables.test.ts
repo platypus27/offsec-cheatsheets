@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { findPlaceholders, substitute } from './variables'
+import { DEFAULT_VARIABLES, findPlaceholders, substitute } from './variables'
 
 describe('substitute', () => {
   it('replaces set placeholders and leaves unset ones visible', () => {
@@ -20,5 +20,14 @@ describe('substitute', () => {
 describe('findPlaceholders', () => {
   it('lists unique placeholder names in first-seen order', () => {
     expect(findPlaceholders('{{B}} {{A}} {{ B }}')).toEqual(['B', 'A'])
+  })
+})
+
+describe('DEFAULT_VARIABLES', () => {
+  it('keeps a single LHOST and one variable per lab machine', () => {
+    const names = DEFAULT_VARIABLES.map((variable) => variable.name)
+    expect(names.filter((name) => name === 'LHOST')).toHaveLength(1)
+    expect(names).toEqual(expect.arrayContaining(['MS01', 'MS02', 'DC01']))
+    expect(names).not.toContain('DC')
   })
 })
