@@ -8,6 +8,7 @@ import { useAppState } from '../state'
 interface CodeBlockProps {
   code: string
   language?: string
+  accessibleLabel?: string
 }
 
 const trimNewlines = (code: string) => code.replace(/^\n+|\n+$/g, '')
@@ -18,7 +19,7 @@ const trimNewlines = (code: string) => code.replace(/^\n+|\n+$/g, '')
  * exam means pasting a stale command; this one fills in target variables
  * and says so loudly when a copy fails.
  */
-export function CodeBlock({ code, language }: CodeBlockProps) {
+export function CodeBlock({ code, language, accessibleLabel }: CodeBlockProps) {
   const { variables } = useAppState()
   const [copied, setCopied] = useState(false)
   const timer = useRef<number | undefined>(undefined)
@@ -53,7 +54,7 @@ export function CodeBlock({ code, language }: CodeBlockProps) {
       </div>
       <pre
         role="region"
-        aria-label={`${label} code`}
+        aria-label={accessibleLabel || `${label} code`}
         tabIndex={0}
         className={`prism-code language-${resolveLanguage(language) || 'text'} overflow-x-auto px-4 py-3 text-[13px] leading-relaxed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-teal-primary`}
       >

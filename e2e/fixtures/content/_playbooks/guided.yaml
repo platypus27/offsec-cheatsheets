@@ -24,3 +24,9 @@ nodes:
       - id: ldap
         title: LDAP
         commands: [workflow/commands#ldap-users]
+    options:
+      - { label: Download WinPEAS, next: winpeas }
+  winpeas:
+    prompt: Host on Kali and download from target PowerShell
+    body: LHOST must be Kali's address reachable from the target. Use LPORT for the HTTP server port.
+    commands: [workflow/commands#host-winpeas-on-kali, workflow/commands#download-winpeas-in-powershell]

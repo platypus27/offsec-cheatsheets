@@ -25,7 +25,12 @@ export function PlaybookCommands({
       <section key={ref} aria-label={chunk.heading} className="mt-5 min-w-0">
         <Heading className="text-sm font-bold">{chunk.heading}</Heading>
         {chunk.blocks.map((block, index) => (
-          <CodeBlock key={index} code={block.code} language={block.language} />
+          <CodeBlock
+            key={index}
+            code={block.code}
+            language={block.language}
+            accessibleLabel={`${chunk.heading} - ${block.language} code${chunk.blocks.length > 1 ? ` ${index + 1}` : ''}`}
+          />
         ))}
       </section>
     )

