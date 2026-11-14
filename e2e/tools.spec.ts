@@ -25,11 +25,17 @@ test('parsing a scan creates a target that fills commands', async ({ page }) => 
   await expect(page.getByRole('button', { name: 'Clear active' })).toBeVisible()
 
   await page.getByRole('link', { name: 'First Page › Command block' }).click()
-  await expect(page.getByRole('region', { name: 'bash code' })).toHaveText('connect --host 10.20.30.40 --port {{RPORT}}')
-  await expect(page.getByRole('button', { name: /^Edit variables, target zoo\.lab 10\.20\.30\.40$/ })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'bash code' })).toHaveText(
+    'connect --host 10.20.30.40 --port {{RPORT}}',
+  )
+  await expect(
+    page.getByRole('button', { name: /^Edit variables, target zoo\.lab 10\.20\.30\.40$/ }),
+  ).toBeVisible()
 
   await page.reload()
-  await expect(page.getByRole('region', { name: 'bash code' })).toHaveText('connect --host 10.20.30.40 --port {{RPORT}}')
+  await expect(page.getByRole('region', { name: 'bash code' })).toHaveText(
+    'connect --host 10.20.30.40 --port {{RPORT}}',
+  )
 })
 
 test('target variables override globals and clearing the target restores them', async ({ page }) => {
@@ -44,7 +50,9 @@ test('target variables override globals and clearing the target restores them', 
   await page.getByRole('button', { name: 'Set active' }).click()
 
   await page.goto('./#/alpha/first')
-  await expect(page.getByRole('region', { name: 'bash code' })).toHaveText('connect --host 10.1.1.1 --port 8443')
+  await expect(page.getByRole('region', { name: 'bash code' })).toHaveText(
+    'connect --host 10.1.1.1 --port 8443',
+  )
 
   await page.getByRole('button', { name: /^Edit variables/ }).click()
   await page.getByRole('combobox', { name: 'Active target' }).click()
@@ -52,7 +60,9 @@ test('target variables override globals and clearing the target restores them', 
   await expect(page.getByRole('listbox')).toBeHidden()
   await page.keyboard.press('Escape')
   await expect(page.getByRole('dialog', { name: 'Target and variables' })).toBeHidden()
-  await expect(page.getByRole('region', { name: 'bash code' })).toHaveText('connect --host {{RHOST}} --port {{RPORT}}')
+  await expect(page.getByRole('region', { name: 'bash code' })).toHaveText(
+    'connect --host {{RHOST}} --port {{RPORT}}',
+  )
 })
 
 test('deleting a target asks first and clears it as active', async ({ page }) => {
@@ -70,7 +80,10 @@ test('deleting a target asks first and clears it as active', async ({ page }) =>
 test('playbooks walk a path that the back button can retrace', async ({ page }) => {
   await page.goto('./#/')
   await openNav(page)
-  await page.getByRole('navigation', { name: 'Cheatsheet sections' }).getByRole('link', { name: 'Playbooks' }).click()
+  await page
+    .getByRole('navigation', { name: 'Cheatsheet sections' })
+    .getByRole('link', { name: 'Playbooks' })
+    .click()
   await expect(page.getByRole('heading', { level: 1, name: 'OSCP playbooks' })).toBeVisible()
   await page.getByRole('link', { name: /Fixture route/ }).click()
   await expect(page.getByRole('heading', { name: 'Go left or right?' })).toBeVisible()

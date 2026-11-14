@@ -26,7 +26,9 @@ function parseXml(input: string): ScanResult {
   if (doc.getElementsByTagName('parsererror').length > 0) return UNKNOWN
   const hosts = Array.from(doc.getElementsByTagName('host'), (host): ScannedHost => {
     const address =
-      Array.from(host.getElementsByTagName('address')).find((item) => item.getAttribute('addrtype') !== 'mac')?.getAttribute('addr') ?? ''
+      Array.from(host.getElementsByTagName('address'))
+        .find((item) => item.getAttribute('addrtype') !== 'mac')
+        ?.getAttribute('addr') ?? ''
     const hostname = host.getElementsByTagName('hostname')[0]?.getAttribute('name') ?? undefined
     const ports = Array.from(host.getElementsByTagName('port')).flatMap((port): ScannedPort[] => {
       const protocol = toProtocol(port.getAttribute('protocol') ?? '')
@@ -36,7 +38,11 @@ function parseXml(input: string): ScanResult {
       const number = Number(portid)
       const service = port.getElementsByTagName('service')[0]
       const extra = service?.getAttribute('extrainfo')
-      const version = [service?.getAttribute('product'), service?.getAttribute('version'), extra ? `(${extra})` : '']
+      const version = [
+        service?.getAttribute('product'),
+        service?.getAttribute('version'),
+        extra ? `(${extra})` : '',
+      ]
         .filter(Boolean)
         .join(' ')
       return [
@@ -95,9 +101,17 @@ function parseNormal(input: string): ScanResult {
       hosts.push(current)
     }
     const [, port = '', protocol = '', state = '', service = '', version = ''] = row
-    current.ports.push({ port: Number(port), protocol: toProtocol(protocol) ?? 'tcp', state, service, version })
+    current.ports.push({
+      port: Number(port),
+      protocol: toProtocol(protocol) ?? 'tcp',
+      state,
+      service,
+      version,
+    })
   }
-  return hosts.some((host) => host.ports.length > 0 || host.address) ? { format: 'nmap-normal', hosts } : UNKNOWN
+  return hosts.some((host) => host.ports.length > 0 || host.address)
+    ? { format: 'nmap-normal', hosts }
+    : UNKNOWN
 }
 
 /** Parses pasted nmap output (normal, grepable or XML) into hosts and ports. */

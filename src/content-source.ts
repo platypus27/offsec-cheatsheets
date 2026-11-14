@@ -15,7 +15,11 @@ const files = Object.fromEntries(
 
 export const content = buildContent(files)
 
-const ruleFiles = import.meta.glob<string>('@content/_rules.yaml', { query: '?raw', import: 'default', eager: true })
+const ruleFiles = import.meta.glob<string>('@content/_rules.yaml', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+})
 const playbookFiles = import.meta.glob<string>('@content/_playbooks/*.{yaml,yml}', {
   query: '?raw',
   import: 'default',

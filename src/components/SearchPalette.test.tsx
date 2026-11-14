@@ -13,7 +13,11 @@ const content = buildContent({
   'web/sqli.md': '---\ntitle: SQL Injection\n---\n## Union based\n\nOrder by to count columns.\n',
 })
 
-const tools = buildTools('', { 'x/stuck.yaml': 'title: Stuck on foothold\nstart: a\nnodes:\n  a: { prompt: A }\n' }, content)
+const tools = buildTools(
+  '',
+  { 'x/stuck.yaml': 'title: Stuck on foothold\nstart: a\nnodes:\n  a: { prompt: A }\n' },
+  content,
+)
 
 describe('SearchPalette', () => {
   it('lists matching tools and playbooks first', async () => {

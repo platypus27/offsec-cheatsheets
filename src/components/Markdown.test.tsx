@@ -33,7 +33,9 @@ const content = buildContent({ 'web/sqli.md': '## Union\n', 'recon/udp.md': 'x' 
 describe('Markdown', () => {
   it('renders heading ids identical to the parsed (searchable) ids', () => {
     renderApp(<Markdown page={page} content={content} />)
-    const ids = [...document.querySelectorAll('.prose-cheat > h2, .prose-cheat > h3')].map((element) => element.id)
+    const ids = [...document.querySelectorAll('.prose-cheat > h2, .prose-cheat > h3')].map(
+      (element) => element.id,
+    )
     expect(ids).toEqual(page.headings.map((heading) => heading.id))
   })
 
@@ -56,7 +58,10 @@ describe('Markdown', () => {
 
   it('keeps duplicate task labels independent and honours loose [x] items', async () => {
     const user = userEvent.setup()
-    const tasks = parsePage('m/check.md', '## A\n\n- [ ] Run nmap\n\n## B\n\n- [ ] Run nmap\n\n- [x] loose\n\n- [ ] other\n')
+    const tasks = parsePage(
+      'm/check.md',
+      '## A\n\n- [ ] Run nmap\n\n## B\n\n- [ ] Run nmap\n\n- [x] loose\n\n- [ ] other\n',
+    )
     renderApp(<Markdown page={tasks} content={content} />)
     const [first, second] = screen.getAllByRole('checkbox', { name: 'Run nmap' })
     await user.click(first!)
@@ -70,7 +75,10 @@ describe('Markdown', () => {
     renderApp(<Markdown page={page} content={content} />)
     expect(screen.getByRole('link', { name: 'other page' })).toHaveAttribute('href', '/web/sqli?h=union')
     expect(screen.getByRole('link', { name: 'sibling' })).toHaveAttribute('href', '/recon/udp')
-    expect(screen.getByRole('link', { name: 'same page' })).toHaveAttribute('href', '/recon/scan?h=full-tcp-scan')
+    expect(screen.getByRole('link', { name: 'same page' })).toHaveAttribute(
+      'href',
+      '/recon/scan?h=full-tcp-scan',
+    )
     expect(screen.getByRole('link', { name: 'web section' })).toHaveAttribute('href', '/web')
     expect(screen.getByRole('link', { name: 'section slash' })).toHaveAttribute('href', '/web')
     expect(screen.getByRole('link', { name: /diagram/ })).toHaveAttribute('href', './diagram.png')

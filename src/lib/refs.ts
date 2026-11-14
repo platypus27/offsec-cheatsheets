@@ -11,7 +11,8 @@ export function refProblem(ref: string, content: Content): string | null {
   const { slug, headingId } = splitRef(ref)
   const page = content.page(slug)
   if (!page) return `"${ref}" has no such page`
-  if (headingId && !page.headings.some((heading) => heading.id === headingId)) return `"${ref}" has no such heading`
+  if (headingId && !page.headings.some((heading) => heading.id === headingId))
+    return `"${ref}" has no such heading`
   return null
 }
 

@@ -56,7 +56,12 @@ describe('parsePage', () => {
 
   it('splits searchable chunks by heading, keeping prose and code apart', () => {
     const page = parsePage('recon/port-scanning.md', sample)
-    expect(page.chunks.map((chunk) => chunk.headingId)).toEqual([null, 'full-tcp-scan', 'notes', 'full-tcp-scan-1'])
+    expect(page.chunks.map((chunk) => chunk.headingId)).toEqual([
+      null,
+      'full-tcp-scan',
+      'notes',
+      'full-tcp-scan-1',
+    ])
     const scan = page.chunks[1]!
     expect(scan.heading).toBe('Full TCP scan')
     expect(scan.text).toContain('Scan every port first.')
@@ -125,7 +130,10 @@ describe('buildContent', () => {
   it('links pages into one prev/next reading order across sections', () => {
     const content = buildContent(files)
     expect(content.pages.map((page) => page.slug)).toEqual(['recon/z', 'web/a', 'web/b', 'misc-notes/c'])
-    expect(content.neighbours('web/a')).toEqual({ prev: content.page('recon/z'), next: content.page('web/b') })
+    expect(content.neighbours('web/a')).toEqual({
+      prev: content.page('recon/z'),
+      next: content.page('web/b'),
+    })
     expect(content.neighbours('recon/z').prev).toBeUndefined()
     expect(content.page('nope/missing')).toBeUndefined()
   })

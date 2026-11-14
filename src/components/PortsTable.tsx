@@ -19,7 +19,10 @@ export function PortsTable({ ports, caption }: { ports: ScannedPort[]; caption: 
           {ports.map((port) => {
             const open = port.state.startsWith('open')
             return (
-              <tr key={`${port.port}/${port.protocol}`} className={open ? undefined : 'text-teal-on-surface-variant'}>
+              <tr
+                key={`${port.port}/${port.protocol}`}
+                className={open ? undefined : 'text-teal-on-surface-variant'}
+              >
                 <td className="whitespace-nowrap font-mono">
                   {port.port}/{port.protocol}
                 </td>

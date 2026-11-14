@@ -27,7 +27,13 @@ function AddTargetForm() {
         navigate(`/tools/targets/${id}`)
       }}
     >
-      <Input label="Name" placeholder="e.g. MS01" value={name} onChange={(event) => setName(event.target.value)} className="w-full sm:w-48" />
+      <Input
+        label="Name"
+        placeholder="e.g. MS01"
+        value={name}
+        onChange={(event) => setName(event.target.value)}
+        className="w-full sm:w-48"
+      />
       <Input
         label="Address"
         placeholder="IP or hostname"
@@ -53,7 +59,9 @@ export function TargetsPage() {
     >
       <AddTargetForm />
       {targets.length === 0 ? (
-        <p className="text-teal-on-surface-variant">No targets yet. Add one above, or save hosts from the output parser.</p>
+        <p className="text-teal-on-surface-variant">
+          No targets yet. Add one above, or save hosts from the output parser.
+        </p>
       ) : (
         <ul className="grid gap-3">
           {targets.map((target) => {
@@ -61,9 +69,14 @@ export function TargetsPage() {
             const open = target.ports.filter((port) => port.state.startsWith('open')).length
             return (
               <li key={target.id} className={`card-link ${active ? 'border-teal-primary/60' : ''}`}>
-                <Link to={`/tools/targets/${target.id}`} className="group min-w-0 flex-1 focus-visible:outline-none">
+                <Link
+                  to={`/tools/targets/${target.id}`}
+                  className="group min-w-0 flex-1 focus-visible:outline-none"
+                >
                   <span className="flex flex-wrap items-center gap-2">
-                    <span className="font-semibold group-hover:text-teal-primary group-focus-visible:underline">{target.name}</span>
+                    <span className="font-semibold group-hover:text-teal-primary group-focus-visible:underline">
+                      {target.name}
+                    </span>
                     {active ? <Badge variant="info">Active</Badge> : null}
                   </span>
                   <span className="mt-0.5 flex flex-wrap gap-x-2 text-sm text-teal-on-surface-variant">
@@ -117,7 +130,9 @@ function TargetVariables({ targetId }: { targetId: string }) {
             <IconButton
               label={`Remove ${key}`}
               variant="danger"
-              onClick={() => setVars(Object.fromEntries(Object.entries(target.vars).filter(([item]) => item !== key)))}
+              onClick={() =>
+                setVars(Object.fromEntries(Object.entries(target.vars).filter(([item]) => item !== key)))
+              }
             >
               <Trash2 />
             </IconButton>
@@ -167,7 +182,11 @@ export function TargetPage({ content, tools }: { content: Content; tools: Tools 
       crumbs={[{ label: 'Targets', href: '#/tools/targets' }]}
       actions={
         <>
-          <Button variant={active ? 'secondary' : 'primary'} aria-pressed={active} onClick={() => setActiveTarget(active ? null : target.id)}>
+          <Button
+            variant={active ? 'secondary' : 'primary'}
+            aria-pressed={active}
+            onClick={() => setActiveTarget(active ? null : target.id)}
+          >
             <Crosshair aria-hidden="true" className="size-4" />
             {active ? 'Clear active' : 'Set active'}
           </Button>
@@ -216,7 +235,11 @@ export function TargetPage({ content, tools }: { content: Content; tools: Tools 
           </h2>
           <PortsTable ports={target.ports} caption={`Ports on ${target.name}`} />
           <p className="mt-2 text-sm text-teal-on-surface-variant">
-            Add or update ports by pasting scans into the <Link to="/tools/parse" className="prose-link">output parser</Link>.
+            Add or update ports by pasting scans into the{' '}
+            <Link to="/tools/parse" className="prose-link">
+              output parser
+            </Link>
+            .
           </p>
         </section>
         <section aria-labelledby="target-suggestions">

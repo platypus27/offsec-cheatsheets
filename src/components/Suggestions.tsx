@@ -5,20 +5,33 @@ import { suggest, type Rule } from '../lib/rules'
 import { NoteLink } from './NoteLink'
 
 /** Notes your own rules point to for the open ports given. */
-export function Suggestions({ ports, rules, content }: { ports: ScannedPort[]; rules: Rule[]; content: Content }) {
+export function Suggestions({
+  ports,
+  rules,
+  content,
+}: {
+  ports: ScannedPort[]
+  rules: Rule[]
+  content: Content
+}) {
   const results = suggest(ports, rules)
   if (rules.length === 0) {
     return (
       <p className="text-sm text-teal-on-surface-variant">
-        No rules yet. Add them to <code className="inline-code">content/_rules.yaml</code> to get note suggestions here.
+        No rules yet. Add them to <code className="inline-code">content/_rules.yaml</code> to get note
+        suggestions here.
       </p>
     )
   }
-  if (results.length === 0) return <p className="text-sm text-teal-on-surface-variant">No rule matches these open ports.</p>
+  if (results.length === 0)
+    return <p className="text-sm text-teal-on-surface-variant">No rule matches these open ports.</p>
   return (
     <ul className="grid gap-3">
       {results.map(({ rule, ports: matched }) => (
-        <li key={rule.id} className="rounded-xl border border-teal-outline-variant/40 bg-teal-surface-container-low p-4">
+        <li
+          key={rule.id}
+          className="rounded-xl border border-teal-outline-variant/40 bg-teal-surface-container-low p-4"
+        >
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <Lightbulb aria-hidden="true" className="size-4 text-teal-primary" />
             <span className="font-semibold">{rule.title}</span>

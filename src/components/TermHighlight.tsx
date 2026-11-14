@@ -25,7 +25,10 @@ export function TermHighlight({ text, query }: { text: string; query: string }) 
     <>
       {parts.map((part, index) =>
         part.match ? (
-          <mark key={index} className="rounded-sm bg-teal-secondary-container px-0.5 text-teal-on-secondary-container">
+          <mark
+            key={index}
+            className="rounded-sm bg-teal-secondary-container px-0.5 text-teal-on-secondary-container"
+          >
             {part.text}
           </mark>
         ) : (

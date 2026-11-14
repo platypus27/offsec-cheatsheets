@@ -1,0 +1,14 @@
+node_modules/
+dist/
+dist-e2e/
+test-results/
+playwright-report/
+coverage/
+package-lock.json
+src/vite-env.d.ts
+**/CHANGELOG.md
+
+# Keep authored notes, research evidence and test fixture source positions intact.
+content/
+docs/research/
+e2e/fixtures/

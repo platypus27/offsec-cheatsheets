@@ -13,12 +13,22 @@ export interface Target {
 let counter = 0
 function createId(): string {
   counter += 1
-  const random = typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID().slice(0, 8) : Math.random().toString(36).slice(2, 10)
+  const random =
+    typeof crypto !== 'undefined' && 'randomUUID' in crypto
+      ? crypto.randomUUID().slice(0, 8)
+      : Math.random().toString(36).slice(2, 10)
   return `t-${Date.now().toString(36)}-${counter}-${random}`
 }
 
 export function newTarget(name: string, address: string): Target {
-  return { id: createId(), name: name.trim() || address.trim() || 'Target', address: address.trim(), vars: {}, ports: [], notes: '' }
+  return {
+    id: createId(),
+    name: name.trim() || address.trim() || 'Target',
+    address: address.trim(),
+    vars: {},
+    ports: [],
+    notes: '',
+  }
 }
 
 /** Values commands are filled with: globals, overridden by the active target's own vars, with its address as RHOST. */
@@ -48,14 +58,23 @@ export function mergePorts(existing: ScannedPort[], incoming: ScannedPort[]): Sc
   return [...merged.values()].sort((a, b) => a.port - b.port || a.protocol.localeCompare(b.protocol))
 }
 
-export function upsertFromScan(targets: Target[], host: ScannedHost): { targets: Target[]; targetId: string } {
+export function upsertFromScan(
+  targets: Target[],
+  host: ScannedHost,
+): { targets: Target[]; targetId: string } {
   const index = host.address ? targets.findIndex((target) => target.address === host.address) : -1
   if (index >= 0) {
     const target = targets[index]!
     const updated = { ...target, ports: mergePorts(target.ports, host.ports) }
-    return { targets: targets.map((item, position) => (position === index ? updated : item)), targetId: target.id }
+    return {
+      targets: targets.map((item, position) => (position === index ? updated : item)),
+      targetId: target.id,
+    }
   }
-  const created = { ...newTarget(host.hostname ?? host.address, host.address), ports: mergePorts([], host.ports) }
+  const created = {
+    ...newTarget(host.hostname ?? host.address, host.address),
+    ports: mergePorts([], host.ports),
+  }
   return { targets: [...targets, created], targetId: created.id }
 }
 

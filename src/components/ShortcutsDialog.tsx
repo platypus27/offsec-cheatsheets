@@ -12,7 +12,13 @@ const SHORTCUTS: { keys: string[]; action: string }[] = [
   { keys: ['?'], action: 'Show this list' },
 ]
 
-export function ShortcutsDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+export function ShortcutsDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange} size="sm" title="Keyboard shortcuts">
       <dl className="divide-y divide-teal-outline-variant/30">

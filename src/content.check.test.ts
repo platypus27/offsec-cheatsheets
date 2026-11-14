@@ -24,7 +24,9 @@ for (const root of ['content', 'e2e/fixtures/content']) {
   describe(`content in ${root}`, () => {
     const files = readTree(root)
     const content = buildContent(files)
-    const playbooks = Object.fromEntries(Object.entries(files).filter(([path]) => /^_playbooks\/[^/]+\.ya?ml$/.test(path)))
+    const playbooks = Object.fromEntries(
+      Object.entries(files).filter(([path]) => /^_playbooks\/[^/]+\.ya?ml$/.test(path)),
+    )
     const tools = buildTools(files['_rules.yaml'] ?? '', playbooks, content)
 
     it('has pages', () => {

@@ -36,7 +36,11 @@ export function parsePlaybook(id: string, source: string): { playbook?: Playbook
   try {
     data = parseYaml(source)
   } catch (error) {
-    return { errors: [`Could not read playbook YAML: ${error instanceof Error ? error.message.split('\n')[0] : 'syntax error'}`] }
+    return {
+      errors: [
+        `Could not read playbook YAML: ${error instanceof Error ? error.message.split('\n')[0] : 'syntax error'}`,
+      ],
+    }
   }
   const root = record(data)
   const rawNodes = record(root.nodes)
@@ -88,7 +92,16 @@ export function parsePlaybook(id: string, source: string): { playbook?: Playbook
   }
 
   if (errors.length) return { errors }
-  return { playbook: { id, title: text(root.title), description: text(root.description), start, nodes: { ...nodes } }, errors }
+  return {
+    playbook: {
+      id,
+      title: text(root.title),
+      description: text(root.description),
+      start,
+      nodes: { ...nodes },
+    },
+    errors,
+  }
 }
 
 /** Replays a path of node ids, stopping at the first step that is not a valid transition. */

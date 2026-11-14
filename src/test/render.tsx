@@ -15,7 +15,15 @@ export function renderApp(ui: ReactElement, { route = '/' }: { route?: string } 
       <AppStateProvider>
         <TooltipProvider>
           <Routes>
-            <Route path="*" element={<>{ui}<LocationProbe /></>} />
+            <Route
+              path="*"
+              element={
+                <>
+                  {ui}
+                  <LocationProbe />
+                </>
+              }
+            />
           </Routes>
           <Toaster />
         </TooltipProvider>

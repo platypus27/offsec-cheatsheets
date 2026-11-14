@@ -37,7 +37,10 @@ describe('encoders', () => {
       ok: true,
       value: '&lt;a href=&quot;x&quot;&gt;&#39;&amp;&#39;&lt;/a&gt;',
     })
-    expect(run('html-decode', '&lt;b&gt; &amp;amp; &#65;&#x42; &unknown;')).toEqual({ ok: true, value: '<b> &amp; AB &unknown;' })
+    expect(run('html-decode', '&lt;b&gt; &amp;amp; &#65;&#x42; &unknown;')).toEqual({
+      ok: true,
+      value: '<b> &amp; AB &unknown;',
+    })
   })
 
   it('applies rot13 symmetrically', () => {

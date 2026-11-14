@@ -11,10 +11,15 @@ import { ToolLayout } from './ToolLayout'
 
 export function PlaybooksPage({ tools }: { tools: Tools }) {
   return (
-    <ToolLayout title="OSCP playbooks" description="OSCP decision paths. Choose a starting point and follow each step to the next check.">
+    <ToolLayout
+      title="OSCP playbooks"
+      description="OSCP decision paths. Choose a starting point and follow each step to the next check."
+    >
       <ToolProblems problems={tools.problems.filter((problem) => problem.startsWith('_playbooks'))} />
       {tools.playbooks.length === 0 ? (
-        <p className="text-teal-on-surface-variant">No playbooks yet. See the authoring guide for the format.</p>
+        <p className="text-teal-on-surface-variant">
+          No playbooks yet. See the authoring guide for the format.
+        </p>
       ) : (
         <ul className="grid gap-3">
           {tools.playbooks.map((playbook) => (
@@ -23,7 +28,9 @@ export function PlaybooksPage({ tools }: { tools: Tools }) {
                 <span className="min-w-0 flex-1">
                   <span className="block font-semibold group-hover:text-teal-primary">{playbook.title}</span>
                   {playbook.description ? (
-                    <span className="mt-1 block text-sm text-teal-on-surface-variant">{playbook.description}</span>
+                    <span className="mt-1 block text-sm text-teal-on-surface-variant">
+                      {playbook.description}
+                    </span>
                   ) : null}
                 </span>
                 <ChevronRight aria-hidden="true" className="size-4 shrink-0 text-teal-on-surface-variant" />
@@ -52,7 +59,11 @@ export function PlaybookPage({ content, tools }: { content: Content; tools: Tool
   const go = (next: string[]) => setParams(next.length > 1 ? { path: next.join('.') } : {})
 
   return (
-    <ToolLayout title={playbook.title} crumbs={[{ label: 'Playbooks', href: '#/tools/playbooks' }]} description={playbook.description}>
+    <ToolLayout
+      title={playbook.title}
+      crumbs={[{ label: 'Playbooks', href: '#/tools/playbooks' }]}
+      description={playbook.description}
+    >
       {path.length > 1 ? (
         <ol aria-label="Answers so far" className="mb-6 flex flex-wrap items-center gap-x-1 gap-y-2 text-sm">
           {path.slice(0, -1).map((step, index) => {
@@ -76,7 +87,9 @@ export function PlaybookPage({ content, tools }: { content: Content; tools: Tool
         {node.body ? <p className="mt-3 whitespace-pre-line text-teal-on-surface">{node.body}</p> : null}
         {node.links.length > 0 ? (
           <div className="mt-4">
-            <p className="mb-1 text-xs font-bold uppercase tracking-wider text-teal-on-surface-variant">Notes</p>
+            <p className="mb-1 text-xs font-bold uppercase tracking-wider text-teal-on-surface-variant">
+              Notes
+            </p>
             <ul className="flex flex-col gap-1">
               {node.links.map((ref) => (
                 <li key={ref}>

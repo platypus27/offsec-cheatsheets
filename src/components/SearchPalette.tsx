@@ -40,7 +40,12 @@ function searchFor(content: Content) {
 function toolOptions(tools: Tools, query: string): Option[] {
   const needle = query.toLowerCase()
   const entries = [
-    ...TOOL_LINKS.map((tool) => ({ to: tool.to, title: tool.label, trail: 'Tools', haystack: `${tool.label} ${tool.keywords}` })),
+    ...TOOL_LINKS.map((tool) => ({
+      to: tool.to,
+      title: tool.label,
+      trail: 'Tools',
+      haystack: `${tool.label} ${tool.keywords}`,
+    })),
     ...tools.playbooks.map((playbook) => ({
       to: `/tools/playbooks/${playbook.id}`,
       title: playbook.title,
@@ -57,7 +62,13 @@ function toolOptions(tools: Tools, query: string): Option[] {
     .filter(({ score: value }) => value > 0)
     .sort((a, b) => b.score - a.score)
     .map(({ entry }) => entry)
-    .map((entry) => ({ id: `tool:${entry.to}`, to: entry.to, title: entry.title, trail: entry.trail, kind: 'tool' }))
+    .map((entry) => ({
+      id: `tool:${entry.to}`,
+      to: entry.to,
+      title: entry.title,
+      trail: entry.trail,
+      kind: 'tool',
+    }))
 }
 
 function PaletteBody({ content, tools, onClose }: { content: Content; tools: Tools; onClose: () => void }) {
@@ -72,20 +83,31 @@ function PaletteBody({ content, tools, onClose }: { content: Content; tools: Too
 
   const options: Option[] = useMemo(() => {
     if (trimmed) {
-      return [...toolOptions(tools, trimmed), ...search(trimmed).map((result): Option => ({
-        id: result.id,
-        to: pageHref(result.pageSlug, result.headingId),
-        title: result.headingId ? result.heading : result.pageTitle,
-        trail: result.headingId ? `${result.sectionTitle} / ${result.pageTitle}` : result.sectionTitle,
-        snippet: result.snippet,
-        kind: result.headingId !== null ? 'heading' : 'page',
-      }))]
+      return [
+        ...toolOptions(tools, trimmed),
+        ...search(trimmed).map((result): Option => ({
+          id: result.id,
+          to: pageHref(result.pageSlug, result.headingId),
+          title: result.headingId ? result.heading : result.pageTitle,
+          trail: result.headingId ? `${result.sectionTitle} / ${result.pageTitle}` : result.sectionTitle,
+          snippet: result.snippet,
+          kind: result.headingId !== null ? 'heading' : 'page',
+        })),
+      ]
     }
     return recents.flatMap((slug) => {
       const page = content.page(slug)
       if (!page) return []
       const section = content.section(page.section)
-      return [{ id: slug, to: pageHref(slug), title: page.title, trail: section?.title ?? '', kind: 'page' as const }]
+      return [
+        {
+          id: slug,
+          to: pageHref(slug),
+          title: page.title,
+          trail: section?.title ?? '',
+          kind: 'page' as const,
+        },
+      ]
     })
   }, [trimmed, search, recents, content, tools])
 
@@ -120,7 +142,10 @@ function PaletteBody({ content, tools, onClose }: { content: Content; tools: Too
   return (
     <div className="-mt-5 flex max-h-[min(36rem,80dvh)] flex-col">
       <div className="relative flex h-16 shrink-0 items-center border-b border-teal-outline-variant/30">
-        <Search aria-hidden="true" className="pointer-events-none absolute left-4 size-4 text-teal-on-surface-variant" />
+        <Search
+          aria-hidden="true"
+          className="pointer-events-none absolute left-4 size-4 text-teal-on-surface-variant"
+        />
         <input
           autoFocus
           role="combobox"
@@ -158,7 +183,9 @@ function PaletteBody({ content, tools, onClose }: { content: Content; tools: Too
               onMouseMove={() => setActive(index)}
               onClick={() => choose(option)}
               className={`flex cursor-pointer items-start gap-3 rounded-lg px-3 py-2.5 ${
-                index === active ? 'bg-teal-surface-container-high ring-1 ring-inset ring-teal-primary/40' : ''
+                index === active
+                  ? 'bg-teal-surface-container-high ring-1 ring-inset ring-teal-primary/40'
+                  : ''
               }`}
             >
               {option.kind === 'heading' ? (
@@ -166,19 +193,18 @@ function PaletteBody({ content, tools, onClose }: { content: Content; tools: Too
               ) : option.kind === 'tool' ? (
                 <Wrench aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-teal-secondary" />
               ) : (
-                <FileText aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-teal-on-surface-variant" />
+                <FileText
+                  aria-hidden="true"
+                  className="mt-0.5 size-4 shrink-0 text-teal-on-surface-variant"
+                />
               )}
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm font-semibold text-teal-on-surface">
                   <TermHighlight text={option.title} query={trimmed} />
                 </span>
-                <span className="block truncate text-xs text-teal-on-surface-variant">
-                  {option.trail}
-                </span>
+                <span className="block truncate text-xs text-teal-on-surface-variant">{option.trail}</span>
                 {option.snippet ? (
-                  <span
-                    className="mt-1 line-clamp-2 block break-words font-mono text-xs text-teal-on-surface-variant"
-                  >
+                  <span className="mt-1 line-clamp-2 block break-words font-mono text-xs text-teal-on-surface-variant">
                     <TermHighlight text={option.snippet} query={trimmed} />
                   </span>
                 ) : null}
@@ -223,7 +249,9 @@ export function SearchPalette({ content, tools, open, onOpenChange }: SearchPale
       onOpenChange={onOpenChange}
       size="lg"
       title={<span className="sr-only">Search</span>}
-      description={<span className="sr-only">Type to search, use the arrow keys to move and Enter to open.</span>}
+      description={
+        <span className="sr-only">Type to search, use the arrow keys to move and Enter to open.</span>
+      }
       className="search-dialog top-[10vh] translate-y-0 overflow-hidden p-0"
     >
       {open ? <PaletteBody content={content} tools={tools} onClose={() => onOpenChange(false)} /> : null}

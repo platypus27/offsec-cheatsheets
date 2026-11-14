@@ -26,7 +26,11 @@ function HostResult({ host, content, tools }: { host: ScannedHost; content: Cont
   function save(activate: boolean) {
     const id = importHost(host)
     if (activate) setActiveTarget(id)
-    toast({ title: activate ? `Saved and targeting ${host.address || 'host'}` : 'Saved to targets', variant: 'success', duration: 2000 })
+    toast({
+      title: activate ? `Saved and targeting ${host.address || 'host'}` : 'Saved to targets',
+      variant: 'success',
+      duration: 2000,
+    })
     if (activate) navigate(`/tools/targets/${id}`)
   }
 
@@ -46,7 +50,9 @@ function HostResult({ host, content, tools }: { host: ScannedHost; content: Cont
         </div>
       </div>
       <PortsTable ports={host.ports} caption={`Ports on ${label}`} />
-      <h3 className="mb-3 mt-6 text-sm font-bold uppercase tracking-wider text-teal-on-surface-variant">Suggested notes</h3>
+      <h3 className="mb-3 mt-6 text-sm font-bold uppercase tracking-wider text-teal-on-surface-variant">
+        Suggested notes
+      </h3>
       <Suggestions ports={host.ports} rules={tools.rules} content={content} />
     </section>
   )
@@ -74,12 +80,19 @@ export function ParserPage({ content, tools }: { content: Content; tools: Tools 
       {deferred.trim() ? (
         <div className="mt-6 grid gap-6">
           <p className="flex items-center gap-2 text-sm text-teal-on-surface-variant">
-            Detected format <Badge variant={result.format === 'unknown' ? 'warning' : 'info'}>{FORMAT_LABEL[result.format]}</Badge>
+            Detected format{' '}
+            <Badge variant={result.format === 'unknown' ? 'warning' : 'info'}>
+              {FORMAT_LABEL[result.format]}
+            </Badge>
           </p>
           {result.format === 'unknown' ? (
-            <p className="text-sm text-teal-on-surface-variant">No hosts or ports found. Paste the full nmap output including the PORT table.</p>
+            <p className="text-sm text-teal-on-surface-variant">
+              No hosts or ports found. Paste the full nmap output including the PORT table.
+            </p>
           ) : (
-            result.hosts.map((host, index) => <HostResult key={`${host.address}-${index}`} host={host} content={content} tools={tools} />)
+            result.hosts.map((host, index) => (
+              <HostResult key={`${host.address}-${index}`} host={host} content={content} tools={tools} />
+            ))
           )}
         </div>
       ) : null}
