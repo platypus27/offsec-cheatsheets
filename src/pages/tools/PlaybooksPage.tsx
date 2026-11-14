@@ -78,8 +78,13 @@ export function PlaybookPage({ content, tools }: { content: Content; tools: Tool
             const answer = playbook.nodes[step]!.options.find((option) => option.next === path[index + 1])
             return (
               <li key={`${step}-${index}`} className="flex items-center gap-1">
-                <button type="button" onClick={() => go(path.slice(0, index + 1))} className="chip-link">
-                  {playbook.nodes[step]!.prompt}: <span className="ml-1 font-semibold">{answer?.label}</span>
+                <button
+                  type="button"
+                  onClick={() => go(path.slice(0, index + 1))}
+                  className="chip-link text-left"
+                  aria-label={`${playbook.nodes[step]!.prompt}: ${answer?.label}`}
+                >
+                  {answer?.label}
                 </button>
                 <ChevronRight aria-hidden="true" className="size-3.5 text-teal-on-surface-variant" />
               </li>

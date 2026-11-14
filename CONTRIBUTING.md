@@ -46,6 +46,13 @@ so note edits do not alter their expectations. The browser suite covers Chromium
 Firefox, WebKit and a mobile viewport. Its platform-specific skips are explicit in
 the tests; they are not failures.
 
+Firefox 159 (Playwright 1.65.0, browser build 1572) exits with SIGSEGV when Axe
+4.14.0 builds its DOM context for the playbook service step. The two new light/dark
+service-card accessibility scans explicitly skip Firefox. Selection, persistence,
+copy and 320px layout checks still run in Firefox; full service-card Axe scans run
+in Chromium, WebKit and mobile Chromium. These two Firefox accessibility cases
+remain unverified. TODO: retry them when upgrading Playwright or Firefox.
+
 ## Review and automate
 
 The `Verify` GitHub Actions workflow runs the same `npm run verify` command on pull

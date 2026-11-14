@@ -23,6 +23,7 @@ test('HTTP download step shows both machines and fills the reachable Kali addres
 test('service choices reveal only selected commands and survive Back and reload for the current host', async ({
   page,
 }) => {
+  await page.setViewportSize({ width: 320, height: 844 })
   await page.goto('./#/tools/playbooks/guided')
   await page.getByRole('button', { name: /^Edit variables/ }).click()
   let dialog = page.getByRole('dialog', { name: 'Target and variables' })
@@ -37,6 +38,7 @@ test('service choices reveal only selected commands and survive Back and reload 
   await expect(page.getByRole('region', { name: /bash code/ }).first()).toContainText('nxc smb 192.0.2.20')
   await expect(page.getByRole('region', { name: /bash code/ }).last()).toContainText('nxc winrm 192.0.2.20')
   await expect(page.getByText('nxc ldap', { exact: false })).toHaveCount(0)
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320)
   await page.getByRole('button', { name: 'Back', exact: true }).click()
   await page.getByRole('button', { name: 'Domain recorded', exact: true }).click()
   await page.reload()
@@ -76,7 +78,16 @@ test('service choices reveal only selected commands and survive Back and reload 
 })
 
 for (const scheme of ['light', 'dark'] as const) {
-  test(`selected service cards remain accessible on a narrow screen (${scheme})`, async ({ page }) => {
+  test(`selected service cards remain accessible on a narrow screen (${scheme})`, async ({
+    page,
+    browserName,
+  }) => {
+    // Native SIGSEGV in Firefox's Axe DOM-context traversal, before rules run.
+    // Layout and selection still run above in every browser. TODO: retry after browser upgrades.
+    test.skip(
+      browserName === 'firefox',
+      'Firefox crashes during Axe service-card DOM inspection; see CONTRIBUTING.md',
+    )
     await page.setViewportSize({ width: 320, height: 844 })
     await page.emulateMedia({ colorScheme: scheme })
     await page.goto('./#/tools/playbooks/guided')
@@ -88,6 +99,10 @@ for (const scheme of ['light', 'dark'] as const) {
     await expect
       .poll(() => page.evaluate(() => document.documentElement.scrollWidth))
       .toBeLessThanOrEqual(320)
+    await page.evaluate(() => document.fonts.ready)
+    await page.evaluate(() =>
+      Promise.allSettled(document.getAnimations().map((animation) => animation.finished)),
+    )
     expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
   })
 }
@@ -127,6 +142,9 @@ test('playbook steps show and copy the current target command before moving on',
   expect(copied).toBe('nmap -sV 192.0.2.20')
   await page.getByRole('button', { name: 'Scan complete', exact: true }).click()
   await expect(page.getByRole('region', { name: /bash code/ })).toHaveText('nxc smb 192.0.2.20')
+  await expect(page.getByRole('list', { name: 'Answers so far' }).getByRole('button')).toHaveText(
+    'Scan complete',
+  )
   await page.reload()
   await expect(page.getByRole('region', { name: /bash code/ })).toHaveText('nxc smb 192.0.2.20')
   await page.getByRole('button', { name: 'Back', exact: true }).click()
