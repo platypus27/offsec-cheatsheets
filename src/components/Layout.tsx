@@ -215,10 +215,10 @@ export function Layout({ content, tools }: { content: Content; tools: Tools }) {
               <button
                 type="button"
                 onClick={() => setSearchOpen(true)}
-                className="flex h-10 w-full max-w-md items-center gap-2 rounded-xl border border-teal-outline-variant/50 bg-teal-surface-container-low px-3 text-sm text-teal-on-surface-variant transition-colors hover:border-teal-outline hover:text-teal-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-primary"
+                className="flex h-10 w-full max-w-md items-center gap-2 rounded-xl border border-teal-outline-variant/50 bg-teal-surface-container-low px-3 text-sm text-teal-on-surface-variant transition-colors hover:border-teal-outline hover:text-teal-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-primary max-[360px]:justify-center max-[360px]:gap-0"
               >
                 <Search aria-hidden="true" className="size-4 shrink-0" />
-                <span className="truncate">Search</span>
+                <span className="truncate max-[360px]:sr-only">Search</span>
                 <span className="ml-auto hidden items-center gap-1 sm:flex" aria-hidden="true">
                   <Key>{isMac ? '⌘' : 'Ctrl'}</Key>
                   <Key>K</Key>
