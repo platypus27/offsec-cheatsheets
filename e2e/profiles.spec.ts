@@ -178,6 +178,14 @@ test('making a box default switches filled and copied commands and survives relo
   await expect(dialog.getByRole('status')).toHaveText('Commands use Box 3')
   await dialog.getByRole('button', { name: 'Close', exact: true }).click()
   await expect(command).toHaveText('connect --host 192.0.2.33 --port 443')
+  if ((page.viewportSize()?.width ?? 1280) < 640) {
+    await page.setViewportSize({ width: 320, height: 780 })
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.scrollWidth))
+      .toBeLessThanOrEqual(320)
+  }
+  const currentBox = page.getByRole('button', { name: /Edit variables, profile Box 3/ })
+  await expect(currentBox.getByText(/Box 3/).first()).toBeVisible()
   await page.getByRole('button', { name: 'Copy code', exact: true }).click()
   const copied =
     browserName === 'chromium'
