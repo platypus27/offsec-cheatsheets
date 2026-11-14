@@ -1,7 +1,9 @@
-import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
 import type { ScannedHost } from './lib/nmap'
 import { isBooleanRecord, isStringArray, type Guard } from './lib/guards'
-import { usePersistentState } from './lib/storage'
+import { createId } from './lib/ids'
+import { readJSON, usePersistentState } from './lib/storage'
+import { initialProfiles, isVariableProfiles, type VariableProfile } from './lib/profiles'
 import { effectiveVariables, isTargets, newTarget, upsertFromScan, type Target } from './lib/targets'
 import { isVariables, type Variables } from './lib/variables'
 
@@ -10,11 +12,14 @@ const isNullableString: Guard<string | null> = (value): value is string | null =
   value === null || typeof value === 'string'
 
 interface AppState {
-  /** Values filled into commands: globals layered under the active target. */
+  /** Values filled into commands: the default profile layered under its saved target. */
   variables: Variables
-  globals: Variables
+  profiles: VariableProfile[]
+  defaultProfile: VariableProfile
+  setDefaultProfile: (id: string) => void
+  addBox: () => string
+  updateProfile: (id: string, patch: Partial<Pick<VariableProfile, 'variables' | 'targetId'>>) => void
   setVariable: (name: string, value: string) => void
-  removeVariable: (name: string) => void
   targets: Target[]
   activeTarget: Target | undefined
   setActiveTarget: (id: string | null) => void
@@ -34,31 +39,77 @@ interface AppState {
 const AppStateContext = createContext<AppState | null>(null)
 
 /**
- * The cheatsheet's personal state: global variables, targets, checklist
+ * The cheatsheet's personal state: variable profiles, targets, checklist
  * progress, pinned and recent pages. One provider keeps every code block and
  * sidebar in step within a tab; storage events keep separate tabs in step.
  */
 export function AppStateProvider({ children }: { children: ReactNode }) {
-  const [globals, setGlobals] = usePersistentState('variables', isVariables, {})
+  // Read legacy keys only as the initial fallback. A valid profile workspace always wins.
+  const [initial] = useState(() =>
+    initialProfiles(
+      readJSON('variables', isVariables, {}),
+      readJSON('active-target', isNullableString, null),
+    ),
+  )
+  const [profileState, setProfileState] = usePersistentState('variable-profiles', isVariableProfiles, initial)
+  const profiles = profileState.items
+  // The storage guard guarantees that defaultId names an existing profile.
+  const defaultProfile = profiles.find((profile) => profile.id === profileState.defaultId)!
   const [targets, setTargets] = usePersistentState('targets', isTargets, [])
-  const [activeId, setActiveId] = usePersistentState('active-target', isNullableString, null)
   const [checks, setChecks] = usePersistentState('checks', isBooleanRecord, {})
   const [pins, setPins] = usePersistentState('pins', isStringArray, [])
   const [recents, setRecents] = usePersistentState('recents', isStringArray, [])
 
-  const activeTarget = useMemo(() => targets.find((target) => target.id === activeId), [targets, activeId])
-  const variables = useMemo(() => effectiveVariables(globals, activeTarget), [globals, activeTarget])
+  const activeTarget = useMemo(
+    () => targets.find((target) => target.id === defaultProfile.targetId),
+    [targets, defaultProfile.targetId],
+  )
+  const variables = useMemo(
+    () => effectiveVariables(defaultProfile.variables, activeTarget),
+    [defaultProfile.variables, activeTarget],
+  )
+
+  const updateProfile = useCallback(
+    (id: string, patch: Partial<Pick<VariableProfile, 'variables' | 'targetId'>>) =>
+      setProfileState((prev) => ({
+        ...prev,
+        items: prev.items.map((profile) => (profile.id === id ? { ...profile, ...patch } : profile)),
+      })),
+    [setProfileState],
+  )
+  const setDefaultProfile = useCallback(
+    (id: string) =>
+      setProfileState((prev) =>
+        prev.items.some((profile) => profile.id === id) ? { ...prev, defaultId: id } : prev,
+      ),
+    [setProfileState],
+  )
+
+  const addBox = useCallback(() => {
+    const id = createId('box')
+    setProfileState((prev) => ({
+      ...prev,
+      items: [...prev.items, { id, name: `Box ${prev.items.length}`, variables: {}, targetId: null }],
+    }))
+    return id
+  }, [setProfileState])
 
   const setVariable = useCallback(
-    (name: string, value: string) => setGlobals((prev) => ({ ...prev, [name]: value })),
-    [setGlobals],
+    (name: string, value: string) =>
+      setProfileState((prev) => ({
+        ...prev,
+        items: prev.items.map((profile) =>
+          profile.id === prev.defaultId
+            ? { ...profile, variables: { ...profile.variables, [name]: value } }
+            : profile,
+        ),
+      })),
+    [setProfileState],
   )
-  const removeVariable = useCallback(
-    (name: string) =>
-      setGlobals((prev) => Object.fromEntries(Object.entries(prev).filter(([key]) => key !== name))),
-    [setGlobals],
+  const setActiveTarget = useCallback(
+    (id: string | null) => updateProfile(defaultProfile.id, { targetId: id }),
+    [updateProfile, defaultProfile.id],
   )
-  const setActiveTarget = useCallback((id: string | null) => setActiveId(id), [setActiveId])
   const addTarget = useCallback(
     (name: string, address: string) => {
       const target = newTarget(name, address)
@@ -75,9 +126,14 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const removeTarget = useCallback(
     (id: string) => {
       setTargets((prev) => prev.filter((target) => target.id !== id))
-      setActiveId((prev) => (prev === id ? null : prev))
+      setProfileState((prev) => ({
+        ...prev,
+        items: prev.items.map((profile) =>
+          profile.targetId === id ? { ...profile, targetId: null } : profile,
+        ),
+      }))
     },
-    [setTargets, setActiveId],
+    [setTargets, setProfileState],
   )
   const importHost = useCallback(
     (host: ScannedHost) => {
@@ -114,9 +170,12 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       variables,
-      globals,
+      profiles,
+      defaultProfile,
+      setDefaultProfile,
+      addBox,
+      updateProfile,
       setVariable,
-      removeVariable,
       targets,
       activeTarget,
       setActiveTarget,
@@ -134,9 +193,12 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     }),
     [
       variables,
-      globals,
+      profiles,
+      defaultProfile,
+      setDefaultProfile,
+      addBox,
+      updateProfile,
       setVariable,
-      removeVariable,
       targets,
       activeTarget,
       setActiveTarget,

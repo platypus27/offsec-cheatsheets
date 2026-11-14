@@ -29,7 +29,7 @@ test('parsing a scan creates a target that fills commands', async ({ page }) => 
     'connect --host 10.20.30.40 --port {{RPORT}}',
   )
   await expect(
-    page.getByRole('button', { name: /^Edit variables, target zoo\.lab 10\.20\.30\.40$/ }),
+    page.getByRole('button', { name: /^Edit variables, profile Box 1 \/ zoo\.lab 10\.20\.30\.40$/ }),
   ).toBeVisible()
 
   await page.reload()
@@ -38,7 +38,7 @@ test('parsing a scan creates a target that fills commands', async ({ page }) => 
   )
 })
 
-test('target variables override globals and clearing the target restores them', async ({ page }) => {
+test('target variables override profile values and clearing the target restores them', async ({ page }) => {
   await page.goto('./#/tools/targets')
   await page.getByRole('textbox', { name: 'Name' }).fill('DC01')
   await page.getByRole('textbox', { name: 'Address' }).fill('10.1.1.1')
@@ -55,8 +55,8 @@ test('target variables override globals and clearing the target restores them', 
   )
 
   await page.getByRole('button', { name: /^Edit variables/ }).click()
-  await page.getByRole('combobox', { name: 'Active target' }).click()
-  await page.getByRole('option', { name: 'No active target' }).click()
+  await page.getByRole('combobox', { name: 'Target for Box 1' }).click()
+  await page.getByRole('option', { name: 'Use profile values' }).click()
   await expect(page.getByRole('listbox')).toBeHidden()
   await page.keyboard.press('Escape')
   await expect(page.getByRole('dialog', { name: 'Target and variables' })).toBeHidden()
@@ -74,7 +74,7 @@ test('deleting a target asks first and clears it as active', async ({ page }) =>
   await page.getByRole('alertdialog').getByRole('button', { name: 'Delete' }).click()
   await expect(page).toHaveURL(/#\/tools\/targets$/)
   await expect(page.getByText('No targets yet.')).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Edit variables', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Edit variables, profile Box 1', exact: true })).toBeVisible()
 })
 
 test('playbooks walk a path that the back button can retrace', async ({ page }) => {

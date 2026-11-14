@@ -1,4 +1,5 @@
 import type { ScannedHost, ScannedPort } from './nmap'
+import { createId } from './ids'
 import { isVariables, type Variables } from './variables'
 
 export interface Target {
@@ -10,19 +11,9 @@ export interface Target {
   notes: string
 }
 
-let counter = 0
-function createId(): string {
-  counter += 1
-  const random =
-    typeof crypto !== 'undefined' && 'randomUUID' in crypto
-      ? crypto.randomUUID().slice(0, 8)
-      : Math.random().toString(36).slice(2, 10)
-  return `t-${Date.now().toString(36)}-${counter}-${random}`
-}
-
 export function newTarget(name: string, address: string): Target {
   return {
-    id: createId(),
+    id: createId('t'),
     name: name.trim() || address.trim() || 'Target',
     address: address.trim(),
     vars: {},
@@ -31,12 +22,12 @@ export function newTarget(name: string, address: string): Target {
   }
 }
 
-/** Values commands are filled with: globals, overridden by the active target's own vars, with its address as RHOST. */
-export function effectiveVariables(globals: Variables, target: Target | undefined): Variables {
-  if (!target) return globals
-  const merged: Variables = { ...globals, ...target.vars }
+/** Values commands are filled with: profile values, overridden by the selected target's own vars, with its address as RHOST. */
+export function effectiveVariables(profileValues: Variables, target: Target | undefined): Variables {
+  if (!target) return profileValues
+  const merged: Variables = { ...profileValues, ...target.vars }
   if (target.address) merged.RHOST = target.address
-  else if (globals.RHOST !== undefined) merged.RHOST = globals.RHOST
+  else if (profileValues.RHOST !== undefined) merged.RHOST = profileValues.RHOST
   else delete merged.RHOST
   return merged
 }

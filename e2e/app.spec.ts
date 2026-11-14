@@ -147,7 +147,7 @@ test('variables fill commands and copy the filled-in text', async ({ page, brows
   else await stubClipboard(page, 'resolve')
   await page.goto('./#/alpha/first')
 
-  await page.getByRole('button', { name: 'Edit variables' }).click()
+  await page.getByRole('button', { name: /^Edit variables/ }).click()
   await page.getByRole('textbox', { name: 'RHOST' }).fill('10.9.8.7')
   await page.keyboard.press('Escape')
   await expect(page.getByRole('dialog', { name: 'Target and variables' })).toBeHidden()
@@ -155,7 +155,7 @@ test('variables fill commands and copy the filled-in text', async ({ page, brows
   const block = page.getByRole('region', { name: 'bash code' })
   await expect(block).toHaveText('connect --host 10.9.8.7 --port {{RPORT}}')
   await expect(block.locator('.var-unset')).toHaveText('{{RPORT}}')
-  await expect(page.getByRole('button', { name: 'Edit variables, target 10.9.8.7' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Edit variables, profile Box 1 / 10.9.8.7' })).toBeVisible()
 
   await page.getByRole('button', { name: 'Copy code' }).click()
   await expect(page.getByText('Copied to clipboard', { exact: true })).toBeVisible()
@@ -229,6 +229,18 @@ for (const scheme of ['light', 'dark'] as const) {
     await settled(page)
     const results = await new AxeBuilder({ page }).analyze()
     expect(results.violations, 'search').toEqual([])
+    await page.keyboard.press('Escape')
+    if (isMobile(page)) await page.setViewportSize({ width: 320, height: 780 })
+    await page.getByRole('button', { name: /^Edit variables/ }).click()
+    await page.getByRole('tab', { name: 'Box 3', exact: true }).click()
+    await settled(page)
+    const profileResults = await new AxeBuilder({ page }).analyze()
+    expect(profileResults.violations, 'variable profiles').toEqual([])
+    if (isMobile(page)) {
+      await expect
+        .poll(() => page.evaluate(() => document.documentElement.scrollWidth))
+        .toBeLessThanOrEqual(320)
+    }
   })
 }
 

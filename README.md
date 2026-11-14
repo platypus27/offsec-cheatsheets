@@ -14,10 +14,12 @@ identifies this scope on desktop and mobile, including when opening a note direc
   every page, pins and recent pages.
 - **Search** (`/` or `Ctrl K`): full text over every heading, paragraph and
   command, with typo tolerance. A result opens at the exact heading.
-- **Copy-ready commands**: `{{RHOST}}`-style placeholders are filled from your
-  variables and active target, shown highlighted, and copied filled in.
+- **Variable profiles**: separate AD and Box 1-3 tabs, with more boxes as needed.
+  Make a profile default to fill every displayed and copied command with its
+  saved values. Browsing another tab leaves the working profile unchanged.
 - **Targets**: per-host address, variables, ports and notes. The active target
-  supplies `RHOST` and overrides global variables.
+  supplies `RHOST` and overrides its profile's variables. Each profile remembers
+  its own target choice.
 - **Output parser**: paste nmap normal, grepable or XML output to extract ports,
   save hosts as targets, and get note suggestions from your own rules.
 - **Playbooks**: decision trees you write in YAML, with links into your notes.
@@ -27,6 +29,11 @@ identifies this scope on desktop and mobile, including when opening a note direc
 
 Everything personal (variables, targets, checks, pins) is stored in this
 browser's localStorage only.
+
+When hosted, visitors keep independent settings in their own browser profiles
+for that site address. Personal values are not sent to the hosting server or
+stored in cookies. Existing variable values and the selected target are preserved
+in Box 1 when upgrading.
 
 ## Use
 
