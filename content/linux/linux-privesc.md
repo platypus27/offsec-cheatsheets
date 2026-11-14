@@ -75,3 +75,25 @@ systemctl list-timers --all
 ```
 
 Inspect the associated service and its execution context. [systemctl manual](https://man7.org/linux/man-pages/man1/systemctl.1.html).
+
+## Version-based exploits
+
+Record the kernel (`uname -a`) and SUID binary versions, then search local exploit archives:
+
+```bash
+searchsploit linux kernel 5.15
+searchsploit screen 4.5.0
+```
+
+Match the exact target version and compile on a matching libc where possible. A listed version alone is not a working exploit. [Exploit-DB searchsploit](https://www.exploit-db.com/searchsploit).
+
+## Credential files
+
+Look for reusable secrets in user files:
+
+```bash
+ls -la /home/*/.ssh/ 2>/dev/null
+cat ~/.bash_history
+```
+
+A readable `id_rsa` grants SSH access; history and scripts often hold passwords or hashes. Check [web credentials](windows/credential-harvesting#common-locations) on dual-role hosts. [OpenSSH keys](https://www.openssh.com/txt.html).

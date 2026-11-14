@@ -57,9 +57,24 @@ nodes:
     body: Choose only a lead supported by collected results. There is no guaranteed exploitation sequence.
     options:
       - { label: Kerberos roasting lead, next: roast }
-      - { label: ACL or delegation lead, next: path }
+      - { label: Admin or SYSTEM on a host - dump credentials, next: dump }
+      - { label: Internal segment not routable - pivot, next: pivot }
+      - { label: ACL, GPO or delegation lead, next: path }
       - { label: Certificate enrollment lead, next: certificates }
-      - { label: New credential, next: reuse }
+      - { label: New credential or hash, next: reuse }
+  dump:
+    prompt: Dump credentials from the compromised host.
+    body: With administrator or SYSTEM, dump remotely with secretsdump or in memory with mimikatz. Save the whole output; LSA DefaultPassword and _SC_* entries are plaintext pivots, cached logons crack with hashcat mode 2100. Check Windows.old and backups for SAM/SYSTEM hives, then replay what you recover.
+    commands: [active-directory/credential-dumping#secretsdump-remotely, active-directory/credential-dumping#mimikatz-logon-passwords, active-directory/credential-dumping#secretsdump-from-hives, active-directory/credential-dumping#crack-cached-logons]
+    options:
+      - { label: Credential or hash recovered - follow a lead, next: leads }
+  pivot:
+    prompt: Reach the internal segment through the foothold.
+    body: Route whole tools through the foothold with Ligolo, or fall back to a chisel SOCKS proxy and proxychains. Use the pivot's own subnet from ipconfig, then scan the internal range and identify each machine.
+    commands: [pivoting/tunnelling#ligolo-ng-tunnel, pivoting/tunnelling#scan-through-a-tunnel]
+    options:
+      - { label: Internal hosts identified - return to service selection, next: services }
+      - { label: Back to leads, next: leads }
   roast:
     prompt: Check roasting prerequisites and identify the returned hash format.
     body: These methods require confirmed LDAP on DC. AS-REP roasting needs a known username with preauthentication disabled; Kerberoasting needs valid domain credentials and an eligible SPN account. Prepare wordlist.txt. The cracking commands below apply only to etype 23; check the hash marker first.
@@ -77,6 +92,6 @@ nodes:
     links: [active-directory/attack-paths#ad-cs-enrollment-prerequisites, active-directory/attack-paths#certificate-strong-mapping-after-2025]
   reuse:
     prompt: Validate the credential authority and resulting access on one intended host.
-    body: Remote SMB execution below requires administrator access and a working execution method. Verify the resulting identity.
-    commands: [active-directory/credential-access#remote-windows-command]
+    body: Spray harvested user and password lists against the intended services, and replay NT hashes with impacket-psexec or wmiexec. A domain-admin hash reaches the controller directly. Remote SMB execution below requires administrator access and a working execution method. Verify the resulting identity.
+    commands: [active-directory/credential-access#password-spraying, active-directory/credential-access#pass-the-hash, active-directory/credential-access#remote-windows-command]
     links: [active-directory/credential-access#domain-or-local-login, active-directory/credential-access#reuse-one-known-credential, active-directory/credential-access#kerberos-authentication]
