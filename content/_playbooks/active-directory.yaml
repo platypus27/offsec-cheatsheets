@@ -227,11 +227,11 @@ nodes:
   privesc:
     phase: Privilege escalation
     prompt: Validate the exact host-specific privilege path.
-    body: Match the technique to enabled privileges, group membership, OS build and a controllable execution path. Potato variants apply to service contexts with impersonation rights; service, task, DNS and backup paths require their own prerequisites.
+    body: 'Match the lead to a concrete path: service control, DNS plugin loading, backup rights, token impersonation, or a writable service/task dependency.'
     why: A listed privilege or group is not an exploit by itself, and a failed binary does not invalidate the underlying evidence.
     lookFor: SeImpersonate or SeAssignPrimaryToken, Server Operators, DnsAdmins, Backup Operators, SeLoadDriverPrivilege, writable service/task binaries and a usable trigger.
     record: Save the prerequisite evidence, command, resulting identity and any persistent account or configuration change.
-    commands: [windows/windows-privesc#impersonation-escalation, windows/windows-privesc#printspoofer, windows/windows-privesc#godpotato, windows/windows-privesc#sigmapotato, windows/windows-privesc#service-paths-and-accounts, windows/windows-privesc#file-and-directory-acls, windows/windows-privesc#scheduled-tasks]
+    commands: [windows/windows-privesc#server-operators-service-control, windows/windows-privesc#dnsadmins-plugin-dll, windows/windows-privesc#backup-operators-registry-and-ifm, windows/windows-privesc#impersonation-escalation, windows/windows-privesc#printspoofer, windows/windows-privesc#godpotato, windows/windows-privesc#sigmapotato, windows/windows-privesc#service-paths-and-accounts, windows/windows-privesc#file-and-directory-acls, windows/windows-privesc#scheduled-tasks]
     links: [windows/windows-privesc#privileged-group-and-host-specific-leads, windows/windows-privesc#create-a-local-administrator]
     options:
       - { label: Admin or SYSTEM obtained - collect credentials, next: dump }
@@ -240,11 +240,11 @@ nodes:
   path:
     phase: Post-exploitation
     prompt: Convert verified object control into the intended access.
-    body: Identify the controlled principal, target object and effective right. Group control, password reset, DCSync delegation and shadow credentials require different operations. Confirm the resulting access and record every modification.
+    body: Identify the controlled principal, target object and effective right. Read the DACL first, choose the narrowest supported operation, confirm the result and record a cleanup path.
     why: BloodHound edges describe possible control, not a universal command or guaranteed path.
     lookFor: GenericAll, WriteOwner, WriteDacl, force-change-password, group membership, replication rights and msDS-KeyCredentialLink write access.
     record: Save before/after state, object names, exact operation and verification. Reverse modifications when required by the engagement.
-    commands: [active-directory/attack-paths#shadow-credentials-with-certipy]
+    commands: [active-directory/attack-paths#acl-abuse-operations, active-directory/attack-paths#shadow-credentials-with-certipy]
     links: [active-directory/attack-paths#acl-abuse, active-directory/attack-paths#gpo-permissions]
     options:
       - { label: Certificate or shadow-credential path, next: certificates }
@@ -255,10 +255,11 @@ nodes:
   delegate:
     phase: Post-exploitation
     prompt: Validate the delegation type and required computer control.
-    body: Separate unconstrained, constrained and resource-based constrained delegation. For RBCD, confirm write access to the target computer, a controlled machine account or permitted machine-account creation, and a compatible DC. Protected accounts and service configuration can prevent the path.
+    body: For RBCD, confirm target-computer write access, machine-account quota or an existing controlled computer, then configure delegation, request a ticket and verify the identity.
     why: Delegation abuse depends on object control, ticket semantics and target restrictions; a graph edge alone is insufficient.
     lookFor: Allowed SPNs, controlled computer objects, machine-account quota, usable TGT evidence and target service permissions.
     record: Save the controlled account, target SPN, delegation change, ticket request and resulting identity.
+    commands: [active-directory/attack-paths#resource-based-constrained-delegation]
     links: [active-directory/attack-paths#delegation-prerequisites]
     options:
       - { label: Delegation produced a usable credential or ticket, next: reuse }
@@ -267,11 +268,11 @@ nodes:
   certificates:
     phase: Post-exploitation
     prompt: Enumerate AD CS and select a supported certificate path.
-    body: Use valid domain credentials to enumerate enabled CAs and templates. Verify enrollment rights, EKUs, subject control, approval/signatures, CA permissions and strong mapping before requesting anything.
+    body: 'Enumerate CAs and templates, then choose only the ESC path whose prerequisites are verified: subject control, template write, CA management or relay conditions.'
     why: AD CS can provide direct domain escalation, but each ESC path has distinct prerequisites and certificate issuance alone does not prove authentication.
     lookFor: ESC1 subject control, ESC4 template write, ESC7 CA management, ESC8 web enrollment/relay conditions, shadow-credential write rights and strong-mapping behavior.
     record: Save CA and template names, effective principals, vulnerability evidence, request output and authentication result.
-    commands: [active-directory/attack-paths#enumerate-ad-cs-with-certipy]
+    commands: [active-directory/attack-paths#enumerate-ad-cs-with-certipy, active-directory/attack-paths#esc4-template-modification, active-directory/attack-paths#esc7-ca-management, active-directory/attack-paths#esc8-relay-conditions]
     links: [active-directory/attack-paths#ad-cs-enrollment-prerequisites, active-directory/attack-paths#certificate-strong-mapping-after-2025]
     options:
       - { label: ESC1 conditions confirmed - request and authenticate, next: certificate-request }
@@ -281,11 +282,12 @@ nodes:
   certificate-request:
     phase: Post-exploitation
     prompt: Request the authorized certificate and verify authentication.
-    body: Set CA_HOST, CA, TEMPLATE, TARGET_USER and TARGET_SID from evidence. Use the PFX produced by Certipy. If PKINIT fails, assess Schannel/LDAPS and strong mapping instead of repeating issuance.
+    body: Request the authorized certificate, authenticate with it, and test Schannel when PKINIT fails. The objective is verified access, not merely a PFX.
     why: The objective is authenticated access as the intended identity, not merely obtaining a certificate file.
     lookFor: Successful request, correct UPN/SID, usable PFX, TGT/NT hash or an alternative Schannel path.
     record: Protect the private key and save the identity, authentication method and resulting access.
     commands: [active-directory/attack-paths#request-and-use-an-esc1-certificate]
+    links: [active-directory/attack-paths#ad-cs-enrollment-prerequisites, active-directory/attack-paths#certificate-strong-mapping-after-2025, active-directory/attack-paths#certificate-schannel-fallback]
     options:
       - { label: Certificate authentication succeeded, next: reuse }
       - { label: Privileged certificate identity obtained, next: dump }
@@ -293,11 +295,11 @@ nodes:
   dump:
     phase: Post-exploitation
     prompt: Collect credentials only with the required privilege or directory right.
-    body: 'Use the secretsdump source matching your access: remote admin, DCSync rights, local hives or NTDS. Keep each credential tied to its source host and authority.'
+    body: 'Use the secretsdump source matching your access: remote admin, DCSync rights, local hives, NTDS/IFM or LAPS. Keep each credential tied to its source host and authority.'
     why: Credential collection is often the bridge to another host, but each method has a distinct privilege requirement.
     lookFor: Plaintext credentials, NT hashes, cached logons, LAPS passwords, service accounts and reusable domain material.
     record: Save complete output, source host, account authority and any recovered material in the relevant profile.
-    commands: [active-directory/credential-dumping#secretsdump-cheat-sheet, active-directory/credential-dumping#dcsync-through-the-domain-controller, active-directory/credential-dumping#mimikatz-logon-passwords, active-directory/credential-dumping#secretsdump-from-hives, active-directory/credential-dumping#crack-cached-logons, active-directory/credential-dumping#read-laps-passwords]
+    commands: [active-directory/credential-dumping#secretsdump-cheat-sheet, active-directory/credential-dumping#ntds-and-backup-collection, active-directory/credential-dumping#dcsync-through-the-domain-controller, active-directory/credential-dumping#mimikatz-logon-passwords, active-directory/credential-dumping#secretsdump-from-hives, active-directory/credential-dumping#crack-cached-logons, active-directory/credential-dumping#read-laps-passwords]
     links: [active-directory/credential-dumping#crack-a-protected-archive, windows/credential-harvesting#application-data-files]
     options:
       - { label: Credential or hash recovered - validate reuse, next: reuse }

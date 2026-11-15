@@ -55,6 +55,15 @@ describe('Active Directory companion coverage', () => {
         'windows/credential-harvesting#first-pass-credential-hunt',
         'windows/windows-privesc#privilege-escalation-decision',
         'pivoting/tunnelling#static-route',
+        'active-directory/attack-paths#acl-abuse-operations',
+        'active-directory/attack-paths#resource-based-constrained-delegation',
+        'active-directory/attack-paths#esc4-template-modification',
+        'active-directory/attack-paths#esc7-ca-management',
+        'active-directory/attack-paths#esc8-relay-conditions',
+        'windows/windows-privesc#server-operators-service-control',
+        'windows/windows-privesc#dnsadmins-plugin-dll',
+        'windows/windows-privesc#backup-operators-registry-and-ifm',
+        'active-directory/credential-dumping#ntds-and-backup-collection',
       ]),
     )
   })
@@ -69,6 +78,33 @@ describe('Active Directory companion coverage', () => {
     )
     expect(playbook?.nodes.services?.services.find((service) => service.id === 'ldap')?.commands).toContain(
       'active-directory/ad-enumeration#enumerate-groups-and-members',
+    )
+  })
+
+  it('covers high-value AD escalation and cleanup branches', () => {
+    expect(playbook?.nodes.path?.commands).toContain('active-directory/attack-paths#acl-abuse-operations')
+    expect(playbook?.nodes.delegate?.commands).toContain(
+      'active-directory/attack-paths#resource-based-constrained-delegation',
+    )
+    expect(playbook?.nodes.certificates?.commands).toEqual(
+      expect.arrayContaining([
+        'active-directory/attack-paths#esc4-template-modification',
+        'active-directory/attack-paths#esc7-ca-management',
+        'active-directory/attack-paths#esc8-relay-conditions',
+      ]),
+    )
+    expect(playbook?.nodes['certificate-request']?.links).toContain(
+      'active-directory/attack-paths#certificate-schannel-fallback',
+    )
+    expect(playbook?.nodes.privesc?.commands).toEqual(
+      expect.arrayContaining([
+        'windows/windows-privesc#server-operators-service-control',
+        'windows/windows-privesc#dnsadmins-plugin-dll',
+        'windows/windows-privesc#backup-operators-registry-and-ifm',
+      ]),
+    )
+    expect(playbook?.nodes.dump?.commands).toContain(
+      'active-directory/credential-dumping#ntds-and-backup-collection',
     )
   })
 })
