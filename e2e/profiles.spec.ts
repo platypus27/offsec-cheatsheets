@@ -182,3 +182,20 @@ test('DC01 supplies DC without adding a field to other machine profiles', async 
   await page.getByRole('checkbox', { name: 'LDAP', exact: true }).check()
   await expect(page.getByRole('region', { name: /bash code/ })).toContainText('nxc ldap 192.0.2.140')
 })
+
+test('My port stays inside the variables dialog on a narrow screen', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 780 })
+  await page.goto('./#/alpha/first')
+  const dialog = await openVariables(page)
+  const field = dialog.getByRole('textbox', { name: 'My port', exact: true })
+  await expect(field).toBeVisible()
+  await page.evaluate(() =>
+    Promise.allSettled(document.getAnimations().map((animation) => animation.finished)),
+  )
+  const fieldBox = await field.boundingBox()
+  const dialogBox = await dialog.boundingBox()
+  expect(fieldBox).not.toBeNull()
+  expect(dialogBox).not.toBeNull()
+  expect(fieldBox!.x).toBeGreaterThanOrEqual(dialogBox!.x)
+  expect(fieldBox!.x + fieldBox!.width).toBeLessThanOrEqual(dialogBox!.x + dialogBox!.width)
+})

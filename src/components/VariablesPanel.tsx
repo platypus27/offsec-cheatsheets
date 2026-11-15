@@ -101,7 +101,7 @@ function ProfileTabs() {
   const { profiles, defaultProfile, addBox } = useAppState()
   const [editingId, setEditingId] = useState(defaultProfile.id)
   return (
-    <div className="grid gap-5">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-5">
       <SharedVariables />
       <div className="flex flex-wrap items-center gap-2">
         <Badge variant="info">
