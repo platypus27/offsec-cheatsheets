@@ -8,10 +8,12 @@ export function PlaybookServices({
   node,
   prefix,
   content,
+  recommended = [],
 }: {
   node: PlaybookNode
   prefix: string
   content: Content
+  recommended?: string[]
 }) {
   const { checks, setCheck } = useAppState()
   if (node.services.length === 0) return null
@@ -23,12 +25,18 @@ export function PlaybookServices({
         <legend className="mb-3 text-sm font-bold">Services confirmed in Nmap</legend>
         <div className="grid gap-3 sm:grid-cols-2">
           {node.services.map((service) => (
-            <Checkbox
-              key={service.id}
-              label={service.title}
-              checked={checks[key(service.id)] ?? false}
-              onCheckedChange={(checked) => setCheck(key(service.id), checked === true)}
-            />
+            <div key={service.id}>
+              <Checkbox
+                label={service.title}
+                checked={checks[key(service.id)] ?? false}
+                onCheckedChange={(checked) => setCheck(key(service.id), checked === true)}
+              />
+              {recommended.includes(service.id) ? (
+                <p className="ml-7 mt-1 text-xs font-medium text-teal-primary">
+                  Suggested by the current profile's scan
+                </p>
+              ) : null}
+            </div>
           ))}
         </div>
       </fieldset>

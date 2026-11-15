@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Check, Crosshair, Plus } from 'lucide-react'
-import { Badge, Button, Dialog, Select, Tabs } from '@kryv/teal'
-import { Link } from 'react-router'
+import { Badge, Button, Dialog, Input, Tabs } from '@kryv/teal'
 import type { VariableProfile } from '../lib/profiles'
+import { SHARED_VARIABLES } from '../lib/variables'
 import { useAppState } from '../state'
 import { ProfileVariables } from './ProfileVariables'
 
@@ -11,18 +11,66 @@ interface VariablesPanelProps {
   onOpenChange: (open: boolean) => void
 }
 
-const NO_TARGET = '__none__'
+function NameEditor({ profile }: { profile: VariableProfile }) {
+  const { updateProfile } = useAppState()
+  const [name, setName] = useState(profile.name)
+  const commit = () => {
+    const trimmed = name.trim()
+    if (trimmed && trimmed !== profile.name) {
+      updateProfile(profile.id, { name: trimmed })
+      setName(trimmed)
+    } else {
+      setName(profile.name)
+    }
+  }
+  return (
+    <Input
+      label="Profile name"
+      description="Renames this tab; saved with the other profile values in this browser."
+      value={name}
+      onChange={(event) => setName(event.target.value)}
+      onBlur={commit}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter') event.currentTarget.blur()
+      }}
+      className="max-w-48"
+      autoComplete="off"
+    />
+  )
+}
 
-function ProfileEditor({ profile, onNavigate }: { profile: VariableProfile; onNavigate: () => void }) {
-  const { targets, defaultProfile, setDefaultProfile, updateProfile } = useAppState()
-  const target = targets.find((item) => item.id === profile.targetId)
+function SharedVariables() {
+  const { sharedVariables, setSharedVariable } = useAppState()
+  return (
+    <div className="grid gap-4 rounded-xl border border-teal-outline-variant/40 bg-teal-surface-container-low p-4 sm:grid-cols-2">
+      {SHARED_VARIABLES.map((variable) => (
+        <Input
+          key={variable.name}
+          label={variable.label}
+          description={variable.hint}
+          value={sharedVariables[variable.name] ?? ''}
+          onChange={(event) => setSharedVariable(variable.name, event.target.value)}
+          className="font-mono"
+          spellCheck={false}
+          autoComplete="off"
+        />
+      ))}
+      <p className="text-xs text-teal-on-surface-variant sm:col-span-2">
+        Shared across every box. Each profile keeps its own IP address, domain, username and password.
+      </p>
+    </div>
+  )
+}
+
+function ProfileEditor({ profile }: { profile: VariableProfile }) {
+  const { defaultProfile, setDefaultProfile, updateProfile } = useAppState()
   const isDefault = defaultProfile.id === profile.id
 
   return (
     <div className="grid gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h3 className="font-teal-headline text-lg font-bold">{profile.name} variables</h3>
+          <h3 className="font-teal-headline text-lg font-bold">{profile.name}</h3>
           <p className="mt-1 text-xs text-teal-on-surface-variant">
             {isDefault
               ? 'Changes apply to every command.'
@@ -38,53 +86,23 @@ function ProfileEditor({ profile, onNavigate }: { profile: VariableProfile; onNa
           {isDefault ? 'Default' : `Make ${profile.name} default`}
         </Button>
       </div>
-      <div className="grid gap-2 rounded-xl border border-teal-outline-variant/40 bg-teal-surface-container-low p-4">
-        <Select
-          aria-label={`Target for ${profile.name}`}
-          value={target?.id ?? NO_TARGET}
-          onValueChange={(value) =>
-            updateProfile(profile.id, { targetId: value === NO_TARGET ? null : value })
-          }
-          options={[
-            { value: NO_TARGET, label: 'Use profile values' },
-            ...targets.map((item) => ({
-              value: item.id,
-              label: `${item.name}${item.address ? ` (${item.address})` : ''}`,
-            })),
-          ]}
-        />
-        <p className="text-xs text-teal-on-surface-variant">
-          {target ? 'Saved-target fields take priority.' : 'Optionally use a saved target for this profile.'}{' '}
-          <Link
-            to={target ? `/tools/targets/${target.id}` : '/tools/targets'}
-            onClick={onNavigate}
-            className="prose-link"
-          >
-            {target ? 'Edit saved target' : 'Manage targets'}
-          </Link>
-        </p>
-      </div>
+      <NameEditor key={profile.id} profile={profile} />
       <ProfileVariables
         profile={profile}
-        target={target}
         onChange={(name, value) =>
           updateProfile(profile.id, { variables: { ...profile.variables, [name]: value } })
-        }
-        onRemove={(name) =>
-          updateProfile(profile.id, {
-            variables: Object.fromEntries(Object.entries(profile.variables).filter(([key]) => key !== name)),
-          })
         }
       />
     </div>
   )
 }
 
-function ProfileTabs({ onNavigate }: { onNavigate: () => void }) {
+function ProfileTabs() {
   const { profiles, defaultProfile, addBox } = useAppState()
   const [editingId, setEditingId] = useState(defaultProfile.id)
   return (
     <div className="grid gap-5">
+      <SharedVariables />
       <div className="flex flex-wrap items-center gap-2">
         <Badge variant="info">
           <Crosshair aria-hidden="true" className="mr-1 size-3" /> Default
@@ -110,14 +128,13 @@ function ProfileTabs({ onNavigate }: { onNavigate: () => void }) {
               ) : null}
             </span>
           ),
-          content: <ProfileEditor profile={profile} onNavigate={onNavigate} />,
+          content: <ProfileEditor profile={profile} />,
         }))}
       />
     </div>
   )
 }
 
-/** Browsing a tab edits that profile; only Make default changes the command context. */
 export function VariablesPanel({ open, onOpenChange }: VariablesPanelProps) {
   return (
     <Dialog
@@ -125,10 +142,10 @@ export function VariablesPanel({ open, onOpenChange }: VariablesPanelProps) {
       onOpenChange={onOpenChange}
       placement="right"
       width="min(42rem,calc(100vw - 1.5rem))"
-      title="Target and variables"
-      description="Separate values for AD and each box. Profiles and the default are saved only in this browser."
+      title="Machine variables"
+      description="Basic values per box with shared attacker IP and port. Profiles and the default are saved only in this browser."
     >
-      <ProfileTabs onNavigate={() => onOpenChange(false)} />
+      <ProfileTabs />
     </Dialog>
   )
 }

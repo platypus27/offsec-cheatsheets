@@ -35,3 +35,25 @@ strings admintool.exe | grep -i pass
 ```
 
 Read the surrounding strings for context before trusting a match. [GNU strings](https://www.gnu.org/software/binutils/manual/html_node/strings.html).
+
+## PowerShell history and transcripts
+
+Read user-specific history and look for configured transcript directories. History often contains commands, paths, credentials or service accounts that automated scans only summarize.
+
+```powershell
+Get-Content "$env:APPDATA\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt"
+Get-ChildItem -Path C:\ -Filter '*transcript*' -Recurse -ErrorAction SilentlyContinue
+```
+
+Review only accessible files and preserve useful context around each finding. [PSReadLine history](https://learn.microsoft.com/en-us/powershell/module/psreadline/about/about_psreadline), [PowerShell transcription](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.host/start-transcript).
+
+## AutoLogon registry credentials
+
+Check the Winlogon configuration directly when autologon is suspected. A missing value is not evidence of a password elsewhere.
+
+```cmd
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v DefaultUserName
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v DefaultPassword
+```
+
+[Winlogon registry settings](https://learn.microsoft.com/en-us/troubleshoot/windows-server/user-profiles-and-logon/turn-on-automatic-logon).

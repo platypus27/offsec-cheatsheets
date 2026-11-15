@@ -1,7 +1,6 @@
 import { useDeferredValue, useMemo, useState } from 'react'
-import { Crosshair, Save } from 'lucide-react'
+import { Crosshair } from 'lucide-react'
 import { Badge, Button, TextArea, toast } from '@kryv/teal'
-import { useNavigate } from 'react-router'
 import { PortsTable } from '../../components/PortsTable'
 import { Suggestions } from '../../components/Suggestions'
 import { ToolProblems } from '../../components/ToolProblems'
@@ -19,35 +18,26 @@ const FORMAT_LABEL = {
 } as const
 
 function HostResult({ host, content, tools }: { host: ScannedHost; content: Content; tools: Tools }) {
-  const { importHost, setActiveTarget } = useAppState()
-  const navigate = useNavigate()
+  const { importHost, defaultProfile } = useAppState()
   const label = host.hostname ? `${host.hostname} (${host.address})` : host.address || 'Unknown host'
 
-  function save(activate: boolean) {
-    const id = importHost(host)
-    if (activate) setActiveTarget(id)
+  function useInProfile() {
+    importHost(host)
     toast({
-      title: activate ? `Saved and targeting ${host.address || 'host'}` : 'Saved to targets',
+      title: `${host.address} loaded into ${defaultProfile.name}`,
       variant: 'success',
       duration: 2000,
     })
-    if (activate) navigate(`/tools/targets/${id}`)
   }
 
   return (
-    <section aria-label={label} className="section-card">
+    <section aria-label={label} className="section-card min-w-0">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h2 className="font-teal-headline text-lg font-bold">{label}</h2>
-        <div className="flex flex-wrap gap-2">
-          <Button size="sm" variant="secondary" onClick={() => save(false)} disabled={!host.address}>
-            <Save aria-hidden="true" className="size-3.5" />
-            Save to targets
-          </Button>
-          <Button size="sm" onClick={() => save(true)} disabled={!host.address}>
-            <Crosshair aria-hidden="true" className="size-3.5" />
-            Save and target
-          </Button>
-        </div>
+        <Button size="sm" onClick={useInProfile} disabled={!host.address}>
+          <Crosshair aria-hidden="true" className="size-3.5" />
+          Use in {defaultProfile.name}
+        </Button>
       </div>
       <PortsTable ports={host.ports} caption={`Ports on ${label}`} />
       <h3 className="mb-3 mt-6 text-sm font-bold uppercase tracking-wider text-teal-on-surface-variant">
@@ -65,8 +55,8 @@ export function ParserPage({ content, tools }: { content: Content; tools: Tools 
 
   return (
     <ToolLayout
-      title="Output parser"
-      description="Paste nmap output (normal, -oG or -oX). Ports are extracted and matched against your rules in content/_rules.yaml."
+      title="Scan parser"
+      description="Paste nmap output (normal, -oG or -oX). Load an address and its ports into the current machine profile, or follow the matching reference notes."
     >
       <ToolProblems problems={tools.problems.filter((problem) => problem.startsWith('_rules'))} />
       <TextArea
@@ -78,8 +68,8 @@ export function ParserPage({ content, tools }: { content: Content; tools: Tools 
         className="min-h-40 font-mono text-xs"
       />
       {deferred.trim() ? (
-        <div className="mt-6 grid gap-6">
-          <p className="flex items-center gap-2 text-sm text-teal-on-surface-variant">
+        <div className="mt-6 grid min-w-0 grid-cols-1 gap-6">
+          <p className="flex flex-wrap items-center gap-2 text-sm text-teal-on-surface-variant">
             Detected format{' '}
             <Badge variant={result.format === 'unknown' ? 'warning' : 'info'}>
               {FORMAT_LABEL[result.format]}

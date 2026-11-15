@@ -43,18 +43,18 @@ function toolOptions(tools: Tools, query: string): Option[] {
     ...TOOL_LINKS.map((tool) => ({
       to: tool.to,
       title: tool.label,
-      trail: 'Tools',
+      trail: 'Workspace',
       haystack: `${tool.label} ${tool.keywords}`,
     })),
     ...tools.playbooks.map((playbook) => ({
-      to: `/tools/playbooks/${playbook.id}`,
+      to: `/companions/${playbook.id}`,
       title: playbook.title,
-      trail: 'Tools / Playbooks',
+      trail: 'Companions',
       haystack: `${playbook.title} ${playbook.description} playbook`,
     })),
   ]
   // Title hits outrank keyword hits, so "stuck" finds the playbook named
-  // "Stuck..." before the generic Playbooks tool that lists it as a keyword.
+  // "Stuck..." before the generic Companions destination that lists it as a keyword.
   const score = (entry: (typeof entries)[number]) =>
     entry.title.toLowerCase().includes(needle) ? 2 : entry.haystack.toLowerCase().includes(needle) ? 1 : 0
   return entries
