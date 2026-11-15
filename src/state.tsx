@@ -1,10 +1,25 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
-import type { ScannedHost } from './lib/nmap'
+import {
+  emptyCompanionSession,
+  emptyCompanionSessions,
+  isCompanionSessions,
+  type CompanionSession,
+  type CompanionSessions,
+} from './lib/companions'
 import { isBooleanRecord, isStringArray, type Guard } from './lib/guards'
 import { createId } from './lib/ids'
+import type { ScannedHost } from './lib/nmap'
+import {
+  initialProfiles,
+  isStoredVariableProfiles,
+  isVariableProfiles,
+  migrateProfiles,
+  migrateProfileTargets,
+  nextBoxName,
+  type VariableProfile,
+} from './lib/profiles'
 import { readJSON, usePersistentState } from './lib/storage'
-import { initialProfiles, isVariableProfiles, type VariableProfile } from './lib/profiles'
-import { effectiveVariables, isTargets, newTarget, upsertFromScan, type Target } from './lib/targets'
+import { isTargets, mergePorts } from './lib/targets'
 import { isVariables, type Variables } from './lib/variables'
 
 const MAX_RECENTS = 8
@@ -12,24 +27,26 @@ const isNullableString: Guard<string | null> = (value): value is string | null =
   value === null || typeof value === 'string'
 
 interface AppState {
-  /** Values filled into commands: the default profile layered under its saved target. */
   variables: Variables
   profiles: VariableProfile[]
+  sharedVariables: Variables
+  setSharedVariable: (name: string, value: string) => void
   defaultProfile: VariableProfile
   setDefaultProfile: (id: string) => void
   addBox: () => string
-  updateProfile: (id: string, patch: Partial<Pick<VariableProfile, 'variables' | 'targetId'>>) => void
+  updateProfile: (id: string, patch: Partial<Pick<VariableProfile, 'name' | 'variables' | 'ports'>>) => void
   setVariable: (name: string, value: string) => void
-  targets: Target[]
-  activeTarget: Target | undefined
-  setActiveTarget: (id: string | null) => void
-  addTarget: (name: string, address: string) => string
-  updateTarget: (id: string, patch: Partial<Omit<Target, 'id'>>) => void
-  removeTarget: (id: string) => void
-  importHost: (host: ScannedHost) => string
+  importHost: (host: ScannedHost) => void
   checks: Record<string, boolean>
   setCheck: (key: string, checked: boolean) => void
   resetChecks: (prefix: string) => void
+  companionSessions: CompanionSessions
+  updateCompanionSession: (
+    key: string,
+    start: string,
+    update: (session: CompanionSession) => CompanionSession,
+  ) => void
+  resetCompanionSession: (key: string) => void
   pins: string[]
   togglePin: (slug: string) => void
   recents: string[]
@@ -38,43 +55,50 @@ interface AppState {
 
 const AppStateContext = createContext<AppState | null>(null)
 
-/**
- * The cheatsheet's personal state: variable profiles, targets, checklist
- * progress, pinned and recent pages. One provider keeps every code block and
- * sidebar in step within a tab; storage events keep separate tabs in step.
- */
 export function AppStateProvider({ children }: { children: ReactNode }) {
-  // Read legacy keys only as the initial fallback. A valid profile workspace always wins.
-  const [initial] = useState(() =>
-    initialProfiles(
+  const [initial] = useState(() => {
+    const legacyTargets = readJSON('targets', isTargets, [])
+    const stored = readJSON('variable-profiles', isStoredVariableProfiles, null)
+    if (stored?.version === 3) return stored
+    if (stored?.version === 2) return migrateProfileTargets(stored, legacyTargets)
+    if (stored?.version === 1) return migrateProfiles(stored, legacyTargets)
+    return initialProfiles(
       readJSON('variables', isVariables, {}),
       readJSON('active-target', isNullableString, null),
-    ),
-  )
+      legacyTargets,
+    )
+  })
   const [profileState, setProfileState] = usePersistentState('variable-profiles', isVariableProfiles, initial)
   const profiles = profileState.items
-  // The storage guard guarantees that defaultId names an existing profile.
   const defaultProfile = profiles.find((profile) => profile.id === profileState.defaultId)!
-  const [targets, setTargets] = usePersistentState('targets', isTargets, [])
   const [checks, setChecks] = usePersistentState('checks', isBooleanRecord, {})
+  const [companionSessions, setCompanionSessions] = usePersistentState(
+    'companion-sessions',
+    isCompanionSessions,
+    emptyCompanionSessions(),
+  )
   const [pins, setPins] = usePersistentState('pins', isStringArray, [])
   const [recents, setRecents] = usePersistentState('recents', isStringArray, [])
 
-  const activeTarget = useMemo(
-    () => targets.find((target) => target.id === defaultProfile.targetId),
-    [targets, defaultProfile.targetId],
-  )
-  const variables = useMemo(
-    () => effectiveVariables(defaultProfile.variables, activeTarget),
-    [defaultProfile.variables, activeTarget],
-  )
+  const variables = useMemo(() => {
+    const resolved = { ...profileState.shared, ...defaultProfile.variables }
+    const dc = profiles.find((profile) => profile.id === 'dc01')?.variables.RHOST?.trim()
+    if (dc) resolved.DC = dc
+    else delete resolved.DC
+    return resolved
+  }, [defaultProfile, profiles, profileState.shared])
 
   const updateProfile = useCallback(
-    (id: string, patch: Partial<Pick<VariableProfile, 'variables' | 'targetId'>>) =>
+    (id: string, patch: Partial<Pick<VariableProfile, 'name' | 'variables' | 'ports'>>) =>
       setProfileState((prev) => ({
         ...prev,
         items: prev.items.map((profile) => (profile.id === id ? { ...profile, ...patch } : profile)),
       })),
+    [setProfileState],
+  )
+  const setSharedVariable = useCallback(
+    (name: string, value: string) =>
+      setProfileState((prev) => ({ ...prev, shared: { ...prev.shared, [name]: value } })),
     [setProfileState],
   )
   const setDefaultProfile = useCallback(
@@ -84,16 +108,14 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       ),
     [setProfileState],
   )
-
   const addBox = useCallback(() => {
     const id = createId('box')
     setProfileState((prev) => ({
       ...prev,
-      items: [...prev.items, { id, name: `Box ${prev.items.length}`, variables: {}, targetId: null }],
+      items: [...prev.items, { id, name: nextBoxName(prev.items), variables: {}, ports: [] }],
     }))
     return id
   }, [setProfileState])
-
   const setVariable = useCallback(
     (name: string, value: string) =>
       setProfileState((prev) => ({
@@ -106,44 +128,24 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       })),
     [setProfileState],
   )
-  const setActiveTarget = useCallback(
-    (id: string | null) => updateProfile(defaultProfile.id, { targetId: id }),
-    [updateProfile, defaultProfile.id],
-  )
-  const addTarget = useCallback(
-    (name: string, address: string) => {
-      const target = newTarget(name, address)
-      setTargets((prev) => [...prev, target])
-      return target.id
-    },
-    [setTargets],
-  )
-  const updateTarget = useCallback(
-    (id: string, patch: Partial<Omit<Target, 'id'>>) =>
-      setTargets((prev) => prev.map((target) => (target.id === id ? { ...target, ...patch } : target))),
-    [setTargets],
-  )
-  const removeTarget = useCallback(
-    (id: string) => {
-      setTargets((prev) => prev.filter((target) => target.id !== id))
+  const importHost = useCallback(
+    (host: ScannedHost) => {
+      const address = host.address.trim()
+      if (!address) return
       setProfileState((prev) => ({
         ...prev,
         items: prev.items.map((profile) =>
-          profile.targetId === id ? { ...profile, targetId: null } : profile,
+          profile.id === prev.defaultId
+            ? {
+                ...profile,
+                variables: { ...profile.variables, RHOST: address },
+                ports: mergePorts(profile.ports, host.ports),
+              }
+            : profile,
         ),
       }))
     },
-    [setTargets, setProfileState],
-  )
-  const importHost = useCallback(
-    (host: ScannedHost) => {
-      // State updaters run lazily, so the id must come from a synchronous
-      // computation over the current list, not from inside setTargets.
-      const result = upsertFromScan(targets, host)
-      setTargets(result.targets)
-      return result.targetId
-    },
-    [targets, setTargets],
+    [setProfileState],
   )
   const setCheck = useCallback(
     (key: string, checked: boolean) => setChecks((prev) => ({ ...prev, [key]: checked })),
@@ -155,6 +157,22 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
         Object.fromEntries(Object.entries(prev).filter(([key]) => !key.startsWith(prefix))),
       ),
     [setChecks],
+  )
+  const updateCompanionSession = useCallback(
+    (key: string, start: string, update: (session: CompanionSession) => CompanionSession) =>
+      setCompanionSessions((prev) => {
+        const current = prev.items[key] ?? emptyCompanionSession(start)
+        return { ...prev, items: { ...prev.items, [key]: update(current) } }
+      }),
+    [setCompanionSessions],
+  )
+  const resetCompanionSession = useCallback(
+    (key: string) =>
+      setCompanionSessions((prev) => ({
+        ...prev,
+        items: Object.fromEntries(Object.entries(prev.items).filter(([itemKey]) => itemKey !== key)),
+      })),
+    [setCompanionSessions],
   )
   const togglePin = useCallback(
     (slug: string) =>
@@ -171,21 +189,20 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     () => ({
       variables,
       profiles,
+      sharedVariables: profileState.shared,
+      setSharedVariable,
       defaultProfile,
       setDefaultProfile,
       addBox,
       updateProfile,
       setVariable,
-      targets,
-      activeTarget,
-      setActiveTarget,
-      addTarget,
-      updateTarget,
-      removeTarget,
       importHost,
       checks,
       setCheck,
       resetChecks,
+      companionSessions,
+      updateCompanionSession,
+      resetCompanionSession,
       pins,
       togglePin,
       recents,
@@ -194,21 +211,20 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     [
       variables,
       profiles,
+      profileState.shared,
+      setSharedVariable,
       defaultProfile,
       setDefaultProfile,
       addBox,
       updateProfile,
       setVariable,
-      targets,
-      activeTarget,
-      setActiveTarget,
-      addTarget,
-      updateTarget,
-      removeTarget,
       importHost,
       checks,
       setCheck,
       resetChecks,
+      companionSessions,
+      updateCompanionSession,
+      resetCompanionSession,
       pins,
       togglePin,
       recents,

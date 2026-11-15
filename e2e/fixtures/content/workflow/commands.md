@@ -37,7 +37,7 @@ nxc ldap {{DC}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' --users
 ## Host WinPEAS on Kali
 
 ```bash
-cd /usr/share/peass/winpeas/
+cd /home/kali/tools/binaries
 python3 -m http.server {{LPORT}}
 ```
 

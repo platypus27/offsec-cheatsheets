@@ -22,10 +22,14 @@ export function newTarget(name: string, address: string): Target {
   }
 }
 
-/** Values commands are filled with: profile values, overridden by the selected target's own vars, with its address as RHOST. */
-export function effectiveVariables(profileValues: Variables, target: Target | undefined): Variables {
-  if (!target) return profileValues
-  const merged: Variables = { ...profileValues, ...target.vars }
+/** Values commands are filled with: shared attacker values, overridden by the profile, by the selected target's own vars, with its address as RHOST. */
+export function effectiveVariables(
+  profileValues: Variables,
+  target: Target | undefined,
+  shared: Variables = {},
+): Variables {
+  if (!target) return { ...shared, ...profileValues }
+  const merged: Variables = { ...shared, ...profileValues, ...target.vars }
   if (target.address) merged.RHOST = target.address
   else if (profileValues.RHOST !== undefined) merged.RHOST = profileValues.RHOST
   else delete merged.RHOST
@@ -81,6 +85,8 @@ const isPort = (value: unknown): value is ScannedPort => {
     typeof port.version === 'string'
   )
 }
+
+export const isPorts = (value: unknown): value is ScannedPort[] => Array.isArray(value) && value.every(isPort)
 
 export function isTargets(value: unknown): value is Target[] {
   return (

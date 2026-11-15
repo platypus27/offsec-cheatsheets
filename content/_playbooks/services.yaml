@@ -3,6 +3,7 @@ description: Choose from detected responses, then validate available access.
 start: service
 nodes:
   service:
+    phase: Workflow
     prompt: Which service did the response identify?
     links: [recon/scanning#service-detection]
     options:
@@ -16,24 +17,31 @@ nodes:
       - { label: WinRM or RDP, next: remote }
       - { label: HTTP, next: web }
   ftp:
+    phase: Workflow
     prompt: Check anonymous FTP and accessible files.
     links: [services/common-services#ftp]
   ssh:
+    phase: Workflow
     prompt: Try a known account and verify the resulting identity.
     links: [services/common-services#ssh]
   smb:
+    phase: Workflow
     prompt: List shares and inspect files with the access obtained.
     links: [services/common-services#smb, active-directory/credential-access#domain-or-local-login]
   dns:
+    phase: Workflow
     prompt: Check zone transfer and record returned hostnames.
     links: [services/network-services#dns-zone-transfer]
   snmp:
+    phase: Workflow
     prompt: Walk the service using a known community.
     links: [services/network-services#snmp-community-walk]
   nfs:
+    phase: Workflow
     prompt: Check exports without assuming that no MNT response means no NFS.
     links: [services/network-services#nfs-exports]
   database:
+    phase: Workflow
     prompt: Which database engine is confirmed?
     links: [services/common-services#databases]
     options:
@@ -41,17 +49,22 @@ nodes:
       - { label: MySQL, next: mysql }
       - { label: PostgreSQL, next: postgres }
   mssql:
+    phase: Workflow
     prompt: Connect and record identity, version and visible databases.
     links: [services/databases#mssql]
   mysql:
+    phase: Workflow
     prompt: Connect with the correct port option and enumerate visible databases.
     links: [services/databases#mysql]
   postgres:
+    phase: Workflow
     prompt: List databases and check connection permissions.
     links: [services/databases#postgresql]
   remote:
+    phase: Workflow
     prompt: Test remote logon with the account rights you actually have.
     links: [services/remote-access#winrm, services/remote-access#rdp]
   web:
+    phase: Workflow
     prompt: Fingerprint the response before choosing web tests.
     links: [web/web-enumeration#technology-fingerprinting, web/web-enumeration#content-discovery]

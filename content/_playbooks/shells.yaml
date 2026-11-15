@@ -3,52 +3,62 @@ description: Establish access, improve the terminal, then verify transferred fil
 start: access
 nodes:
   access:
+    phase: Workflow
     prompt: Do you already have a working shell?
     options:
       - { label: 'Yes', next: terminal }
       - { label: No, target can run Bash, next: reverse }
       - { label: No, known remote logon credentials, next: remote }
   reverse:
+    phase: Workflow
     prompt: Start a listener, then connect from the target.
     links: [shells/shells#listeners, shells/shells#bash-reverse-shell]
     options:
       - { label: Connected, next: terminal }
       - { label: Failed, next: failure }
   remote:
+    phase: Workflow
     prompt: Use the service and account rights actually available.
     links: [services/common-services#ssh, services/remote-access#winrm, services/remote-access#rdp]
     options:
       - { label: Connected, next: terminal }
       - { label: Failed, next: failure }
   failure:
+    phase: Workflow
     prompt: Check listener, reachability and runtime separately.
     links: [shells/shells#shell-connection-failure]
   terminal:
+    phase: Workflow
     prompt: Is this a basic Unix shell with Python available?
     options:
       - { label: 'Yes', next: upgrade }
       - { label: 'No', next: transfer }
   upgrade:
+    phase: Workflow
     prompt: Spawn a pseudo-terminal when supported.
     links: [shells/shells#upgrading-a-shell]
     options:
       - { label: Ready, next: transfer }
   transfer:
+    phase: Workflow
     prompt: Which system needs the prepared file?
     links: [shells/file-transfers#serving-files]
     options:
       - { label: Linux, next: linux }
       - { label: Windows, next: windows }
   linux:
+    phase: Workflow
     prompt: Download, then compare the file hash.
     links: [shells/file-transfers#downloading-on-linux, shells/file-transfers#verify-a-transferred-file]
   windows:
+    phase: Workflow
     prompt: Download from PowerShell, then compare the file hash.
     commands: [shells/file-transfers#serving-files, shells/file-transfers#downloading-on-windows, shells/file-transfers#verify-a-transferred-file]
     links: [shells/file-transfers#downloading-on-windows, shells/file-transfers#verify-a-transferred-file]
     options:
       - { label: Download WinPEAS from Kali instead, next: winpeas }
   winpeas:
+    phase: Workflow
     prompt: Pull WinPEAS over HTTP from the target's PowerShell session.
     body: Run the HTTP server on Kali. Use its address reachable from the target as LHOST and the HTTP server port as LPORT.
     commands: [windows/windows-privesc#host-winpeas-on-kali, windows/windows-privesc#download-winpeas-in-powershell]

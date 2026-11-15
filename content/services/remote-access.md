@@ -37,9 +37,22 @@ evil-winrm -i {{RHOST}} -P {{RPORT}} -u '{{USER}}' -p '{{PASS}}'
 Requires remote logon rights. Authenticate and verify the session identity.
 
 ```bash
-xfreerdp /v:{{RHOST}}:{{RPORT}} /u:'{{USER}}' /p:'{{PASS}}'
+xfreerdp3 /v:{{RHOST}}:{{RPORT}} /u:'{{USER}}' /p:'{{PASS}}'
 ```
 
-TODO: verify the installed FreeRDP executable name and certificate-validation options; accept a lab certificate only after checking it.
+Review the presented certificate before accepting a lab certificate exception.
 
 [FreeRDP command-line reference](https://github.com/FreeRDP/FreeRDP/wiki/CommandLineInterface).
+
+## WinRM hash and certificate authentication
+
+Use the credential form actually recovered. NTHASH is the NT hash. For certificate authentication, PFX contains the certificate and private key; openssl converts it to the PEM files Evil-WinRM expects. Use -S for HTTPS.
+
+```bash
+evil-winrm -i {{RHOST}} -P {{RPORT}} -u '{{USER}}' -H '{{NTHASH}}'
+openssl pkcs12 -in '{{PFX}}' -clcerts -nokeys -out client-cert.pem
+openssl pkcs12 -in '{{PFX}}' -nocerts -nodes -out client-key.pem
+evil-winrm -i {{RHOST}} -P {{RPORT}} -c client-cert.pem -k client-key.pem -S
+```
+
+Protect the exported key and verify the resulting identity. [Evil-WinRM authentication options](https://github.com/Hackplayers/evil-winrm), [OpenSSL pkcs12](https://docs.openssl.org/master/man1/openssl-pkcs12/).

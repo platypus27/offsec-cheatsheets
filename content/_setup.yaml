@@ -1,0 +1,117 @@
+sections:
+  - id: application
+    title: This application
+    description: Install Node 24, then build the single-file app in a fixed location.
+    items:
+      - id: node
+        title: Node.js 24
+        description: Required only to build the app. The generated HTML needs no server.
+        destination: PATH
+        command: |
+          curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+          export NVM_DIR="$HOME/.nvm"
+          . "$NVM_DIR/nvm.sh"
+          nvm install 24
+          nvm use 24
+        verify: node --version
+      - id: app
+        title: OffSec Cheatsheets
+        description: Clone or update the repository, install its locked dependencies, and open the offline build.
+        destination: /home/kali/tools/offsec-cheatsheets
+        command: |
+          mkdir -p /home/kali/tools
+          if [ ! -d /home/kali/tools/offsec-cheatsheets/.git ]; then
+            git clone https://github.com/platypus27/offsec-cheatsheets.git /home/kali/tools/offsec-cheatsheets
+          else
+            git -C /home/kali/tools/offsec-cheatsheets pull --ff-only
+          fi
+          cd /home/kali/tools/offsec-cheatsheets
+          npm ci
+          npm run build
+          xdg-open /home/kali/tools/offsec-cheatsheets/dist/index.html
+        verify: test -f /home/kali/tools/offsec-cheatsheets/dist/index.html
+
+  - id: foundation
+    title: Core Kali tooling
+    description: Distribution tools stay on PATH. Run apt update before installing this baseline.
+    items:
+      - id: directories
+        title: Fixed working directories
+        description: Shared destinations used by the setup commands and cheatsheets.
+        destination: /home/kali/tools
+        command: mkdir -p /home/kali/tools/binaries /home/kali/tools/wordlists
+        verify: test -d /home/kali/tools/binaries -a -d /home/kali/tools/wordlists
+      - id: packages
+        title: Recon, AD, web, cracking and pivot packages
+        description: Nmap, NetExec, Impacket, Evil-WinRM, enumeration, exploitation support and wordlists.
+        destination: PATH
+        command: |
+          sudo apt update
+          sudo apt install -y git curl wget unzip jq python3-pip pipx nmap dnsutils smbclient ldap-utils netexec impacket evil-winrm freerdp3-x11 enum4linux-ng feroxbuster gobuster ffuf sqlmap responder hashcat john proxychains4 seclists peass mimikatz bloodhound.py chisel
+          pipx ensurepath
+        verify: nmap --version && nxc --version && impacket-secretsdump -h >/dev/null && evil-winrm -h >/dev/null && feroxbuster --version
+      - id: wordlists
+        title: RockYou and SecLists shortcuts
+        description: Prepare RockYou and expose SecLists below the fixed tools directory.
+        destination: /home/kali/tools/wordlists
+        command: |
+          gzip -dc /usr/share/wordlists/rockyou.txt.gz > /home/kali/tools/wordlists/rockyou.txt
+          ln -sfn /usr/share/seclists /home/kali/tools/wordlists/SecLists
+        verify: test -s /home/kali/tools/wordlists/rockyou.txt && test -d /home/kali/tools/wordlists/SecLists
+
+  - id: active-directory
+    title: Active Directory additions
+    description: Python tools install into pipx environments; Kerbrute gets a fixed executable path.
+    items:
+      - id: certipy
+        title: Certipy
+        description: AD CS enumeration and certificate operations.
+        destination: PATH
+        command: pipx install certipy-ad
+        verify: certipy --version
+      - id: bloodyad
+        title: bloodyAD
+        description: Direct Active Directory object and ACL operations.
+        destination: PATH
+        command: pipx install bloodyad
+        verify: bloodyAD --help
+      - id: kerbrute
+        title: Kerbrute
+        description: Kerberos user enumeration and authentication checks.
+        destination: /home/kali/tools/kerbrute
+        command: |
+          mkdir -p /home/kali/tools/kerbrute
+          curl -fL https://github.com/ropnop/kerbrute/releases/download/v1.0.5/kerbrute_linux_amd64 -o /home/kali/tools/kerbrute/kerbrute
+          chmod +x /home/kali/tools/kerbrute/kerbrute
+        verify: /home/kali/tools/kerbrute/kerbrute --help
+
+  - id: payloads
+    title: Target-side binaries and tunnels
+    description: Stage payloads and pivot tools at the same paths used by the notes.
+    items:
+      - id: windows-binaries
+        title: WinPEAS and mimikatz
+        description: Copy Kali's packaged Windows binaries into one predictable transfer directory.
+        destination: /home/kali/tools/binaries
+        command: |
+          cp /usr/share/peass/winpeas/winPEASx64.exe /home/kali/tools/binaries/winPEASx64.exe
+          cp /usr/share/windows-resources/mimikatz/x64/mimikatz.exe /home/kali/tools/binaries/mimikatz.exe
+        verify: test -s /home/kali/tools/binaries/winPEASx64.exe && test -s /home/kali/tools/binaries/mimikatz.exe
+      - id: chisel
+        title: Chisel Windows client
+        description: Keep the Windows SOCKS client beside the other transfer payloads.
+        destination: /home/kali/tools/binaries/chisel.exe
+        command: |
+          curl -fL https://github.com/jpillora/chisel/releases/download/v1.10.1/chisel_1.10.1_windows_amd64.gz | gzip -dc > /home/kali/tools/binaries/chisel.exe
+        verify: test -s /home/kali/tools/binaries/chisel.exe
+      - id: ligolo
+        title: Ligolo-ng proxy and agent
+        description: Install the Kali proxy and stage the Windows agent using the pinned release from the notes.
+        destination: /home/kali/tools/ligolo-ng
+        command: |
+          mkdir -p /home/kali/tools/ligolo-ng
+          curl -fL https://github.com/nicocha30/ligolo-ng/releases/download/v0.9.2/ligolo-ng_v0.9.2_linux_amd64.tar.gz -o /home/kali/tools/ligolo-ng/proxy.tar.gz
+          curl -fL https://github.com/nicocha30/ligolo-ng/releases/download/v0.9.2/ligolo-ng_v0.9.2_windows_amd64.zip -o /home/kali/tools/ligolo-ng/agent.zip
+          tar -xzf /home/kali/tools/ligolo-ng/proxy.tar.gz -C /home/kali/tools/ligolo-ng proxy
+          unzip -jo /home/kali/tools/ligolo-ng/agent.zip agent.exe -d /home/kali/tools/binaries
+        verify: test -x /home/kali/tools/ligolo-ng/proxy && test -s /home/kali/tools/binaries/agent.exe

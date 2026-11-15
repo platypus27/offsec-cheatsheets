@@ -3,21 +3,25 @@ description: Follow observed app behavior from discovery to a verified test resu
 start: inspect
 nodes:
   inspect:
+    phase: Workflow
     prompt: Have you inspected headers, redirects, source and the app itself?
     links: [web/web-enumeration#technology-fingerprinting]
     options:
       - { label: Ready, next: names }
   names:
+    phase: Workflow
     prompt: Does the app depend on another hostname?
     options:
       - { label: 'Yes', next: vhosts }
       - { label: 'No', next: content }
   vhosts:
+    phase: Workflow
     prompt: Compare virtual hosts and verify HTTPS hostname routing where relevant.
     links: [web/web-enumeration#virtual-hosts, web/web-enumeration#https-hostname-and-sni]
     options:
       - { label: Ready, next: content }
   content:
+    phase: Workflow
     prompt: Discover relevant paths and confirm results against missing-page behavior.
     links: [web/web-enumeration#content-discovery]
     options:
@@ -26,14 +30,18 @@ nodes:
       - { label: Upload feature, next: upload }
       - { label: Found credentials, next: credentials }
   inputs:
+    phase: Workflow
     prompt: Confirm a parameter, then compare controlled SQL conditions if relevant.
     links: [web/input-tests#parameter-discovery, web/input-tests#sql-injection-comparison]
   lfi:
+    phase: Workflow
     prompt: Test the observed file parameter and verify returned file content.
     links: [web/input-tests#local-file-inclusion]
   upload:
+    phase: Workflow
     prompt: Verify storage, retrieval and execution as separate outcomes.
     links: [web/input-tests#file-upload-checks]
   credentials:
+    phase: Workflow
     prompt: Check one credential on an intended service using its correct authority.
     links: [active-directory/credential-access#reuse-one-known-credential]

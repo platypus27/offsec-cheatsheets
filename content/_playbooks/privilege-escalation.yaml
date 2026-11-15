@@ -3,11 +3,13 @@ description: Enumerate the current context, then validate a concrete privileged 
 start: platform
 nodes:
   platform:
+    phase: Workflow
     prompt: Which target OS are you working on?
     options:
       - { label: Linux, next: linux }
       - { label: Windows, next: windows }
   linux:
+    phase: Workflow
     prompt: Which Linux lead needs checking?
     links: [linux/linux-privesc#situational-awareness, linux/linux-privesc#automated-enumeration]
     options:
@@ -15,15 +17,19 @@ nodes:
       - { label: SUID or capabilities, next: binaries }
       - { label: Scheduled execution, next: jobs }
   sudo:
+    phase: Workflow
     prompt: Check exact run-as rights and command restrictions.
     links: [linux/linux-privesc#sudo-permissions, linux/linux-privesc#sudo-find-shell]
   binaries:
+    phase: Workflow
     prompt: Confirm executable ownership and the specific privileged behavior.
     links: [linux/linux-privesc#suid-binaries, linux/linux-privesc#file-capabilities]
   jobs:
+    phase: Workflow
     prompt: Check job user, executed path, dependency permissions and trigger.
     links: [linux/linux-privesc#cron-jobs, linux/linux-privesc#systemd-timers]
   windows:
+    phase: Workflow
     prompt: Which Windows lead needs checking?
     commands: [windows/windows-privesc#situational-awareness, windows/windows-privesc#token-privileges]
     links: [windows/windows-privesc#situational-awareness, windows/windows-privesc#token-privileges, windows/windows-privesc#automated-enumeration]
@@ -33,17 +39,21 @@ nodes:
       - { label: Scheduled task, next: task }
       - { label: Token privilege, next: token }
   winpeas:
+    phase: Workflow
     prompt: Host WinPEAS on Kali, then download it from target PowerShell.
     body: Set LHOST to Kali's address reachable from the target and LPORT to a free HTTP server port. Keep the Kali server running. Use a writable target directory and a binary matching the target architecture and runtime.
     commands: [windows/windows-privesc#host-winpeas-on-kali, windows/windows-privesc#download-winpeas-in-powershell, windows/windows-privesc#run-winpeas]
     links: [shells/file-transfers#verify-a-transferred-file]
   service:
+    phase: Workflow
     prompt: Validate the service account, path, permissions and trigger.
     links: [windows/windows-privesc#service-paths-and-accounts, windows/windows-privesc#file-and-directory-acls]
   task:
+    phase: Workflow
     prompt: Validate the scheduled action and writable dependencies.
     links: [windows/windows-privesc#scheduled-tasks, windows/windows-privesc#file-and-directory-acls]
   token:
-    prompt: Match the privilege to a supported path for the actual target build.
-    commands: [windows/windows-privesc#impersonation-escalation]
-    links: [windows/windows-privesc#token-privileges, windows/windows-privesc#impersonation-escalation]
+    phase: Workflow
+    prompt: SeImpersonate or SeAssignPrimaryToken usually means a potato escalation; create an admin for clean remote work afterwards.
+    commands: [windows/windows-privesc#printspoofer, windows/windows-privesc#godpotato, windows/windows-privesc#sigmapotato]
+    links: [windows/windows-privesc#token-privileges, windows/windows-privesc#impersonation-escalation, windows/windows-privesc#create-a-local-administrator]

