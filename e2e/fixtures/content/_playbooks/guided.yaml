@@ -35,5 +35,5 @@ nodes:
   winpeas:
     phase: Discovery
     prompt: Host on Kali and download from target PowerShell
-    body: LHOST must be Kali's address reachable from the target. Use LPORT for the HTTP server port.
+    body: LHOST must be Kali's address reachable from the target. The HTTP server uses port 8000.
     commands: [workflow/commands#host-winpeas-on-kali, workflow/commands#download-winpeas-in-powershell]

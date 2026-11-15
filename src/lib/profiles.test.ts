@@ -94,7 +94,8 @@ describe('profile migrations', () => {
     expect(migrated.items.find((item) => item.id === 'ms02')?.variables).toEqual({ RHOST: '10.10.139.142' })
     expect(migrated.items.find((item) => item.id === 'dc01')?.variables).toEqual({ RHOST: '10.10.139.140' })
     expect(migrated.items.find((item) => item.id === 'box-2')?.variables).toEqual({ NOTE: 'keep-me' })
-    expect(migrated.shared).toEqual({ LHOST: '192.168.45.152', LPORT: '8443' })
+    expect(migrated.shared).toEqual({ LHOST: '192.168.45.152' })
+    expect(migrated.shared).not.toHaveProperty('LPORT')
     expect(isVariableProfiles(migrated)).toBe(true)
   })
 

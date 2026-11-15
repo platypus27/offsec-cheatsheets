@@ -83,7 +83,7 @@ test('profiles sync across tabs but remain separate in another browser session',
   }
 })
 
-test('machine profiles stay separate, renamable, and share My IP and My Port', async ({ page }) => {
+test('machine profiles stay separate, renamable, and share My IP', async ({ page }) => {
   await page.goto('./#/alpha/first')
   let dialog = await openVariables(page)
   await dialog.getByRole('tab', { name: 'MS01', exact: true }).click()
@@ -92,7 +92,6 @@ test('machine profiles stay separate, renamable, and share My IP and My Port', a
   await dialog.getByRole('textbox', { name: 'Username', exact: true }).fill('lab-user')
   await dialog.getByRole('textbox', { name: 'Password', exact: true }).fill('example-only')
   await dialog.getByRole('textbox', { name: 'My IP', exact: true }).fill('192.0.2.99')
-  await dialog.getByRole('textbox', { name: 'My port', exact: true }).fill('8000')
   await dialog.getByRole('button', { name: 'Make MS01 default', exact: true }).click()
   await dialog.getByRole('button', { name: 'Add box', exact: true }).click()
   await expect(dialog.getByRole('tab', { name: 'Box 4', exact: true })).toHaveAttribute(
@@ -100,7 +99,7 @@ test('machine profiles stay separate, renamable, and share My IP and My Port', a
     'true',
   )
   await expect(dialog.getByRole('textbox', { name: 'My IP', exact: true })).toHaveValue('192.0.2.99')
-  await expect(dialog.getByRole('textbox', { name: 'My port', exact: true })).toHaveValue('8000')
+  await expect(dialog.getByRole('textbox', { name: 'My port', exact: true })).toHaveCount(0)
   for (const name of ['IP address', 'Domain', 'Username', 'Password']) {
     await expect(dialog.getByRole('textbox', { name, exact: true })).toHaveValue('')
   }
@@ -183,11 +182,12 @@ test('DC01 supplies DC without adding a field to other machine profiles', async 
   await expect(page.getByRole('region', { name: /bash code/ })).toContainText('nxc ldap 192.0.2.140')
 })
 
-test('My port stays inside the variables dialog on a narrow screen', async ({ page }) => {
+test('variables dialog stays inside the viewport on a narrow screen without My port', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 780 })
   await page.goto('./#/alpha/first')
   const dialog = await openVariables(page)
-  const field = dialog.getByRole('textbox', { name: 'My port', exact: true })
+  await expect(dialog.getByRole('textbox', { name: 'My port', exact: true })).toHaveCount(0)
+  const field = dialog.getByRole('textbox', { name: 'My IP', exact: true })
   await expect(field).toBeVisible()
   await page.evaluate(() =>
     Promise.allSettled(document.getAnimations().map((animation) => animation.finished)),

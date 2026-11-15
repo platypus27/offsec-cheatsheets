@@ -19,7 +19,7 @@ identifies this scope on desktop and mobile, including when opening a note direc
   command, with typo tolerance. A result opens at the exact heading.
 - **Machine profiles**: one renamable tab per machine — MS01, MS02, DC01,
   Box 1-3 — with only IP address, Domain, Username and Password in the editor.
-  **My IP** and **My port** are shared across every box. DC01's IP address
+  **My IP** is shared across every box. DC01's IP address
   automatically supplies `DC`. Make a profile default to fill every displayed
   and copied command. Browsing another tab leaves the working profile unchanged.
 - **Scan parser**: paste nmap normal, grepable or XML output to extract ports,

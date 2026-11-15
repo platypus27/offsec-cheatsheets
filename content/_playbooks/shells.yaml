@@ -19,7 +19,7 @@ nodes:
   remote:
     phase: Workflow
     prompt: Use the service and account rights actually available.
-    links: [services/common-services#ssh, services/remote-access#winrm, services/remote-access#rdp]
+    links: [services/common-services#ssh, services/remote-access#winrm-checks-and-shell, services/remote-access#rdp]
     options:
       - { label: Connected, next: terminal }
       - { label: Failed, next: failure }
@@ -60,6 +60,6 @@ nodes:
   winpeas:
     phase: Workflow
     prompt: Pull WinPEAS over HTTP from the target's PowerShell session.
-    body: Run the HTTP server on Kali. Use its address reachable from the target as LHOST and the HTTP server port as LPORT.
+    body: Run the HTTP server on Kali with port 8000. Use the Kali address reachable from the target as LHOST.
     commands: [windows/windows-privesc#host-winpeas-on-kali, windows/windows-privesc#download-winpeas-in-powershell]
     links: [windows/windows-privesc#run-winpeas, shells/file-transfers#verify-a-transferred-file]

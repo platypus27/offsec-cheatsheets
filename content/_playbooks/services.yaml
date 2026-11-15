@@ -63,7 +63,7 @@ nodes:
   remote:
     phase: Workflow
     prompt: Test remote logon with the account rights you actually have.
-    links: [services/remote-access#winrm, services/remote-access#rdp]
+    links: [services/remote-access#winrm-checks-and-shell, services/remote-access#rdp]
   web:
     phase: Workflow
     prompt: Fingerprint the response before choosing web tests.

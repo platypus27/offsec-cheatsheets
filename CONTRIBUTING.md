@@ -31,8 +31,8 @@ link target; keep one technique per heading. Use `[text](section/page)` or
 `[text](section/page#heading-id)` for internal links. Raw HTML is disabled.
 
 Use `{{NAME}}` placeholders in fenced commands. The default machine profile,
-DC01-derived controller address and shared My IP/My port values fill displayed
-and copied commands. The profile editor intentionally exposes only IP address,
+DC01-derived controller address and shared My IP value fill displayed and copied
+commands. The profile editor intentionally exposes only IP address,
 Domain, Username and Password; advanced placeholders may remain in commands.
 Supported languages include `bash`, `powershell`, `cmd`, `python`, `sql`,
 `http`, `php`, `c`, `csharp`, `json` and `yaml`. Markdown task lists retain

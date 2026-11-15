@@ -4,6 +4,26 @@ order: 2
 tags: [windows, credentials, rdcman, web-config, loot]
 ---
 
+## First-pass credential hunt
+
+From a new Windows session, check the locations that most often reveal reusable credentials or decisive leads. Review only accessible files and preserve context around each finding.
+
+```powershell
+whoami /all
+Get-Content "$env:APPDATA\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt"
+Get-ChildItem -Path C:\ -Filter '*transcript*' -Recurse -ErrorAction SilentlyContinue
+```
+
+```cmd
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v DefaultUserName
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v DefaultPassword
+type "C:\Users\Administrator\AppData\Local\Microsoft\Remote Desktop Connection Manager\RDCMan.settings"
+type C:\inetpub\wwwroot\web.config
+dir /s /b C:\inetpub\*.db C:\inetpub\*.config C:\Users\*.db 2>nul
+```
+
+Also inspect readable SYSVOL scripts, share contents, service configuration, scheduled tasks, application configuration and downloaded binaries. When a file looks useful in Evil-WinRM, download it and inspect locally.
+
 ## Common locations
 
 Check readable files that commonly hold plaintext or reusable credentials:

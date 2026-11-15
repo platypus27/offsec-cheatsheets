@@ -31,7 +31,7 @@ There is no backend or runtime content fetch.
 - `src/state.tsx` owns shared personal state and derives effective variables.
   `ProfileVariables` receives the current profile and an update callback.
 - `src/lib/profiles.ts` defines the version 3 profile format and validates restored
-  data. Per-profile variables, imported ports, shared My IP/My port values and the
+  data. Per-profile variables, imported ports, the shared My IP value and the
   default selection share one `variable-profiles` entry. Versions 1 and 2 migrate
   forward; linked legacy target values and ports fold into their profiles. Old
   `variables`, `active-target` and `targets` entries seed Box 1 only when no valid
@@ -60,7 +60,7 @@ There is no backend or runtime content fetch.
 - **Saved progress:** task keys include page slug, label and occurrence. Renaming
   those changes the saved identity. Preserve storage namespace and keys unless a
   migration is supplied.
-- **Variable precedence:** shared values (LHOST/LPORT) apply to every profile;
+- **Variable precedence:** the shared LHOST value applies to every profile;
   the default profile supplies its own values, and DC01's IP address supplies DC.
   Editing another profile does not change the default. Display and copy resolve
   values consistently. Substitution is plain text, not shell quoting or escaping.

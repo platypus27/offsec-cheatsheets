@@ -22,7 +22,6 @@ export function findPlaceholders(code: string): string[] {
 /** Attacker-side values shared by every box profile; set once, apply everywhere. */
 export const SHARED_VARIABLES: { name: string; label: string; hint: string }[] = [
   { name: 'LHOST', label: 'My IP', hint: 'Your Kali address reachable from the box (often tun0)' },
-  { name: 'LPORT', label: 'My port', hint: 'Your listener, HTTP server or tunnel port' },
 ]
 
 export const VARIABLE_NAME = /^[A-Z][A-Z0-9_]*$/

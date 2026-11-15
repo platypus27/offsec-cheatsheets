@@ -40,5 +40,9 @@ for (const root of ['content', 'e2e/fixtures/content']) {
     it('has valid rules and playbooks', () => {
       expect(tools.problems).toEqual([])
     })
+
+    it('has no shared listener port placeholders', () => {
+      expect(Object.values(files).join('\n')).not.toMatch(/\{\{\s*LPORT\s*\}\}/)
+    })
   })
 }

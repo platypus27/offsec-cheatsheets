@@ -31,7 +31,7 @@ nodes:
     why: Correct host, domain and KDC identities prevent valid techniques from failing against the wrong endpoint.
     lookFor: DNS and NetBIOS names, DC SRV records, SMB signing, TLS subject/SAN names and reachable controller addresses.
     record: Save Domain and each host IP address in Machine variables. Record naming evidence and any clock skew.
-    commands: [active-directory/ad-enumeration#domain-overview, active-directory/ad-enumeration#dns-srv-records, active-directory/ad-enumeration#tls-certificate-identity]
+    commands: [active-directory/ad-enumeration#identify-domain-and-dc, active-directory/ad-enumeration#tls-certificate-identity]
     options:
       - { label: No credentials yet - try anonymous enumeration, next: anonymous }
       - { label: Supplied or recovered credentials - enumerate services, next: services }
@@ -39,11 +39,11 @@ nodes:
   anonymous:
     phase: Enumerate
     prompt: Enumerate what anonymous, null and guest access actually permit.
-    body: Try independent SMB, RPC, LDAP, Kerberos and DNS checks. A failure on one protocol says nothing about the others. Save valid usernames, descriptions, shares and files before attempting authentication.
+    body: Try independent SMB, RPC, LDAP, Kerberos and DNS checks. Save valid usernames, descriptions, shares and files before attempting authentication.
     why: Null sessions, guest shares and Kerberos responses frequently provide the first user list or credential without any supplied account.
     lookFor: Readable shares, SYSVOL residue, usernames, description/comment fields, naming contexts, DNS records and transferable files.
     record: Save users.txt from verified names, record the exact anonymous identity used, and download interesting files for local inspection.
-    commands: [active-directory/smb-enumeration#anonymous-and-guest-smb-shares, active-directory/ad-enumeration#rpc-null-users-and-descriptions, active-directory/ad-enumeration#anonymous-ldap-naming-contexts, active-directory/ad-enumeration#kerberos-username-enumeration, services/network-services#dns-zone-transfer]
+    commands: [active-directory/ad-enumeration#enumerate-accounts-without-credentials, active-directory/smb-enumeration#smb-login-and-share-access, services/common-services#sysvol, services/network-services#dns-zone-transfer]
     links: [services/common-services#smb, services/common-services#sysvol]
     options:
       - { label: Usernames or password hints found, next: credential-attacks }
@@ -61,33 +61,33 @@ nodes:
         title: SMB and shares
         body: Test domain or local authority, enumerate share permissions and inspect SYSVOL or other readable content. Check GPP only with authenticated SYSVOL access.
         match: { ports: [139, 445], services: [microsoft-ds, netbios-ssn] }
-        commands: [active-directory/smb-enumeration#smb-domain-login, active-directory/smb-enumeration#smb-share-permissions, active-directory/smb-enumeration#gpp-and-autologin-credentials, services/common-services#sysvol]
+        commands: [active-directory/smb-enumeration#smb-login-and-share-access, active-directory/smb-enumeration#gpp-and-autologin-credentials, services/common-services#sysvol]
       - id: rpc
         title: RPC and RID enumeration
         body: Use null RPC only if the anonymous step proved it works. RID cycling with credentials can provide a broader account list.
         match: { ports: [135], services: [msrpc] }
-        commands: [active-directory/ad-enumeration#rpc-null-users-and-descriptions, active-directory/ad-enumeration#rid-cycling-with-credentials]
+        commands: [active-directory/ad-enumeration#enumerate-accounts-without-credentials, active-directory/ad-enumeration#enumerate-accounts-with-credentials]
       - id: ldap
-        title: LDAP and directory objects
-        body: Use a confirmed DC and valid domain credential. Record users, groups, descriptions and policy; collect graph data only after reviewing collector coverage.
+        title: Directory accounts and policy
+        body: Use a confirmed DC and valid domain credential. Pull users, groups and policy as one account picture; collect graph data only after reviewing collector coverage.
         match: { ports: [389, 636, 3268, 3269], services: [ldap] }
-        commands: [active-directory/ad-enumeration#domain-users, active-directory/ad-enumeration#domain-groups, active-directory/ad-enumeration#password-policy, active-directory/ad-enumeration#bloodhound-ce-collection]
+        commands: [active-directory/ad-enumeration#enumerate-accounts-with-credentials, active-directory/ad-enumeration#enumerate-groups-and-members, active-directory/ad-enumeration#password-policy-and-kerberos-controls, active-directory/ad-enumeration#bloodhound-ce-collection]
       - id: kerberos
         title: Kerberos
         body: Confirm the KDC, domain and time. Use username enumeration for a reviewed candidate list; roasting and spraying remain separate decisions.
         match: { ports: [88], services: [kerberos-sec] }
-        commands: [active-directory/ad-enumeration#kerberos-username-enumeration]
+        commands: [active-directory/ad-enumeration#enumerate-accounts-without-credentials]
         links: [active-directory/kerberos#kerberos-dns-or-clock-failure]
       - id: dns
         title: DNS
         body: Resolve controller and service names. Try a zone transfer only against the confirmed DNS service and treat refusal as normal hardening.
         match: { ports: [53], services: [domain] }
-        commands: [active-directory/ad-enumeration#dns-srv-records, services/network-services#dns-zone-transfer]
+        commands: [active-directory/ad-enumeration#identify-domain-and-dc, services/network-services#dns-zone-transfer]
       - id: winrm
         title: WinRM
         body: Check the known credential and verify command execution. A successful SMB login does not establish WinRM rights.
         match: { ports: [5985, 5986], services: [winrm] }
-        commands: [services/remote-access#winrm-credential-check, services/remote-access#winrm-verify-identity]
+        commands: [services/remote-access#winrm-checks-and-shell]
       - id: mssql
         title: MSSQL
         body: Test the recovered account with Windows authentication. Review databases and configuration before using command execution or a controlled UNC authentication trigger.
@@ -131,7 +131,7 @@ nodes:
     why: Horizontal spraying reduces attempts per account, but still increments failed logins and can lock accounts.
     lookFor: Lockout threshold and observation window, valid account authority, and one successful host/service pair.
     record: Save the candidate source, target service, successful account and any lockout observations.
-    commands: [active-directory/ad-enumeration#password-policy, active-directory/credential-access#password-spraying, active-directory/credential-access#kerberos-password-spraying]
+    commands: [active-directory/ad-enumeration#password-policy-and-kerberos-controls, active-directory/credential-access#password-spraying, active-directory/credential-access#kerberos-password-spraying]
     options:
       - { label: Valid credential recovered - verify reuse, next: reuse }
       - { label: No access - return to enumeration, next: services }
@@ -178,7 +178,7 @@ nodes:
     why: Relationship analysis can reveal ACL, delegation, LAPS and certificate paths that service-by-service enumeration misses.
     lookFor: Effective control of users, groups or computers; DCSync rights; shadow-credential write access; machine-account quota; LAPS read rights and AD CS objects.
     record: Save collection output, controlled principal, target object, exact permission and any collection gaps.
-    commands: [active-directory/ad-enumeration#bloodhound-ce-collection, active-directory/ad-enumeration#rid-cycling-with-credentials]
+    commands: [active-directory/ad-enumeration#bloodhound-ce-collection, active-directory/ad-enumeration#enumerate-accounts-with-credentials]
     options:
       - { label: ACL or object-control path, next: path }
       - { label: AD CS or certificate path, next: certificates }
@@ -188,22 +188,22 @@ nodes:
   access:
     phase: Initial access
     prompt: Open and verify the supported remote-access session.
-    body: Set RPORT to the confirmed listener. WinRM uses 5985 for HTTP or 5986 with -S for HTTPS. Use password, NT hash or certificate authentication as appropriate. RDP requires remote logon rights.
+    body: Verify WinRM or RDP access, then open the matching shell. Use password, NT hash or certificate authentication as appropriate; verify the resulting identity and host.
     why: Authentication success alone is not enough; the resulting identity and host establish the actual foothold.
     lookFor: Working execution or desktop session, correct account, hostname, architecture and access level.
     record: Save the working command, identity and hostname. Capture required proof before changing target.
-    commands: [services/remote-access#winrm, services/remote-access#winrm-hash-and-certificate-authentication, services/remote-access#rdp]
+    commands: [services/remote-access#winrm-checks-and-shell, services/remote-access#winrm-hash-and-certificate-authentication, services/remote-access#rdp]
     options:
       - { label: Host session working - enumerate manually, next: host-enum }
       - { label: Access failed - return to service evidence, next: services }
   host-enum:
     phase: Privilege escalation
     prompt: Enumerate the host manually before reaching for automation.
-    body: Establish identity, groups, privileges, OS/build and architecture. Read accessible history, transcripts, AutoLogon settings, application configuration, services and scheduled tasks. Re-enumerate after every new foothold.
+    body: Establish identity, groups, privileges, OS/build and architecture. Hunt common credential locations manually, then validate one concrete host privilege path before optional automation.
     why: Targeted checks expose the decisive evidence in most reviewed AD chains without transferring or running an automated enumerator.
     lookFor: Stored credentials, privileged groups, enabled token privileges, service/task execution paths, writable dependencies and host-specific access.
     record: Save the full identity and a concrete lead with its evidence. Stabilize the shell and preserve useful files.
-    commands: [windows/windows-privesc#situational-awareness, windows/windows-privesc#token-privileges, windows/credential-harvesting#common-locations, windows/credential-harvesting#powershell-history-and-transcripts, windows/credential-harvesting#autologon-registry-credentials, windows/windows-privesc#service-paths-and-accounts, windows/windows-privesc#scheduled-tasks]
+    commands: [windows/windows-privesc#situational-awareness, windows/windows-privesc#token-privileges, windows/windows-privesc#privilege-escalation-decision, windows/credential-harvesting#first-pass-credential-hunt, windows/credential-harvesting#common-locations, windows/credential-harvesting#powershell-history-and-transcripts, windows/credential-harvesting#autologon-registry-credentials, windows/windows-privesc#service-paths-and-accounts, windows/windows-privesc#scheduled-tasks]
     links: [windows/windows-privesc#privileged-group-and-host-specific-leads, shells/shells#upgrading-a-shell]
     options:
       - { label: Concrete local privilege or privileged-group lead, next: privesc }
@@ -214,7 +214,7 @@ nodes:
   winpeas:
     phase: Privilege escalation
     prompt: 'Optional: run one automated sweep when manual leads are exhausted.'
-    body: WinPEAS is not a default step. Use it only with a compatible target and working file transfer. Set LHOST to Kali's reachable address and LPORT to a free HTTP port, verify the binary, then validate every reported path manually.
+    body: WinPEAS is not a default step. Use it only with a compatible target and working file transfer. Set LHOST to Kali's reachable address, keep the HTTP server on port 8000, verify the binary, then validate every reported path manually.
     why: Automation can refresh stale leads, but its output is not proof and was not the decisive step in most reviewed AD paths.
     lookFor: AutoLogon material, history, services, tasks, privileges and credentials already covered by manual checks.
     record: Save the output and record only manually verified leads.
@@ -293,11 +293,11 @@ nodes:
   dump:
     phase: Post-exploitation
     prompt: Collect credentials only with the required privilege or directory right.
-    body: Use remote dumping with administrator access, DCSync only with replication rights, and LAPS only with read permission. With admin/SYSTEM, inspect LSASS and SAM/SYSTEM sources. Keep each credential tied to its source host and authority.
+    body: 'Use the secretsdump source matching your access: remote admin, DCSync rights, local hives or NTDS. Keep each credential tied to its source host and authority.'
     why: Credential collection is often the bridge to another host, but each method has a distinct privilege requirement.
     lookFor: Plaintext credentials, NT hashes, cached logons, LAPS passwords, service accounts and reusable domain material.
     record: Save complete output, source host, account authority and any recovered material in the relevant profile.
-    commands: [active-directory/credential-dumping#secretsdump-remotely, active-directory/credential-dumping#dcsync-through-the-domain-controller, active-directory/credential-dumping#mimikatz-logon-passwords, active-directory/credential-dumping#secretsdump-from-hives, active-directory/credential-dumping#crack-cached-logons, active-directory/credential-dumping#read-laps-passwords]
+    commands: [active-directory/credential-dumping#secretsdump-cheat-sheet, active-directory/credential-dumping#dcsync-through-the-domain-controller, active-directory/credential-dumping#mimikatz-logon-passwords, active-directory/credential-dumping#secretsdump-from-hives, active-directory/credential-dumping#crack-cached-logons, active-directory/credential-dumping#read-laps-passwords]
     links: [active-directory/credential-dumping#crack-a-protected-archive, windows/credential-harvesting#application-data-files]
     options:
       - { label: Credential or hash recovered - validate reuse, next: reuse }
@@ -310,7 +310,7 @@ nodes:
     why: Controlled reuse confirms access without assuming that a credential works everywhere or causing avoidable lockouts.
     lookFor: Valid authentication, actual execution rights, administrator access and a new host or identity worth enumerating.
     record: Save the successful host, service, account and command. Enumerate again from every new foothold.
-    commands: [active-directory/credential-access#domain-or-local-login, active-directory/credential-access#remote-windows-command, active-directory/credential-access#kerberos-authentication, active-directory/credential-access#pass-the-hash, services/remote-access#winrm-hash-and-certificate-authentication]
+    commands: [active-directory/credential-access#domain-or-local-login, active-directory/credential-access#remote-execution, active-directory/credential-access#kerberos-authentication, active-directory/credential-access#pass-the-hash, services/remote-access#winrm-hash-and-certificate-authentication]
     links: [active-directory/credential-access#reuse-one-known-credential]
     options:
       - { label: WinRM or RDP access confirmed, next: access }
@@ -343,7 +343,7 @@ nodes:
     why: New network access changes the visible service map and requires fresh enumeration from the pivot.
     lookFor: Connected agents, working routes, reachable internal hosts and services not visible from Kali.
     record: Save tunnel commands, interfaces, routes and internal addresses. Test application reachability before trusting scan results.
-    commands: [pivoting/tunnelling#ligolo-ng-tunnel, pivoting/tunnelling#chisel-reverse-socks, pivoting/tunnelling#scan-through-a-tunnel]
+    commands: [pivoting/tunnelling#static-route, pivoting/tunnelling#ligolo-ng-tunnel, pivoting/tunnelling#chisel-reverse-socks, pivoting/tunnelling#scan-through-a-tunnel]
     options:
       - { label: Internal host service map established, next: services }
       - { label: Return to current leads, next: leads }

@@ -42,7 +42,7 @@ TODO: verify the cracker workflow for AES AS-REP output; do not force it into 18
 ## Kerberos DNS or clock failure
 
 - [ ] Use the target's resolvable hostname for Kerberos, not just its IP.
-- [ ] Check [DC DNS records](active-directory/ad-enumeration#dns-srv-records); set NetExec's DNS server explicitly when needed.
+- [ ] Check [DC DNS records](active-directory/ad-enumeration#identify-domain-and-dc); set NetExec's DNS server explicitly when needed.
 - [ ] For KRB_AP_ERR_SKEW, compare client and KDC time and check the effective skew policy.
 
 TODO: verify the available time-sync client and local sync procedure.

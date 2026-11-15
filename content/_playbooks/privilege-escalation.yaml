@@ -41,7 +41,7 @@ nodes:
   winpeas:
     phase: Workflow
     prompt: Host WinPEAS on Kali, then download it from target PowerShell.
-    body: Set LHOST to Kali's address reachable from the target and LPORT to a free HTTP server port. Keep the Kali server running. Use a writable target directory and a binary matching the target architecture and runtime.
+    body: Set LHOST to Kali's address reachable from the target. Keep the Kali HTTP server running on port 8000. Use a writable target directory and a binary matching the target architecture and runtime.
     commands: [windows/windows-privesc#host-winpeas-on-kali, windows/windows-privesc#download-winpeas-in-powershell, windows/windows-privesc#run-winpeas]
     links: [shells/file-transfers#verify-a-transferred-file]
   service:

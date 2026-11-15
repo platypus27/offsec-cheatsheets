@@ -24,8 +24,8 @@ describe('findPlaceholders', () => {
 })
 
 describe('SHARED_VARIABLES', () => {
-  it('uses friendly labels for the two shared attacker values', () => {
-    expect(SHARED_VARIABLES.map((variable) => variable.name)).toEqual(['LHOST', 'LPORT'])
-    expect(SHARED_VARIABLES.map((variable) => variable.label)).toEqual(['My IP', 'My port'])
+  it('uses a friendly label for the one shared attacker value', () => {
+    expect(SHARED_VARIABLES.map((variable) => variable.name)).toEqual(['LHOST'])
+    expect(SHARED_VARIABLES.map((variable) => variable.label)).toEqual(['My IP'])
   })
 })

@@ -6,7 +6,7 @@ test('HTTP download step shows both machines and fills the reachable Kali addres
   await page.getByRole('button', { name: /^Edit variables/ }).click()
   const dialog = page.getByRole('dialog', { name: 'Machine variables' })
   await dialog.getByRole('textbox', { name: 'My IP', exact: true }).fill('192.0.2.10')
-  await dialog.getByRole('textbox', { name: 'My port', exact: true }).fill('8000')
+  await expect(dialog.getByRole('textbox', { name: 'My port', exact: true })).toHaveCount(0)
   await dialog.getByRole('button', { name: 'Close', exact: true }).click()
   await page.getByRole('button', { name: 'Scan complete', exact: true }).click()
   await page.getByRole('button', { name: 'Domain recorded', exact: true }).click()

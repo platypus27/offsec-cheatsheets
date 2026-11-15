@@ -47,7 +47,8 @@ const STARTER_PROFILES = [
 ]
 
 const MACHINE_VARIABLES = ['MS01', 'MS02', 'DC01']
-const SHARED_NAMES = ['LHOST', 'LPORT']
+const PROMOTED_SHARED_NAMES = ['LHOST']
+const RETIRED_SHARED_NAMES = ['LHOST', 'LPORT']
 
 function isProfileItem(value: unknown): value is VariableProfile {
   const profile = value as VariableProfile
@@ -128,12 +129,12 @@ export const isStoredVariableProfiles = (
 const stripRetired = (variables: Variables): Variables =>
   Object.fromEntries(
     Object.entries(variables).filter(
-      ([key]) => !MACHINE_VARIABLES.includes(key) && !SHARED_NAMES.includes(key),
+      ([key]) => !MACHINE_VARIABLES.includes(key) && !RETIRED_SHARED_NAMES.includes(key),
     ),
   )
 
 function splitRetired(variables: Variables, shared: Variables): Variables {
-  for (const name of SHARED_NAMES) {
+  for (const name of PROMOTED_SHARED_NAMES) {
     if (!(name in shared) && variables[name]?.trim()) shared[name] = variables[name]!
   }
   return stripRetired(variables)

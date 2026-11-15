@@ -42,7 +42,7 @@ function NameEditor({ profile }: { profile: VariableProfile }) {
 function SharedVariables() {
   const { sharedVariables, setSharedVariable } = useAppState()
   return (
-    <div className="grid gap-4 rounded-xl border border-teal-outline-variant/40 bg-teal-surface-container-low p-4 sm:grid-cols-2">
+    <div className="grid gap-4 rounded-xl border border-teal-outline-variant/40 bg-teal-surface-container-low p-4">
       {SHARED_VARIABLES.map((variable) => (
         <Input
           key={variable.name}
@@ -143,7 +143,7 @@ export function VariablesPanel({ open, onOpenChange }: VariablesPanelProps) {
       placement="right"
       width="min(42rem,calc(100vw - 1.5rem))"
       title="Machine variables"
-      description="Basic values per box with shared attacker IP and port. Profiles and the default are saved only in this browser."
+      description="Basic values per box with a shared attacker IP. Profiles and the default are saved only in this browser."
     >
       <ProfileTabs />
     </Dialog>
