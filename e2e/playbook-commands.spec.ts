@@ -1,6 +1,109 @@
 import { expect, test } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 
+test('home puts the current target and a direct resume action before setup', async ({ page }) => {
+  await page.goto('./#/companions/guided')
+  await page.getByRole('button', { name: 'Scan complete', exact: true }).click()
+  await page.goto('./#/')
+  const resume = page.getByRole('link', { name: /Resume Guided service fixture/ })
+  await expect(resume).toBeVisible()
+  await expect(resume).toContainText('Identify the domain from SMB')
+  await expect
+    .poll(async () => (await resume.boundingBox())!.y)
+    .toBeLessThan((await page.getByRole('link', { name: /Set up Kali/ }).boundingBox())!.y)
+  await resume.click()
+  await expect(page.getByRole('heading', { name: 'Identify the domain from SMB' })).toBeVisible()
+})
+
+test('service commands collapse without losing selection and findings stay reachable', async ({ page }) => {
+  await page.goto('./#/companions/guided')
+  await page.getByRole('button', { name: 'Scan complete', exact: true }).click()
+  await page.getByRole('button', { name: 'Domain recorded', exact: true }).click()
+  await page.getByRole('checkbox', { name: 'SMB', exact: true }).check()
+  const summary = page.locator('summary').filter({ hasText: /^SMB$/ })
+  await summary.click()
+  await expect(page.getByRole('checkbox', { name: 'SMB', exact: true })).toBeChecked()
+  await expect(page.getByRole('region', { name: /SMB shares - bash code/ })).toBeHidden()
+  await summary.click()
+  await expect(page.getByRole('region', { name: /SMB shares - bash code/ })).toBeVisible()
+  await page.getByRole('button', { name: 'Jump to findings', exact: true }).click()
+  await expect(page.getByRole('textbox', { name: 'Findings and evidence' })).toBeFocused()
+})
+
+test('long notes have a mobile section index that opens the requested heading', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('./#/workflow/commands')
+  await page.getByText('Jump to section', { exact: true }).click()
+  await page
+    .getByRole('navigation', { name: 'Page sections' })
+    .getByRole('link', { name: 'LDAP users', exact: true })
+    .click()
+  await expect(page).toHaveURL(/h=ldap-users/)
+  await expect
+    .poll(async () => (await page.getByRole('heading', { name: 'LDAP users', exact: true }).boundingBox())!.y)
+    .toBeGreaterThanOrEqual(64)
+  await expect
+    .poll(async () => (await page.getByRole('heading', { name: 'LDAP users', exact: true }).boundingBox())!.y)
+    .toBeLessThan(300)
+})
+
+test('companion commands retain their reference prerequisites and expected result', async ({ page }) => {
+  await page.goto('./#/companions/context')
+  await expect(
+    page.getByText('Run on Kali after obtaining a service ticket. Confirm the returned identity.'),
+  ).toBeVisible()
+  await expect(page.getByRole('region', { name: /bash code/ })).toContainText('impacket-wmiexec')
+})
+
+test('command-specific values fill display and copy and stay with their machine profile', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: {
+        writeText: async (text: string) => {
+          document.documentElement.dataset.copied = text
+        },
+      },
+    })
+  })
+  await page.goto('./#/workflow/context')
+  await page.getByText('Command values', { exact: false }).click()
+  const target = page.getByRole('textbox', { name: 'TARGET_COMPUTER', exact: true })
+  await target.fill('server.example.test')
+  await expect(page.getByRole('region', { name: 'bash code' })).toContainText("@'server.example.test'")
+  await page.getByRole('button', { name: 'Copy code', exact: true }).click()
+  await expect(page.locator('html')).toHaveAttribute('data-copied', /@'server.example.test'/)
+  await page.getByRole('button', { name: /^Edit variables/ }).click()
+  const dialog = page.getByRole('dialog', { name: 'Machine variables' })
+  await dialog.getByRole('tab', { name: 'Box 2', exact: true }).click()
+  await dialog.getByRole('button', { name: 'Make Box 2 default', exact: true }).click()
+  await dialog.getByRole('button', { name: 'Close', exact: true }).click()
+  await expect(target).toHaveValue('')
+  await expect(page.getByRole('region', { name: 'bash code' })).toContainText('{{TARGET_COMPUTER}}')
+  await page.reload()
+  await page.getByRole('button', { name: /^Edit variables/ }).click()
+  await dialog.getByRole('tab', { name: 'Box 1', exact: true }).click()
+  await dialog.getByRole('button', { name: 'Make Box 1 default', exact: true }).click()
+  await dialog.getByRole('button', { name: 'Close', exact: true }).click()
+  await expect(page.getByRole('region', { name: 'bash code' })).toContainText("@'server.example.test'")
+})
+
+test('advancing from a long step brings the next prompt into view and focus', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('./#/companions/guided')
+  await page.getByRole('button', { name: 'Scan complete', exact: true }).click()
+  await page.getByRole('button', { name: 'Domain recorded', exact: true }).click()
+  await page.getByRole('checkbox', { name: 'SMB', exact: true }).check()
+  await page.getByRole('checkbox', { name: 'WinRM', exact: true }).check()
+  await page.getByRole('button', { name: 'Download WinPEAS', exact: true }).click()
+  const prompt = page.getByRole('heading', { name: 'Host on Kali and download from target PowerShell' })
+  await expect(prompt).toBeFocused()
+  await expect.poll(async () => (await prompt.boundingBox())!.y).toBeGreaterThanOrEqual(64)
+  await expect.poll(async () => (await prompt.boundingBox())!.y).toBeLessThan(400)
+})
+
 test('HTTP download step shows both machines and fills the reachable Kali address', async ({ page }) => {
   await page.goto('./#/companions/guided')
   await page.getByRole('button', { name: /^Edit variables/ }).click()

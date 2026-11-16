@@ -27,6 +27,17 @@ nodes:
 `
 
 describe('parsePlaybook', () => {
+  it('rejects a comma-truncated outcome instead of silently hiding the rest of its label', () => {
+    const result = parsePlaybook(
+      'broken-label',
+      'title: X\nstart: a\nnodes:\n  a:\n    phase: Discovery\n    prompt: A\n    options: [{ label: Credential, hash recovered, next: a }]',
+    )
+    expect(result.playbook).toBeUndefined()
+    expect(result.errors).toContain(
+      'Node a, option 1: unknown field "hash recovered"; quote labels containing commas',
+    )
+  })
+
   it('parses a valid playbook', () => {
     const { playbook, errors } = parsePlaybook('foothold', source)
     expect(errors).toEqual([])

@@ -10,9 +10,9 @@ nodes:
     lookFor: In-scope addresses, existing Nmap output, supplied credentials, known hostnames and an existing foothold.
     record: Record scope, target addresses and the source of the current evidence.
     options:
-      - { label: No usable service map - scan this host, next: scan }
-      - { label: Scan output or service evidence already available, next: domain }
-      - { label: Already have a host session, next: host-enum }
+      - { label: "No usable service map - scan this host", next: scan }
+      - { label: "Scan output or service evidence already available", next: domain }
+      - { label: "Already have a host session", next: host-enum }
   scan:
     phase: Discover
     prompt: Build a complete service map for this host.
@@ -23,7 +23,7 @@ nodes:
     commands: [recon/scanning#port-scanning, recon/scanning#service-detection, recon/scanning#udp-scanning]
     links: [recon/scanning#save-nmap-output]
     options:
-      - { label: Service map saved and imported, next: domain }
+      - { label: "Service map saved and imported", next: domain }
   domain:
     phase: Discover
     prompt: Establish host, domain and controller identities.
@@ -33,9 +33,9 @@ nodes:
     record: Save Domain and each host IP address in Machine variables. Record naming evidence and any clock skew.
     commands: [active-directory/ad-enumeration#identify-domain-and-dc, active-directory/ad-enumeration#tls-certificate-identity]
     options:
-      - { label: No credentials yet - try anonymous enumeration, next: anonymous }
-      - { label: Supplied or recovered credentials - enumerate services, next: services }
-      - { label: Host session already available, next: host-enum }
+      - { label: "No credentials yet - try anonymous enumeration", next: anonymous }
+      - { label: "Supplied or recovered credentials - enumerate services", next: services }
+      - { label: "Host session already available", next: host-enum }
   anonymous:
     phase: Enumerate
     prompt: Enumerate what anonymous, null and guest access actually permit.
@@ -46,9 +46,9 @@ nodes:
     commands: [active-directory/ad-enumeration#enumerate-accounts-without-credentials, active-directory/smb-enumeration#smb-login-and-share-access, services/common-services#sysvol, services/network-services#dns-zone-transfer]
     links: [services/common-services#smb, services/common-services#sysvol]
     options:
-      - { label: Usernames or password hints found, next: credential-attacks }
-      - { label: Credential, hash or useful file recovered, next: reuse }
-      - { label: Anonymous checks complete - review services, next: services }
+      - { label: "Usernames or password hints found", next: credential-attacks }
+      - { label: "Credential, hash or useful file recovered", next: reuse }
+      - { label: "Anonymous checks complete - review services", next: services }
   services:
     phase: Enumerate
     prompt: Enumerate confirmed services with the access you actually have.
@@ -105,12 +105,12 @@ nodes:
         commands: [services/remote-access#rdp]
     links: [active-directory/credential-access#domain-or-local-login, active-directory/credential-access#reuse-one-known-credential]
     options:
-      - { label: Usernames or password hints - choose an authentication attack, next: credential-attacks }
-      - { label: Credential, hash, certificate or file recovered, next: reuse }
-      - { label: Valid domain account - collect and review graph paths, next: graph }
-      - { label: WinRM or RDP access confirmed, next: access }
-      - { label: Existing host session - perform manual host enumeration, next: host-enum }
-      - { label: A concrete domain or host lead is available, next: leads }
+      - { label: "Usernames or password hints - choose an authentication attack", next: credential-attacks }
+      - { label: "Credential, hash, certificate or file recovered", next: reuse }
+      - { label: "Valid domain account - collect and review graph paths", next: graph }
+      - { label: "WinRM or RDP access confirmed", next: access }
+      - { label: "Existing host session - perform manual host enumeration", next: host-enum }
+      - { label: "A concrete domain or host lead is available", next: leads }
   credential-attacks:
     phase: Initial access
     prompt: Choose the attack supported by the collected account evidence.
@@ -119,11 +119,11 @@ nodes:
     lookFor: A reviewed user list, one candidate password, preauthentication-disabled accounts, eligible SPN accounts or a controlled authentication trigger.
     record: Record the source of users and candidate passwords, the account targeted, hash marker and recovered credential.
     options:
-      - { label: One candidate password and a user list - spray safely, next: spray }
-      - { label: Known usernames - check AS-REP roasting, next: asrep }
-      - { label: Valid domain credentials - check Kerberoasting, next: kerberoast }
-      - { label: Controlled MSSQL, RPC or web authentication trigger, next: coerce }
-      - { label: Return to service evidence, next: services }
+      - { label: "One candidate password and a user list - spray safely", next: spray }
+      - { label: "Known usernames - check AS-REP roasting", next: asrep }
+      - { label: "Valid domain credentials - check Kerberoasting", next: kerberoast }
+      - { label: "Controlled MSSQL, RPC or web authentication trigger", next: coerce }
+      - { label: "Return to service evidence", next: services }
   spray:
     phase: Initial access
     prompt: Spray one candidate password only after checking lockout policy.
@@ -133,8 +133,8 @@ nodes:
     record: Save the candidate source, target service, successful account and any lockout observations.
     commands: [active-directory/ad-enumeration#password-policy-and-kerberos-controls, active-directory/credential-access#password-spraying, active-directory/credential-access#kerberos-password-spraying]
     options:
-      - { label: Valid credential recovered - verify reuse, next: reuse }
-      - { label: No access - return to enumeration, next: services }
+      - { label: "Valid credential recovered - verify reuse", next: reuse }
+      - { label: "No access - return to enumeration", next: services }
   asrep:
     phase: Initial access
     prompt: Check AS-REP roasting against known usernames.
@@ -145,8 +145,8 @@ nodes:
     commands: [active-directory/kerberos#as-rep-roasting]
     links: [active-directory/kerberos#kerberos-hash-modes, active-directory/kerberos#kerberos-dns-or-clock-failure]
     options:
-      - { label: Password recovered - verify access, next: reuse }
-      - { label: No eligible or crackable account, next: credential-attacks }
+      - { label: "Password recovered - verify access", next: reuse }
+      - { label: "No eligible or crackable account", next: credential-attacks }
   kerberoast:
     phase: Initial access
     prompt: Request service tickets with valid domain credentials.
@@ -157,8 +157,8 @@ nodes:
     commands: [active-directory/kerberos#kerberoasting]
     links: [active-directory/kerberos#kerberos-hash-modes, active-directory/kerberos#kerberos-dns-or-clock-failure]
     options:
-      - { label: Service account password recovered, next: reuse }
-      - { label: No useful ticket or crack, next: credential-attacks }
+      - { label: "Service account password recovered", next: reuse }
+      - { label: "No useful ticket or crack", next: credential-attacks }
   coerce:
     phase: Initial access
     prompt: Capture a controlled authentication attempt.
@@ -169,8 +169,8 @@ nodes:
     commands: [active-directory/attack-paths#capture-coerced-authentication, services/databases#mssql-unc-authentication, active-directory/credential-access#crack-a-captured-netntlmv2-response]
     links: [active-directory/attack-paths#smb-signing-prerequisites, active-directory/attack-paths#ldap-signing-and-channel-binding]
     options:
-      - { label: Credential recovered - verify it, next: reuse }
-      - { label: No useful capture - return to services, next: services }
+      - { label: "Credential recovered - verify it", next: reuse }
+      - { label: "No useful capture - return to services", next: services }
   graph:
     phase: Post-exploitation
     prompt: Collect directory relationships and verify a concrete path.
@@ -180,11 +180,11 @@ nodes:
     record: Save collection output, controlled principal, target object, exact permission and any collection gaps.
     commands: [active-directory/ad-enumeration#bloodhound-ce-collection, active-directory/ad-enumeration#enumerate-accounts-with-credentials]
     options:
-      - { label: ACL or object-control path, next: path }
-      - { label: AD CS or certificate path, next: certificates }
-      - { label: Delegation or computer-control path, next: delegate }
-      - { label: DCSync, LAPS or dumping rights, next: dump }
-      - { label: No verified path - return to services, next: services }
+      - { label: "ACL or object-control path", next: path }
+      - { label: "AD CS or certificate path", next: certificates }
+      - { label: "Delegation or computer-control path", next: delegate }
+      - { label: "DCSync, LAPS or dumping rights", next: dump }
+      - { label: "No verified path - return to services", next: services }
   access:
     phase: Initial access
     prompt: Open and verify the supported remote-access session.
@@ -194,8 +194,8 @@ nodes:
     record: Save the working command, identity and hostname. Capture required proof before changing target.
     commands: [services/remote-access#winrm-checks-and-shell, services/remote-access#winrm-hash-and-certificate-authentication, services/remote-access#rdp]
     options:
-      - { label: Host session working - enumerate manually, next: host-enum }
-      - { label: Access failed - return to service evidence, next: services }
+      - { label: "Host session working - enumerate manually", next: host-enum }
+      - { label: "Access failed - return to service evidence", next: services }
   host-enum:
     phase: Privilege escalation
     prompt: Enumerate the host manually before reaching for automation.
@@ -206,11 +206,11 @@ nodes:
     commands: [windows/windows-privesc#situational-awareness, windows/windows-privesc#token-privileges, windows/windows-privesc#privilege-escalation-decision, windows/credential-harvesting#first-pass-credential-hunt, windows/credential-harvesting#common-locations, windows/credential-harvesting#powershell-history-and-transcripts, windows/credential-harvesting#autologon-registry-credentials, windows/windows-privesc#service-paths-and-accounts, windows/windows-privesc#scheduled-tasks]
     links: [windows/windows-privesc#privileged-group-and-host-specific-leads, shells/shells#upgrading-a-shell]
     options:
-      - { label: Concrete local privilege or privileged-group lead, next: privesc }
-      - { label: Credential or admin access recovered, next: dump }
-      - { label: Domain object rights found - review graph, next: graph }
-      - { label: No leads remain - optionally run one WinPEAS sweep, next: winpeas }
-      - { label: Objective completed - capture proof, next: proof }
+      - { label: "Concrete local privilege or privileged-group lead", next: privesc }
+      - { label: "Credential or admin access recovered", next: dump }
+      - { label: "Domain object rights found - review graph", next: graph }
+      - { label: "No leads remain - optionally run one WinPEAS sweep", next: winpeas }
+      - { label: "Objective completed - capture proof", next: proof }
   winpeas:
     phase: Privilege escalation
     prompt: 'Optional: run one automated sweep when manual leads are exhausted.'
@@ -221,9 +221,9 @@ nodes:
     commands: [windows/windows-privesc#host-winpeas-on-kali, windows/windows-privesc#download-winpeas-in-powershell, windows/windows-privesc#run-winpeas]
     links: [shells/file-transfers#verify-a-transferred-file, windows/windows-privesc#automated-enumeration]
     options:
-      - { label: A verified local privilege lead, next: privesc }
-      - { label: Credential or admin access recovered, next: dump }
-      - { label: No new evidence - return to manual enumeration, next: host-enum }
+      - { label: "A verified local privilege lead", next: privesc }
+      - { label: "Credential or admin access recovered", next: dump }
+      - { label: "No new evidence - return to manual enumeration", next: host-enum }
   privesc:
     phase: Privilege escalation
     prompt: Validate the exact host-specific privilege path.
@@ -234,9 +234,9 @@ nodes:
     commands: [windows/windows-privesc#server-operators-service-control, windows/windows-privesc#dnsadmins-plugin-dll, windows/windows-privesc#backup-operators-registry-and-ifm, windows/windows-privesc#impersonation-escalation, windows/windows-privesc#printspoofer, windows/windows-privesc#godpotato, windows/windows-privesc#sigmapotato, windows/windows-privesc#service-paths-and-accounts, windows/windows-privesc#file-and-directory-acls, windows/windows-privesc#scheduled-tasks]
     links: [windows/windows-privesc#privileged-group-and-host-specific-leads, windows/windows-privesc#create-a-local-administrator]
     options:
-      - { label: Admin or SYSTEM obtained - collect credentials, next: dump }
-      - { label: Objective completed - capture proof, next: proof }
-      - { label: Path failed - return to host evidence, next: host-enum }
+      - { label: "Admin or SYSTEM obtained - collect credentials", next: dump }
+      - { label: "Objective completed - capture proof", next: proof }
+      - { label: "Path failed - return to host evidence", next: host-enum }
   path:
     phase: Post-exploitation
     prompt: Convert verified object control into the intended access.
@@ -247,11 +247,11 @@ nodes:
     commands: [active-directory/attack-paths#acl-abuse-operations, active-directory/attack-paths#shadow-credentials-with-certipy]
     links: [active-directory/attack-paths#acl-abuse, active-directory/attack-paths#gpo-permissions]
     options:
-      - { label: Certificate or shadow-credential path, next: certificates }
-      - { label: Computer control or delegation path, next: delegate }
-      - { label: DCSync or privileged credential obtained, next: dump }
-      - { label: Credential changed or recovered - verify reuse, next: reuse }
-      - { label: Return to other leads, next: leads }
+      - { label: "Certificate or shadow-credential path", next: certificates }
+      - { label: "Computer control or delegation path", next: delegate }
+      - { label: "DCSync or privileged credential obtained", next: dump }
+      - { label: "Credential changed or recovered - verify reuse", next: reuse }
+      - { label: "Return to other leads", next: leads }
   delegate:
     phase: Post-exploitation
     prompt: Validate the delegation type and required computer control.
@@ -262,9 +262,9 @@ nodes:
     commands: [active-directory/attack-paths#resource-based-constrained-delegation]
     links: [active-directory/attack-paths#delegation-prerequisites]
     options:
-      - { label: Delegation produced a usable credential or ticket, next: reuse }
-      - { label: Prerequisites incomplete - review object control, next: path }
-      - { label: Return to other leads, next: leads }
+      - { label: "Delegation produced a usable credential or ticket", next: reuse }
+      - { label: "Prerequisites incomplete - review object control", next: path }
+      - { label: "Return to other leads", next: leads }
   certificates:
     phase: Post-exploitation
     prompt: Enumerate AD CS and select a supported certificate path.
@@ -275,10 +275,10 @@ nodes:
     commands: [active-directory/attack-paths#enumerate-ad-cs-with-certipy, active-directory/attack-paths#esc4-template-modification, active-directory/attack-paths#esc7-ca-management, active-directory/attack-paths#esc8-relay-conditions]
     links: [active-directory/attack-paths#ad-cs-enrollment-prerequisites, active-directory/attack-paths#certificate-strong-mapping-after-2025]
     options:
-      - { label: ESC1 conditions confirmed - request and authenticate, next: certificate-request }
-      - { label: Shadow-credentials write path, next: path }
-      - { label: CA, template or relay conditions need review, next: leads }
-      - { label: Certificate credential already available - verify reuse, next: reuse }
+      - { label: "ESC1 conditions confirmed - request and authenticate", next: certificate-request }
+      - { label: "Shadow-credentials write path", next: path }
+      - { label: "CA, template or relay conditions need review", next: leads }
+      - { label: "Certificate credential already available - verify reuse", next: reuse }
   certificate-request:
     phase: Post-exploitation
     prompt: Request the authorized certificate and verify authentication.
@@ -289,9 +289,9 @@ nodes:
     commands: [active-directory/attack-paths#request-and-use-an-esc1-certificate]
     links: [active-directory/attack-paths#ad-cs-enrollment-prerequisites, active-directory/attack-paths#certificate-strong-mapping-after-2025, active-directory/attack-paths#certificate-schannel-fallback]
     options:
-      - { label: Certificate authentication succeeded, next: reuse }
-      - { label: Privileged certificate identity obtained, next: dump }
-      - { label: Authentication failed - review AD CS evidence, next: certificates }
+      - { label: "Certificate authentication succeeded", next: reuse }
+      - { label: "Privileged certificate identity obtained", next: dump }
+      - { label: "Authentication failed - review AD CS evidence", next: certificates }
   dump:
     phase: Post-exploitation
     prompt: Collect credentials only with the required privilege or directory right.
@@ -302,9 +302,9 @@ nodes:
     commands: [active-directory/credential-dumping#secretsdump-cheat-sheet, active-directory/credential-dumping#ntds-and-backup-collection, active-directory/credential-dumping#dcsync-through-the-domain-controller, active-directory/credential-dumping#mimikatz-logon-passwords, active-directory/credential-dumping#secretsdump-from-hives, active-directory/credential-dumping#crack-cached-logons, active-directory/credential-dumping#read-laps-passwords]
     links: [active-directory/credential-dumping#crack-a-protected-archive, windows/credential-harvesting#application-data-files]
     options:
-      - { label: Credential or hash recovered - validate reuse, next: reuse }
-      - { label: Collection complete - follow another lead, next: leads }
-      - { label: Objective completed - capture proof, next: proof }
+      - { label: "Credential or hash recovered - validate reuse", next: reuse }
+      - { label: "Collection complete - follow another lead", next: leads }
+      - { label: "Objective completed - capture proof", next: proof }
   reuse:
     phase: Initial access
     prompt: Validate the recovered credential with its actual authority.
@@ -315,11 +315,11 @@ nodes:
     commands: [active-directory/credential-access#domain-or-local-login, active-directory/credential-access#remote-execution, active-directory/credential-access#kerberos-authentication, active-directory/credential-access#pass-the-hash, services/remote-access#winrm-hash-and-certificate-authentication]
     links: [active-directory/credential-access#reuse-one-known-credential]
     options:
-      - { label: WinRM or RDP access confirmed, next: access }
-      - { label: Existing host session - enumerate it, next: host-enum }
-      - { label: Valid domain account - review graph paths, next: graph }
-      - { label: Admin, DCSync or LAPS rights confirmed, next: dump }
-      - { label: Reuse checked - review other leads, next: leads }
+      - { label: "WinRM or RDP access confirmed", next: access }
+      - { label: "Existing host session - enumerate it", next: host-enum }
+      - { label: "Valid domain account - review graph paths", next: graph }
+      - { label: "Admin, DCSync or LAPS rights confirmed", next: dump }
+      - { label: "Reuse checked - review other leads", next: leads }
   leads:
     phase: Post-exploitation
     prompt: Choose the next step supported by recorded evidence.
@@ -328,16 +328,16 @@ nodes:
     lookFor: Untested service, credential, hash, certificate, ACL, delegation, host privilege, internal route or missing proof.
     record: Write the evidence supporting the next branch, what failed, and the next specific check before switching targets.
     options:
-      - { label: Authentication attack evidence, next: credential-attacks }
-      - { label: Authenticated directory or graph review, next: graph }
-      - { label: Host session or local evidence, next: host-enum }
-      - { label: ACL or object-control path, next: path }
-      - { label: AD CS or certificate path, next: certificates }
-      - { label: Delegation path, next: delegate }
-      - { label: Privileged credential collection, next: dump }
-      - { label: New credential or hash, next: reuse }
-      - { label: Internal segment not routable, next: pivot }
-      - { label: Objective completed - capture proof, next: proof }
+      - { label: "Authentication attack evidence", next: credential-attacks }
+      - { label: "Authenticated directory or graph review", next: graph }
+      - { label: "Host session or local evidence", next: host-enum }
+      - { label: "ACL or object-control path", next: path }
+      - { label: "AD CS or certificate path", next: certificates }
+      - { label: "Delegation path", next: delegate }
+      - { label: "Privileged credential collection", next: dump }
+      - { label: "New credential or hash", next: reuse }
+      - { label: "Internal segment not routable", next: pivot }
+      - { label: "Objective completed - capture proof", next: proof }
   pivot:
     phase: Proof and pivot
     prompt: Reach and enumerate the newly accessible internal segment.
@@ -347,8 +347,8 @@ nodes:
     record: Save tunnel commands, interfaces, routes and internal addresses. Test application reachability before trusting scan results.
     commands: [pivoting/tunnelling#static-route, pivoting/tunnelling#ligolo-ng-tunnel, pivoting/tunnelling#chisel-reverse-socks, pivoting/tunnelling#scan-through-a-tunnel]
     options:
-      - { label: Internal host service map established, next: services }
-      - { label: Return to current leads, next: leads }
+      - { label: "Internal host service map established", next: services }
+      - { label: "Return to current leads", next: leads }
   proof:
     phase: Proof and pivot
     prompt: Capture proof and preserve a reproducible path.
@@ -358,5 +358,5 @@ nodes:
     record: Store screenshots and output in the exam evidence workflow. Record failures and the next specific check before switching targets.
     links: [reporting/report#evidence]
     options:
-      - { label: Evidence saved - review remaining leads, next: leads }
-      - { label: Another internal segment found, next: pivot }
+      - { label: "Evidence saved - review remaining leads", next: leads }
+      - { label: "Another internal segment found", next: pivot }

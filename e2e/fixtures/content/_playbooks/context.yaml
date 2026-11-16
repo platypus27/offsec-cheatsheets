@@ -1,0 +1,7 @@
+title: Ticket context
+start: access
+nodes:
+  access:
+    phase: Access
+    prompt: Verify a ticket
+    commands: [workflow/context#ticket-access]

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { ArrowLeft, ArrowRight, ChevronRight, Crosshair, RotateCcw, ScanSearch } from 'lucide-react'
 import { Badge, Button, TextArea } from '@kryv/teal'
 import { Link, useParams, useSearchParams } from 'react-router'
@@ -71,6 +71,17 @@ export function PlaybookPage({ content, tools }: { content: Content; tools: Tool
   const requestedPath = raw ? raw.split('.') : stored?.path
   const path = playbook ? walk(playbook, requestedPath ?? []) : []
   const pathKey = path.join('.')
+  const promptRef = useRef<HTMLHeadingElement>(null)
+  const stepKey = `${sessionKey}:${pathKey}`
+  const previousStep = useRef(stepKey)
+
+  useEffect(() => {
+    if (previousStep.current !== stepKey) {
+      promptRef.current?.focus({ preventScroll: true })
+      promptRef.current?.scrollIntoView({ block: 'start', behavior: 'instant' })
+    }
+    previousStep.current = stepKey
+  }, [stepKey])
 
   useEffect(() => {
     if (playbook && !raw) setParams({ path: pathKey }, { replace: true })
@@ -185,12 +196,45 @@ export function PlaybookPage({ content, tools }: { content: Content; tools: Tool
           <p className="text-xs font-bold uppercase tracking-widest text-teal-primary">Current step</p>
           {completed.includes(node.id) ? <Badge variant="success">Previously completed</Badge> : null}
         </div>
-        <h2 id="step-prompt" className="mt-2 font-teal-headline text-2xl font-bold tracking-tight">
+        <h2
+          id="step-prompt"
+          ref={promptRef}
+          tabIndex={-1}
+          className="mt-2 scroll-mt-24 font-teal-headline text-2xl font-bold tracking-tight outline-none"
+        >
           {node.prompt}
         </h2>
         {node.body ? (
           <p className="mt-3 whitespace-pre-line leading-7 text-teal-on-surface">{node.body}</p>
         ) : null}
+
+        <nav
+          aria-label="Step shortcuts"
+          className="sticky top-16 z-10 mt-4 flex flex-wrap gap-2 rounded-xl border border-teal-outline-variant/40 bg-teal-surface px-3 py-2"
+        >
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              const field = document.getElementById('step-findings')
+              field?.focus({ preventScroll: true })
+              field?.scrollIntoView({ block: 'start', behavior: 'instant' })
+            }}
+          >
+            Jump to findings
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              const outcomes = document.getElementById('step-outcomes')
+              outcomes?.focus({ preventScroll: true })
+              outcomes?.scrollIntoView({ block: 'start', behavior: 'instant' })
+            }}
+          >
+            Choose outcome
+          </Button>
+        </nav>
 
         {node.why || node.lookFor || node.record ? (
           <div className="mt-5 grid gap-2 rounded-xl bg-teal-surface-container-low p-3">
@@ -231,6 +275,7 @@ export function PlaybookPage({ content, tools }: { content: Content; tools: Tool
         ) : null}
 
         <TextArea
+          id="step-findings"
           label="Findings and evidence"
           value={findings}
           onChange={(event) =>
@@ -240,11 +285,11 @@ export function PlaybookPage({ content, tools }: { content: Content; tools: Tool
             }))
           }
           placeholder="Record useful output, credentials, hostnames, errors, or the next concrete lead."
-          className="mt-6 min-h-24 font-mono text-xs"
+          className="mt-6 min-h-24 scroll-mt-36 font-mono text-xs"
         />
 
         {node.options.length > 0 ? (
-          <div className="mt-6 grid gap-2">
+          <div id="step-outcomes" tabIndex={-1} className="mt-6 grid scroll-mt-36 gap-2 outline-none">
             <p className="text-xs font-bold uppercase tracking-wider text-teal-on-surface-variant">
               Choose the outcome
             </p>

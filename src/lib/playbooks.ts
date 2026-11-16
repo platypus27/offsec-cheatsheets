@@ -132,6 +132,11 @@ export function parsePlaybook(id: string, source: string): { playbook?: Playbook
     ;(Array.isArray(node.options) ? node.options : []).forEach((rawOption, index) => {
       const option = asRecord(rawOption)
       const where = `Node ${nodeId}, option ${index + 1}`
+      for (const key of Object.keys(option)) {
+        if (key !== 'label' && key !== 'next') {
+          errors.push(`${where}: unknown field "${key}"; quote labels containing commas`)
+        }
+      }
       const label = text(option.label)
       const next = text(option.next)
       if (!label) return errors.push(`${where}: needs a label`)

@@ -3,6 +3,7 @@ import { Badge } from '@kryv/teal'
 import { Key } from '../components/Key'
 import { Link } from 'react-router'
 import { companionKey } from '../lib/companions'
+import { walk } from '../lib/playbooks'
 import type { Content, Page } from '../lib/content'
 import { pageHref } from '../lib/links'
 import { useAppState } from '../state'
@@ -35,6 +36,13 @@ export function HomePage({ content, tools }: { content: Content; tools: Tools })
   const setupItems = tools.setup.flatMap((section) => section.items)
   const setupDone = setupItems.filter((item) => checks[`setup:${item.id}`]).length
   const boxLabel = variables.RHOST || 'No IP address set'
+  const resumable = tools.playbooks.flatMap((playbook) => {
+    const session =
+      companionSessions.items[companionKey(playbook.id, defaultProfile.id, variables.RHOST?.trim() ?? '')]
+    if (!session || (session.path.length < 2 && session.completed.length === 0)) return []
+    const path = walk(playbook, session.path)
+    return [{ playbook, prompt: playbook.nodes[path[path.length - 1]!]!.prompt }]
+  })
 
   return (
     <main
@@ -53,7 +61,32 @@ export function HomePage({ content, tools }: { content: Content; tools: Tools })
         utilities stay close without getting in the way.
       </p>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2">
+      <div className="mt-6 flex flex-wrap items-center gap-3 rounded-xl border border-teal-outline-variant/40 px-4 py-3">
+        <Crosshair aria-hidden="true" className="size-4 text-teal-primary" />
+        <span className="text-sm font-semibold">{defaultProfile.name}</span>
+        <span className="min-w-0 flex-1 truncate text-sm text-teal-on-surface-variant">{boxLabel}</span>
+        <span className="text-xs font-semibold text-teal-primary">Press v to edit</span>
+      </div>
+      {resumable.length > 0 ? (
+        <section aria-label="Resume current target" className="mt-4 grid gap-3">
+          {resumable.map(({ playbook, prompt }) => (
+            <Link
+              key={playbook.id}
+              to={`/companions/${playbook.id}`}
+              className="card-link border-teal-primary/50"
+            >
+              <History aria-hidden="true" className="size-5 shrink-0 text-teal-primary" />
+              <span className="min-w-0 flex-1">
+                <span className="block font-semibold">Resume {playbook.title}</span>
+                <span className="mt-1 block text-sm text-teal-on-surface-variant">{prompt}</span>
+              </span>
+              <ArrowRight aria-hidden="true" className="size-4 shrink-0" />
+            </Link>
+          ))}
+        </section>
+      ) : null}
+
+      <div className="mt-6 grid gap-4 sm:grid-cols-2">
         <Link to="/setup" className="card-link group p-5">
           <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-teal-primary/10 text-teal-primary">
             <Wrench aria-hidden="true" className="size-5" />
@@ -88,13 +121,6 @@ export function HomePage({ content, tools }: { content: Content; tools: Tools })
           </span>
           <ArrowRight aria-hidden="true" className="size-4 shrink-0 text-teal-primary" />
         </Link>
-      </div>
-
-      <div className="mt-4 flex flex-wrap items-center gap-3 rounded-xl border border-teal-outline-variant/40 px-4 py-3">
-        <Crosshair aria-hidden="true" className="size-4 text-teal-primary" />
-        <span className="text-sm font-semibold">{defaultProfile.name}</span>
-        <span className="min-w-0 flex-1 truncate text-sm text-teal-on-surface-variant">{boxLabel}</span>
-        <span className="text-xs font-semibold text-teal-primary">Press v to edit</span>
       </div>
 
       <section aria-labelledby="companion-list" className="mt-10">

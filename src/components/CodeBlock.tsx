@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Check, Copy } from 'lucide-react'
-import { IconButton, toast } from '@kryv/teal'
+import { IconButton, Input, toast } from '@kryv/teal'
 import { fillVariables, highlightMasked, resolveLanguage } from '../lib/highlight'
-import { substitute } from '../lib/variables'
+import { findPlaceholders, resolveVariable, substitute } from '../lib/variables'
 import { useAppState } from '../state'
 
 interface CodeBlockProps {
@@ -20,10 +20,14 @@ const trimNewlines = (code: string) => code.replace(/^\n+|\n+$/g, '')
  * and says so loudly when a copy fails.
  */
 export function CodeBlock({ code, language, accessibleLabel }: CodeBlockProps) {
-  const { variables } = useAppState()
+  const { variables, setVariable, defaultProfile } = useAppState()
   const [copied, setCopied] = useState(false)
   const timer = useRef<number | undefined>(undefined)
   const source = trimNewlines(code)
+  const names = findPlaceholders(source)
+  const basic = new Set(['RHOST', 'DOMAIN', 'USER', 'PASS', 'DC', 'LHOST'])
+  const advanced = names.filter((name) => !basic.has(name))
+  const missing = names.filter((name) => resolveVariable(variables, name) === undefined)
   const label = language || 'text'
   const highlighted = useMemo(() => highlightMasked(source, language), [source, language])
   const html = useMemo(() => fillVariables(highlighted, variables), [highlighted, variables])
@@ -52,6 +56,35 @@ export function CodeBlock({ code, language, accessibleLabel }: CodeBlockProps) {
           {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
         </IconButton>
       </div>
+      {advanced.length > 0 ? (
+        <details className="border-b border-teal-outline-variant/30 px-4 py-2 text-sm">
+          <summary className="cursor-pointer font-semibold text-teal-primary">
+            Command values{missing.length > 0 ? ` (${missing.length} unfilled)` : ''}
+          </summary>
+          <p className="mt-2 text-xs text-teal-on-surface-variant">
+            Saved with {defaultProfile.name}. Basic addresses and credentials come from Machine variables.
+            Values substitute literally; preserve the command's shell quoting.
+          </p>
+          <div className="my-3 grid gap-3 sm:grid-cols-2">
+            {advanced.map((name) => (
+              <Input
+                key={name}
+                label={name}
+                value={variables[name] ?? ''}
+                onChange={(event) => setVariable(name, event.target.value)}
+                autoComplete="off"
+                spellCheck={false}
+                className="font-mono"
+              />
+            ))}
+          </div>
+        </details>
+      ) : null}
+      {missing.length > 0 ? (
+        <p className="px-4 pt-2 text-xs text-teal-warning">
+          Unfilled: {missing.join(', ')}. Replace these values before running the copied command.
+        </p>
+      ) : null}
       <pre
         role="region"
         aria-label={accessibleLabel || `${label} code`}

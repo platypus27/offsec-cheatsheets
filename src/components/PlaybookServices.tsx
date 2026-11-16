@@ -52,11 +52,17 @@ export function PlaybookServices({
             aria-label={service.title}
             className="min-w-0 rounded-xl border border-teal-outline-variant/40 bg-teal-surface-container-low p-4"
           >
-            <h3 className="font-teal-headline text-xl font-bold">{service.title}</h3>
-            {service.body ? (
-              <p className="mt-2 whitespace-pre-line text-sm text-teal-on-surface-variant">{service.body}</p>
-            ) : null}
-            <PlaybookCommands refs={service.commands} content={content} headingLevel={4} />
+            <details open>
+              <summary className="cursor-pointer font-teal-headline text-xl font-bold">
+                {service.title}
+              </summary>
+              {service.body ? (
+                <p className="mt-2 whitespace-pre-line text-sm text-teal-on-surface-variant">
+                  {service.body}
+                </p>
+              ) : null}
+              <PlaybookCommands refs={service.commands} content={content} headingLevel={4} />
+            </details>
           </section>
         ))}
       </div>

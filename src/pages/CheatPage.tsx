@@ -209,6 +209,28 @@ export function CheatPage({ content }: { content: Content }) {
             </Button>
           </div>
         </header>
+        {page.headings.length > 1 ? (
+          <details className="mb-6 rounded-xl border border-teal-outline-variant/40 bg-teal-surface-container-low p-3 xl:hidden">
+            <summary className="cursor-pointer text-sm font-semibold text-teal-primary">
+              Jump to section
+            </summary>
+            <nav aria-label="Page sections" className="mt-3 grid gap-1">
+              {page.headings.map((item) => (
+                <Link
+                  key={item.id}
+                  to={pageHref(page.slug, item.id)}
+                  replace
+                  className="rounded-lg px-2 py-2 text-sm text-teal-on-surface-variant hover:text-teal-primary"
+                  onClick={(event) => {
+                    event.currentTarget.closest('details')!.open = false
+                  }}
+                >
+                  {item.text}
+                </Link>
+              ))}
+            </nav>
+          </details>
+        ) : null}
         <Markdown page={page} content={content} />
         <PrevNext prev={prev} next={next} />
       </main>

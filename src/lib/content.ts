@@ -28,6 +28,8 @@ export interface Chunk {
   text: string
   code: string
   blocks: FencedCommand[]
+  markdown: string
+  lineOffset: number
 }
 
 /** A Markdown task-list item. `line` ties the rendered checkbox back to it. */
@@ -113,6 +115,9 @@ interface ChunkDraft {
   text: string[]
   code: string[]
   blocks: FencedCommand[]
+  startOffset?: number
+  endOffset?: number
+  startLine?: number
 }
 
 function collect(node: RootContent, draft: ChunkDraft) {
@@ -206,6 +211,9 @@ export function parsePage(path: string, raw: string): Page {
       }
     }
     collect(node, current)
+    current.startOffset ??= node.position?.start.offset
+    current.startLine ??= node.position?.start.line
+    current.endOffset = node.position?.end.offset
   }
   drafts.push(current)
 
@@ -221,6 +229,8 @@ export function parsePage(path: string, raw: string): Page {
       text: draft.text.join('\n'),
       code: draft.code.join('\n'),
       blocks: draft.blocks,
+      markdown: body.slice(draft.startOffset ?? 0, draft.endOffset ?? 0),
+      lineOffset: (draft.startLine ?? 1) - 1,
     }))
 
   return {
