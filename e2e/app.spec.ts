@@ -44,7 +44,7 @@ async function stubClipboard(page: Page, mode: 'resolve' | 'reject') {
 test('home identifies OSCP and the sidebar navigates', async ({ page }) => {
   await page.goto('./')
   await expect(page).toHaveTitle('OSCP Cheatsheet | OffSec')
-  await expect(page.getByRole('heading', { level: 1, name: 'OSCP Cheatsheet' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: 'Your OSCP field workspace' })).toBeVisible()
   await expect(page.getByRole('banner')).toContainText('OSCP')
   if (isMobile(page)) {
     await page.setViewportSize({ width: 320, height: 780 })
@@ -54,6 +54,7 @@ test('home identifies OSCP and the sidebar navigates', async ({ page }) => {
   }
   if (isMobile(page)) await page.getByRole('button', { name: 'Open navigation' }).click()
   const nav = page.getByRole('navigation', { name: 'Cheatsheet sections' })
+  await nav.getByText('Beta Section', { exact: true }).click()
   await nav.getByRole('link', { name: 'Second Page' }).click()
   await expect(page).toHaveURL(/#\/beta\/second$/)
   await expect(page.getByRole('heading', { level: 1, name: 'Second Page' })).toBeVisible()
@@ -148,9 +149,9 @@ test('variables fill commands and copy the filled-in text', async ({ page, brows
   await page.goto('./#/alpha/first')
 
   await page.getByRole('button', { name: /^Edit variables/ }).click()
-  await page.getByRole('textbox', { name: 'RHOST' }).fill('10.9.8.7')
+  await page.getByRole('textbox', { name: 'IP address' }).fill('10.9.8.7')
   await page.keyboard.press('Escape')
-  await expect(page.getByRole('dialog', { name: 'Target and variables' })).toBeHidden()
+  await expect(page.getByRole('dialog', { name: 'Machine variables' })).toBeHidden()
 
   const block = page.getByRole('region', { name: 'bash code' })
   await expect(block).toHaveText('connect --host 10.9.8.7 --port {{RPORT}}')
@@ -215,6 +216,9 @@ test('unknown routes show a not-found page', async ({ page }) => {
 
 for (const scheme of ['light', 'dark'] as const) {
   test(`has no accessibility violations (${scheme})`, async ({ page }) => {
+    // This journey runs five full Axe scans, including two dialogs. Keep their
+    // total budget separate from the default single-interaction test budget.
+    test.setTimeout(60_000)
     await page.emulateMedia({ colorScheme: scheme })
     for (const route of ['./', './#/alpha', './#/alpha/first']) {
       await page.goto(route)

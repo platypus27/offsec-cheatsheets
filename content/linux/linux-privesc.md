@@ -96,4 +96,7 @@ ls -la /home/*/.ssh/ 2>/dev/null
 cat ~/.bash_history
 ```
 
-A readable `id_rsa` grants SSH access; history and scripts often hold passwords or hashes. Check [web credentials](windows/credential-harvesting#common-locations) on dual-role hosts. [OpenSSH keys](https://www.openssh.com/txt.html).
+A readable private key is a lead. Confirm its passphrase, intended account,
+authorized server and logon policy before claiming SSH access. Check
+[Linux application credentials](linux/credential-hunting) on dual-role hosts.
+[OpenSSH key authentication](https://man.openbsd.org/ssh).

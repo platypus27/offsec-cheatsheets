@@ -6,41 +6,63 @@ There is no backend or runtime content fetch.
 
 ## Where to make changes
 
-| Change                                 | Start here                                                                                                | Existing checks                                               |
-| -------------------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| Notes and section order                | `content/`, `content/start/authoring.md`                                                                  | `src/content.check.test.ts`                                   |
-| Searchable headings and task keys      | `src/lib/content.ts`                                                                                      | `src/lib/content.test.ts`, `src/components/Markdown.test.tsx` |
-| Content file discovery                 | `src/content-source.ts`, `vite.config.ts`                                                                 | Content check and offline browser test                        |
-| Link resolution and heading URLs       | `src/lib/links.ts`, `src/lib/refs.ts`, `src/lib/linkcheck.ts`                                             | Link check and navigation browser journeys                    |
-| Port-to-note suggestions               | `src/lib/rules.ts`, `src/components/Suggestions.tsx`                                                      | `src/lib/rules.test.ts`                                       |
-| Playbook parsing and traversal         | `src/lib/playbooks.ts`, `src/pages/tools/PlaybooksPage.tsx`                                               | Playbook unit tests and browser journey                       |
-| Scan parsing and target merging        | `src/lib/nmap.ts`, `src/lib/targets.ts`                                                                   | Matching unit tests and scan-import browser journey           |
-| Variables and command display/copy     | `src/lib/variables.ts`, `src/lib/highlight.ts`, `src/components/CodeBlock.tsx`                            | Variable and code-block tests, copy browser journey           |
-| Personal state and persistence         | `src/state.tsx`, `src/lib/storage.ts`                                                                     | Storage tests and persistence browser journeys                |
-| Target list, details and variable form | `src/pages/tools/TargetsPage.tsx`, `src/pages/tools/TargetPage.tsx`, `src/components/TargetVariables.tsx` | Target browser journeys                                       |
-| App shell, routes and shortcuts        | `src/components/Layout.tsx`, `src/App.tsx`, `src/hooks.ts`                                                | Navigation, keyboard and accessibility browser journeys       |
+Command catalogue metadata lives in `content/_recipes.yaml`. `src/lib/recipes.ts`
+validates it against parsed real content; `src/pages/tools/CommandsPage.tsx` owns
+URL-backed filters and lazy command-group expansion. Catalogue entries reference
+the source heading and reuse `PlaybookCommands`; they do not contain command text.
+
+`src/lib/notebook.ts` owns the versioned lab-note format, target key and Markdown
+export. `src/pages/tools/NotebookPage.tsx` uses existing persistent storage and the
+working profile. It does not alter companion sessions or export other targets.
+
+| Change                                 | Start here                                                                      | Existing checks                                               |
+| -------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| Notes and section order                | `content/`, `CONTRIBUTING.md`                                                   | `src/content.check.test.ts`                                   |
+| Kali setup catalog and page            | `content/_setup.yaml`, `src/lib/setup.ts`, `src/pages/SetupPage.tsx`            | Setup unit and browser journeys                               |
+| Searchable headings and task keys      | `src/lib/content.ts`                                                            | `src/lib/content.test.ts`, `src/components/Markdown.test.tsx` |
+| Content file discovery                 | `src/content-source.ts`, `vite.config.ts`                                       | Content check and offline browser test                        |
+| Link resolution and heading URLs       | `src/lib/links.ts`, `src/lib/refs.ts`, `src/lib/linkcheck.ts`                   | Link check and navigation browser journeys                    |
+| Port-to-note suggestions               | `src/lib/rules.ts`, `src/components/Suggestions.tsx`                            | `src/lib/rules.test.ts`                                       |
+| Companion parsing and traversal        | `src/lib/playbooks.ts`, `src/pages/tools/PlaybooksPage.tsx`                     | Companion unit tests and browser journeys                     |
+| Companion sessions and recommendations | `src/lib/companions.ts`, `src/state.tsx`, `src/components/PlaybookServices.tsx` | Session unit tests and target-switching browser journeys      |
+| Scan parsing and profile port import   | `src/lib/nmap.ts`, `src/state.tsx`                                              | Matching unit tests and scan-import browser journey           |
+| Variables and command display/copy     | `src/lib/variables.ts`, `src/lib/highlight.ts`, `src/components/CodeBlock.tsx`  | Variable and code-block tests, copy browser journey           |
+| Personal state and persistence         | `src/state.tsx`, `src/lib/storage.ts`                                           | Storage tests and persistence browser journeys                |
+| Machine profile and variable form      | `src/components/VariablesPanel.tsx`, `src/components/ProfileVariables.tsx`      | Profile and accessibility browser journeys                    |
+| App shell, routes and shortcuts        | `src/components/Layout.tsx`, `src/App.tsx`, `src/hooks.ts`                      | Navigation, keyboard and accessibility browser journeys       |
 
 ## Keep responsibilities clear
 
 - `src/lib/guards.ts` holds runtime shape checks shared by parsed YAML and stored
   JSON. It does not import React, storage, or the DOM.
-- Parsing, reference checks, search, encoders and target transformations in
+- Parsing, reference checks, search, encoders and legacy migration helpers in
   `src/lib/` return data. Keep browser effects in `storage.ts`, hooks, or the UI.
 - `src/state.tsx` owns shared personal state and derives effective variables.
-  Editors such as `TargetVariables` receive values and an update callback instead
-  of looking up their parent record again.
-- `src/lib/profiles.ts` defines the variable-profile storage format and validates
-  restored data. Values, per-profile target bindings and the default selection
-  share one versioned `variable-profiles` storage entry. Old `variables` and
-  `active-target` entries seed Box 1 only when no valid profile entry exists;
-  they are retained as legacy data. Other profiles start empty.
+  `ProfileVariables` receives the current profile and an update callback.
+- `src/lib/profiles.ts` defines the version 3 profile format and validates restored
+  data. Per-profile variables, imported ports, the shared My IP value and the
+  default selection share one `variable-profiles` entry. Versions 1 and 2 migrate
+  forward; linked legacy target values and ports fold into their profiles. Old
+  `variables`, `active-target` and `targets` entries seed Box 1 only when no valid
+  profile entry exists and remain as untouched legacy data. DC01's IP address
+  supplies `DC` for every command.
 - `src/content-source.ts` is the build-time file adapter. `buildContent` and
   `buildTools` accept source strings, so their logic can be exercised without Vite.
-- Playbook `commands` and service commands reference note headings. The content
+- Companion `commands` and service commands reference note headings. The content
   parser retains each fenced block's language; `PlaybookCommands` resolves those
   blocks and reuses `CodeBlock` for display and copy. `PlaybookServices` uses the
-  shared check state, scoped by playbook, default profile and effective host.
-  Playbook validation rejects missing headings and headings without commands.
+  shared check state, scoped by companion, default profile and effective host.
+  Service matchers only recommend confirmed open ports. Companion validation
+  rejects missing phases, broken references and headings without commands.
+- `src/lib/companions.ts` validates the versioned `companion-sessions` entry.
+  Paths, completed nodes and findings are keyed by companion, profile and host;
+  an explicit URL path remains bookmarkable and browser history stays authoritative.
+- `PlaybookCommands` renders page-level context once per source page in a command
+  list, followed by each heading excerpt. Excerpt source-line offsets preserve
+  the original checklist identities. Code blocks use the working profile's
+  advanced values for both display and copy.
+- Notebook entries use `[profileId, trimmedAddress]` keys in the new version 1
+  `lab-notebook` entry. The existing profile/companion storage formats are unchanged.
 
 ## Invariants to preserve
 
@@ -53,15 +75,16 @@ There is no backend or runtime content fetch.
 - **Saved progress:** task keys include page slug, label and occurrence. Renaming
   those changes the saved identity. Preserve storage namespace and keys unless a
   migration is supplied.
-- **Variable precedence:** the default profile supplies values; its selected target's
-  address supplies `RHOST`, and target variables override profile values. Editing
-  another profile does not change the default. Display and copy must resolve values consistently. Substitution
-  is plain text, so it does not provide shell quoting or escaping.
+- **Variable precedence:** the shared LHOST value applies to every profile;
+  the default profile supplies its own values, and DC01's IP address supplies DC.
+  Editing another profile does not change the default. Display and copy resolve
+  values consistently. Substitution is plain text, not shell quoting or escaping.
 - **Untrusted text:** keep raw Markdown HTML disabled and escape variable values
   before inserting highlighted HTML. Treat pasted scans and persisted JSON as
   external input.
 - **Content validation:** a renamed page or heading needs updates to every note
-  link, suggestion and playbook reference. `npm test` checks the real content.
+  link, suggestion and companion reference. `npm test` checks the real content
+  and setup catalog.
 - **Current scope:** the interface and content identify the reference as OSCP only.
   Additional certifications need an explicit product and content decision.
 

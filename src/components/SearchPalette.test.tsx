@@ -15,19 +15,19 @@ const content = buildContent({
 
 const tools = buildTools(
   '',
-  { 'x/stuck.yaml': 'title: Stuck on foothold\nstart: a\nnodes:\n  a: { prompt: A }\n' },
+  { 'x/stuck.yaml': 'title: Stuck on foothold\nstart: a\nnodes:\n  a: { phase: Discovery, prompt: A }\n' },
   content,
 )
 
 describe('SearchPalette', () => {
-  it('lists matching tools and playbooks first', async () => {
+  it('lists matching tools and companions first', async () => {
     const user = userEvent.setup()
     renderApp(<SearchPalette content={content} tools={tools} open onOpenChange={() => {}} />)
     await user.keyboard('stuck')
     const option = await screen.findByRole('option', { name: /Stuck on foothold/ })
-    expect(option).toHaveTextContent('Tools / Playbooks')
+    expect(option).toHaveTextContent('Companions')
     await user.keyboard('{Enter}')
-    expect(screen.getByTestId('location')).toHaveTextContent('/tools/playbooks/stuck')
+    expect(screen.getByTestId('location')).toHaveTextContent('/companions/stuck')
   })
 
   it('searches as you type and opens the exact heading on Enter', async () => {

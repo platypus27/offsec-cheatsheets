@@ -8,10 +8,12 @@ export function PlaybookServices({
   node,
   prefix,
   content,
+  recommended = [],
 }: {
   node: PlaybookNode
   prefix: string
   content: Content
+  recommended?: string[]
 }) {
   const { checks, setCheck } = useAppState()
   if (node.services.length === 0) return null
@@ -23,12 +25,18 @@ export function PlaybookServices({
         <legend className="mb-3 text-sm font-bold">Services confirmed in Nmap</legend>
         <div className="grid gap-3 sm:grid-cols-2">
           {node.services.map((service) => (
-            <Checkbox
-              key={service.id}
-              label={service.title}
-              checked={checks[key(service.id)] ?? false}
-              onCheckedChange={(checked) => setCheck(key(service.id), checked === true)}
-            />
+            <div key={service.id}>
+              <Checkbox
+                label={service.title}
+                checked={checks[key(service.id)] ?? false}
+                onCheckedChange={(checked) => setCheck(key(service.id), checked === true)}
+              />
+              {recommended.includes(service.id) ? (
+                <p className="ml-7 mt-1 text-xs font-medium text-teal-primary">
+                  Suggested by the current profile's scan
+                </p>
+              ) : null}
+            </div>
           ))}
         </div>
       </fieldset>
@@ -44,11 +52,17 @@ export function PlaybookServices({
             aria-label={service.title}
             className="min-w-0 rounded-xl border border-teal-outline-variant/40 bg-teal-surface-container-low p-4"
           >
-            <h3 className="font-teal-headline text-xl font-bold">{service.title}</h3>
-            {service.body ? (
-              <p className="mt-2 whitespace-pre-line text-sm text-teal-on-surface-variant">{service.body}</p>
-            ) : null}
-            <PlaybookCommands refs={service.commands} content={content} headingLevel={4} />
+            <details open>
+              <summary className="cursor-pointer font-teal-headline text-xl font-bold">
+                <h3 className="inline">{service.title}</h3>
+              </summary>
+              {service.body ? (
+                <p className="mt-2 whitespace-pre-line text-sm text-teal-on-surface-variant">
+                  {service.body}
+                </p>
+              ) : null}
+              <PlaybookCommands refs={service.commands} content={content} headingLevel={4} />
+            </details>
           </section>
         ))}
       </div>

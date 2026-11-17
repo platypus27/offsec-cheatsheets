@@ -3,12 +3,15 @@ description: Two-step fixture tree.
 start: first
 nodes:
   first:
+    phase: Discovery
     prompt: Go left or right?
     options:
       - { label: Left, next: left }
       - { label: Right, next: right }
   left:
+    phase: Discovery
     prompt: Left end
     links: [beta/second#zebra-target]
   right:
+    phase: Discovery
     prompt: Right end

@@ -1,6 +1,7 @@
 import { parse as parseYaml } from 'yaml'
 import type { Chunk, Content } from './content'
 import { asRecord, isStringArray } from './guards'
+import type { ScannedPort } from './nmap'
 import { refProblem, splitRef } from './refs'
 
 export interface PlaybookOption {
@@ -8,17 +9,27 @@ export interface PlaybookOption {
   next: string
 }
 
+export interface ServiceMatch {
+  ports: number[]
+  services: string[]
+}
+
 export interface PlaybookService {
   id: string
   title: string
   body: string
   commands: string[]
+  match: ServiceMatch
 }
 
 export interface PlaybookNode {
   id: string
+  phase: string
   prompt: string
   body: string
+  why: string
+  lookFor: string
+  record: string
   links: string[]
   commands: string[]
   services: PlaybookService[]
@@ -35,6 +46,20 @@ export interface Playbook {
 
 const NODE_ID = /^[A-Za-z0-9_-]+$/
 const text = (value: unknown) => (typeof value === 'string' ? value.trim() : '')
+
+function parseMatch(value: unknown, where: string, errors: string[]): ServiceMatch {
+  if (value === undefined) return { ports: [], services: [] }
+  const match = asRecord(value)
+  const ports = Array.isArray(match.ports) ? match.ports : []
+  const services = isStringArray(match.services) ? match.services : []
+  if (ports.some((port) => !Number.isInteger(port) || port < 1 || port > 65535)) {
+    errors.push(`${where}: match ports must be integers between 1 and 65535`)
+  }
+  if (match.services !== undefined && !isStringArray(match.services)) {
+    errors.push(`${where}: match services must be a list of names`)
+  }
+  return { ports: ports.filter((port): port is number => typeof port === 'number'), services }
+}
 
 function parseServices(value: unknown, where: string, errors: string[]): PlaybookService[] {
   if (value === undefined) return []
@@ -57,7 +82,15 @@ function parseServices(value: unknown, where: string, errors: string[]): Playboo
       errors.push(`${label}: needs a title and at least one command reference`)
       return []
     }
-    return [{ id, title, body: text(service.body), commands: service.commands }]
+    return [
+      {
+        id,
+        title,
+        body: text(service.body),
+        commands: service.commands,
+        match: parseMatch(service.match, label, errors),
+      },
+    ]
   })
 }
 
@@ -91,6 +124,7 @@ export function parsePlaybook(id: string, source: string): { playbook?: Playbook
     // The answered path is stored in the URL joined by ".", so ids must not contain it.
     if (!NODE_ID.test(nodeId)) errors.push(`Node id "${nodeId}" may only use letters, digits, "-" and "_"`)
     const node = asRecord(raw)
+    if (!text(node.phase)) errors.push(`Node ${nodeId}: needs a phase`)
     if (node.commands !== undefined && !isStringArray(node.commands)) {
       errors.push(`Node ${nodeId}: commands must be a list of note heading references`)
     }
@@ -98,6 +132,11 @@ export function parsePlaybook(id: string, source: string): { playbook?: Playbook
     ;(Array.isArray(node.options) ? node.options : []).forEach((rawOption, index) => {
       const option = asRecord(rawOption)
       const where = `Node ${nodeId}, option ${index + 1}`
+      for (const key of Object.keys(option)) {
+        if (key !== 'label' && key !== 'next') {
+          errors.push(`${where}: unknown field "${key}"; quote labels containing commas`)
+        }
+      }
       const label = text(option.label)
       const next = text(option.next)
       if (!label) return errors.push(`${where}: needs a label`)
@@ -106,8 +145,12 @@ export function parsePlaybook(id: string, source: string): { playbook?: Playbook
     })
     nodes[nodeId] = {
       id: nodeId,
+      phase: text(node.phase),
       prompt: text(node.prompt) || nodeId,
       body: text(node.body),
+      why: text(node.why),
+      lookFor: text(node.lookFor),
+      record: text(node.record),
       links: isStringArray(node.links) ? node.links : [],
       commands: isStringArray(node.commands) ? node.commands : [],
       services: parseServices(node.services, `Node ${nodeId}`, errors),
@@ -155,6 +198,19 @@ export function walk(playbook: Playbook, path: string[]): string[] {
   }
   if (path[0] !== undefined && path[0] !== playbook.start) return [playbook.start]
   return result
+}
+
+export function recommendedServices(node: PlaybookNode, ports: ScannedPort[]): string[] {
+  const open = ports.filter((port) => port.state === 'open')
+  return node.services
+    .filter((service) =>
+      open.some(
+        (port) =>
+          service.match.ports.includes(port.port) ||
+          service.match.services.some((name) => port.service.toLowerCase().includes(name.toLowerCase())),
+      ),
+    )
+    .map((service) => service.id)
 }
 
 export function validatePlaybookLinks(playbook: Playbook, content: Content): string[] {

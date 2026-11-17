@@ -4,36 +4,50 @@ A personal, searchable, offline cheatsheet app for OffSec exam prep, built on
 [`@kryv/teal`](https://github.com/platypus27/teal). Notes are plain Markdown;
 the build is a single HTML file that opens straight from disk.
 
-The current cheatsheet and playbooks cover **OSCP (PEN-200) only**. OSWP and
+The current cheatsheets and companions cover **OSCP (PEN-200) only**. OSWP and
 OSEP content are outside the current reference. The persistent OSCP badge
 identifies this scope on desktop and mobile, including when opening a note directly.
 
 ## Features
 
-- **Navigation**: sidebar by section, breadcrumbs, prev/next, an outline of
-  every page, pins and recent pages.
+- **Field manual**: a task index connecting setup, discovery, services, web,
+  exploits, passwords, host and AD escalation, pivoting, reporting and labs.
+  Symptom tables and Windows/Linux path references support quick recovery.
+- **Command explorer**: combine text, tool, service and phase filters. Bookmark
+  the selection, open a group for its source context and copyable commands, or
+  jump to the full note. Metadata references the original heading.
+- **Lab notebook**: save status, entry point, privilege path, evidence, working
+  notes and next action per profile and target address. Export the selected
+  target as Markdown; companion findings remain visible beside the notes.
+- **Workflow navigation**: Field manual, command lookup, lab notes, Setup and Companions stay primary; reference sections
+  are collapsible and the parser/encoders sit under Utilities.
+- **Kali setup**: copyable installation and verification commands with fixed
+  `/home/kali/tools/...` destinations for the app, third-party tools, payloads
+  and wordlists. Manual check-offs are saved locally.
 - **Search** (`/` or `Ctrl K`): full text over every heading, paragraph and
   command, with typo tolerance. A result opens at the exact heading.
-- **Variable profiles**: separate AD and Box 1-3 tabs, with more boxes as needed.
-  Make a profile default to fill every displayed and copied command with its
-  saved values. Browsing another tab leaves the working profile unchanged. The
-  AD profile names the lab machines directly: `MS01`, `MS02` and `DC01` each
-  hold one machine's address, while `LHOST` stays the single attacker address.
-- **Targets**: per-host address, variables, ports and notes. The active target
-  supplies `RHOST` and overrides its profile's variables. Each profile remembers
-  its own target choice.
-- **Output parser**: paste nmap normal, grepable or XML output to extract ports,
-  save hosts as targets, and get note suggestions from your own rules.
-- **Playbooks**: YAML decision paths with copyable commands drawn from note
-  headings. The AD path starts with Nmap and SMB domain discovery, then shows
-  enumeration commands for the services you select. Service choices are saved
+- **Machine profiles**: one renamable tab per machine — MS01, MS02, DC01,
+  Box 1-3 — with only IP address, Domain, Username and Password in the editor.
+  **My IP** is shared across every box. DC01's IP address
+  automatically supplies `DC`. Make a profile default to fill every displayed
+  and copied command. Browsing another tab leaves the working profile unchanged.
+- **Scan parser**: paste nmap normal, grepable or XML output to extract ports,
+  load the address and ports into the current profile, and get note suggestions
+  from your own rules.
+- **Companions**: phased YAML decision paths with copyable commands drawn from
+  note headings, contextual methodology, outcome-based transitions and per-step
+  findings. Imported target ports recommend relevant services without selecting
+  them automatically. Paths, completion, findings and service choices are saved
   separately for each default profile and target address.
 - **Encoders**: Base64, PowerShell `-EncodedCommand`, URL, hex, HTML entities
   and ROT13, all offline.
 - **Checklists**: Markdown task lists become checkboxes with saved progress.
+- **Command values**: advanced placeholders are editable inside code blocks and
+  saved to the working profile. Page-level context and heading prose accompany
+  commands in companions and explorer groups. Long notes have a mobile section index.
 
-Everything personal (variables, targets, checks, pins) is stored in this
-browser's localStorage only.
+Everything personal (profile values, imported ports, checks, companion sessions,
+findings, lab notes, pins) is stored in this browser's localStorage only.
 
 When hosted, visitors keep independent settings in their own browser profiles
 for that site address. Personal values are not sent to the hosting server or
@@ -53,12 +67,15 @@ shortcuts are listed under `?`.
 
 ## Write notes
 
-See `content/start/authoring.md` (also the first page in the app):
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the complete authoring guide:
 
 - Pages: `content/<section>/<page>.md`, with optional `title`, `order`, `tags`
   frontmatter. Section titles and order go in `content/<section>/_meta.yaml`.
 - Suggestion rules: `content/_rules.yaml`.
-- Playbooks: `content/_playbooks/*.yaml`.
+- Companions: `content/_playbooks/*.yaml`.
+- Setup catalog: `content/_setup.yaml`.
+- Command catalogue: `content/_recipes.yaml`, referencing the original headings.
+- Task index and coverage: `content/field-guide/`.
 
 The section name `tools` and folders starting with `_` are reserved.
 
@@ -72,8 +89,8 @@ npm run format
 npm run format:check
 npm run lint
 npm run typecheck
-npm test           # unit tests, plus a check that every note link, rule and
-                   # playbook points at a page or heading that exists
+npm test           # unit tests, plus checks that note links, rules, setup and
+                   # companions point at valid content and commands
 npm run test:e2e   # Playwright: Chromium, Firefox, WebKit and mobile
 npm run verify     # all of the above plus a build
 ```

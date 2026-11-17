@@ -4,31 +4,28 @@ order: 2
 tags: [ad, smb, netexec, shares, users]
 ---
 
-## SMB domain login
+## SMB login and share access
 
-Use the discovered domain label and a known domain account. A successful login does not prove administrator or WinRM rights.
-
-```bash
-nxc smb {{MS01}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}'
-nxc smb {{MS02}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}'
-```
-
-[Domain authentication](https://www.netexec.wiki/smb-protocol/authentication/checking-credentials-domain).
-
-## SMB share permissions
+Use the account's actual authority. Run against the intended member host so RHOST is that box. A successful login does not prove administrator or WinRM rights.
 
 ```bash
-nxc smb {{MS01}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' --shares
-nxc smb {{MS02}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' --shares
+# Domain account
+nxc smb {{RHOST}} -u '{{USER}}' -p '{{PASS}}'
+# Local account
+nxc smb {{RHOST}} -u '{{USER}}' -p '{{PASS}}' --local-auth
+nxc smb {{RHOST}} -u '{{USER}}' -p '{{PASS}}' --shares
+smbclient -L '//{{RHOST}}' -U '{{USER}}%{{PASS}}'
 ```
 
-Record readable shares and inspect them with [smbclient](services/common-services#smb). [NetExec shares](https://www.netexec.wiki/smb-protocol/enumeration/enumerate-shares-and-access).
+Record readable shares and inspect them with [smbclient](services/common-services#smb). [NetExec authentication](https://www.netexec.wiki/smb-protocol/authentication/checking-credentials-domain), [NetExec shares](https://www.netexec.wiki/smb-protocol/enumeration/enumerate-shares-and-access).
 
-## SMB domain users
+## GPP and autologin credentials
+
+With authenticated access to SYSVOL, check for legacy Group Policy Preferences and autologin residue. These are historical misconfigurations, not guaranteed findings.
 
 ```bash
-nxc smb {{MS01}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' --users
-nxc smb {{MS02}} -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' --users
+nxc smb {{DC}} -u '{{USER}}' -p '{{PASS}}' -M gpp_password
+nxc smb {{DC}} -u '{{USER}}' -p '{{PASS}}' -M gpp_autologin
 ```
 
-Record returned usernames. Failure does not prove that the domain has no users. [NetExec user enumeration](https://www.netexec.wiki/smb-protocol/enumeration/enumerate-domain-users).
+Also inspect [SYSVOL scripts and configuration](services/common-services#sysvol) directly. Validate recovered credentials with their actual authority. [NetExec module listing](https://www.netexec.wiki/smb-protocol/list-modules).

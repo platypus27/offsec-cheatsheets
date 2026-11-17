@@ -1,6 +1,6 @@
 import type { Content } from '../lib/content'
 import { commandChunk } from '../lib/playbooks'
-import { CodeBlock } from './CodeBlock'
+import { Markdown } from './Markdown'
 
 /** Inline commands come directly from the referenced note heading, including its language. */
 export function PlaybookCommands({
@@ -13,6 +13,7 @@ export function PlaybookCommands({
   headingLevel?: 3 | 4
 }) {
   const Heading = headingLevel === 4 ? 'h4' : 'h3'
+  const introduced = new Set<string>()
   return refs.map((ref) => {
     const chunk = commandChunk(ref, content)
     if (!chunk)
@@ -21,17 +22,14 @@ export function PlaybookCommands({
           Commands unavailable for {ref}.
         </p>
       )
+    const page = content.page(chunk.pageSlug)!
+    const intro = introduced.has(page.slug) ? undefined : page.chunks.find((item) => item.headingId === null)
+    introduced.add(page.slug)
     return (
       <section key={ref} aria-label={chunk.heading} className="mt-5 min-w-0">
         <Heading className="text-sm font-bold">{chunk.heading}</Heading>
-        {chunk.blocks.map((block, index) => (
-          <CodeBlock
-            key={index}
-            code={block.code}
-            language={block.language}
-            accessibleLabel={`${chunk.heading} - ${block.language} code${chunk.blocks.length > 1 ? ` ${index + 1}` : ''}`}
-          />
-        ))}
+        {intro ? <Markdown page={page} content={content} excerpt={intro} /> : null}
+        <Markdown page={page} content={content} excerpt={chunk} />
       </section>
     )
   })

@@ -6,7 +6,7 @@ import ReactMarkdown, { type Components } from 'react-markdown'
 import { Link } from 'react-router'
 import rehypeSlug from 'rehype-slug'
 import remarkGfm from 'remark-gfm'
-import type { Content, Page, Task } from '../lib/content'
+import type { Chunk, Content, Page, Task } from '../lib/content'
 import { resolveLink } from '../lib/links'
 import { useAppState } from '../state'
 import { CodeBlock } from './CodeBlock'
@@ -96,7 +96,7 @@ function MarkdownLink({
   )
 }
 
-function buildComponents(page: Page, content: Content): Components {
+function buildComponents(page: Page, content: Content, excerpt?: Chunk): Components {
   const tasksByLine = new Map(page.tasks.map((task) => [task.line, task]))
   return {
     pre({ node }) {
@@ -106,7 +106,13 @@ function buildComponents(page: Page, content: Content): Components {
       const className = code?.properties.className
       const classes = Array.isArray(className) ? className.map(String) : []
       const language = classes.find((name) => name.startsWith('language-'))?.slice('language-'.length)
-      return <CodeBlock code={code ? hastText(code) : ''} language={language} />
+      return (
+        <CodeBlock
+          code={code ? hastText(code) : ''}
+          language={language}
+          accessibleLabel={excerpt ? `${excerpt.heading} - ${language || 'text'} code` : undefined}
+        />
+      )
     },
     // The page header already shows the title; a body h1 would repeat it.
     h1: () => null,
@@ -123,7 +129,9 @@ function buildComponents(page: Page, content: Content): Components {
     input: TaskInput,
     li({ node, children }) {
       // Same parser, same source: the hast position is the mdast position parsePage recorded.
-      const task = node?.position ? tasksByLine.get(node.position.start.line) : undefined
+      const task = node?.position
+        ? tasksByLine.get(node.position.start.line + (excerpt?.lineOffset ?? 0))
+        : undefined
       if (task) return <TaskItem task={task}>{children}</TaskItem>
       return <li>{children}</li>
     },
@@ -146,12 +154,20 @@ function buildComponents(page: Page, content: Content): Components {
  * Renders a cheatsheet page. Heading ids come from rehype-slug, which uses
  * the same github-slugger pass as the search index (see lib/content.ts).
  */
-export const Markdown = memo(function Markdown({ page, content }: { page: Page; content: Content }) {
-  const components = useMemo(() => buildComponents(page, content), [page, content])
+export const Markdown = memo(function Markdown({
+  page,
+  content,
+  excerpt,
+}: {
+  page: Page
+  content: Content
+  excerpt?: Chunk
+}) {
+  const components = useMemo(() => buildComponents(page, content, excerpt), [page, content, excerpt])
   return (
     <div className="prose-cheat">
       <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSlug]} components={components}>
-        {page.body}
+        {excerpt?.markdown ?? page.body}
       </ReactMarkdown>
     </div>
   )

@@ -19,18 +19,9 @@ export function findPlaceholders(code: string): string[] {
   return [...new Set(Array.from(code.matchAll(PLACEHOLDER), (match) => match[1] ?? ''))].filter(Boolean)
 }
 
-export const DEFAULT_VARIABLES: { name: string; hint: string }[] = [
-  { name: 'RHOST', hint: 'Target IP' },
-  { name: 'RPORT', hint: 'Target port' },
-  { name: 'LHOST', hint: 'Your IP (tun0)' },
-  { name: 'LPORT', hint: 'Your listener port' },
-  { name: 'DOMAIN', hint: 'AD domain' },
-  { name: 'MS01', hint: 'Member server IP' },
-  { name: 'MS02', hint: 'Member server IP' },
-  { name: 'DC01', hint: 'Domain controller IP' },
-  { name: 'USER', hint: 'Username' },
-  { name: 'PASS', hint: 'Password' },
-  { name: 'NTHASH', hint: 'NT hash for pass-the-hash' },
+/** Attacker-side values shared by every box profile; set once, apply everywhere. */
+export const SHARED_VARIABLES: { name: string; label: string; hint: string }[] = [
+  { name: 'LHOST', label: 'My IP', hint: 'Your Kali address reachable from the box (often tun0)' },
 ]
 
 export const VARIABLE_NAME = /^[A-Z][A-Z0-9_]*$/

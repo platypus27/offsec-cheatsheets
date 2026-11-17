@@ -27,7 +27,13 @@ for (const root of ['content', 'e2e/fixtures/content']) {
     const playbooks = Object.fromEntries(
       Object.entries(files).filter(([path]) => /^_playbooks\/[^/]+\.ya?ml$/.test(path)),
     )
-    const tools = buildTools(files['_rules.yaml'] ?? '', playbooks, content)
+    const tools = buildTools(
+      files['_rules.yaml'] ?? '',
+      playbooks,
+      content,
+      files['_setup.yaml'] ?? '',
+      files['_recipes.yaml'] ?? '',
+    )
 
     it('has pages', () => {
       expect(content.pages.length).toBeGreaterThan(0)
@@ -39,6 +45,10 @@ for (const root of ['content', 'e2e/fixtures/content']) {
 
     it('has valid rules and playbooks', () => {
       expect(tools.problems).toEqual([])
+    })
+
+    it('has no shared listener port placeholders', () => {
+      expect(Object.values(files).join('\n')).not.toMatch(/\{\{\s*LPORT\s*\}\}/)
     })
   })
 }

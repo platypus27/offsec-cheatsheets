@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { DEFAULT_VARIABLES, findPlaceholders, substitute } from './variables'
+import { SHARED_VARIABLES, findPlaceholders, substitute } from './variables'
 
 describe('substitute', () => {
   it('replaces set placeholders and leaves unset ones visible', () => {
@@ -23,11 +23,9 @@ describe('findPlaceholders', () => {
   })
 })
 
-describe('DEFAULT_VARIABLES', () => {
-  it('keeps a single LHOST and one variable per lab machine', () => {
-    const names = DEFAULT_VARIABLES.map((variable) => variable.name)
-    expect(names.filter((name) => name === 'LHOST')).toHaveLength(1)
-    expect(names).toEqual(expect.arrayContaining(['MS01', 'MS02', 'DC01']))
-    expect(names).not.toContain('DC')
+describe('SHARED_VARIABLES', () => {
+  it('uses a friendly label for the one shared attacker value', () => {
+    expect(SHARED_VARIABLES.map((variable) => variable.name)).toEqual(['LHOST'])
+    expect(SHARED_VARIABLES.map((variable) => variable.label)).toEqual(['My IP'])
   })
 })

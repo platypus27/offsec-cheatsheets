@@ -1,0 +1,1408 @@
+# Authored command catalogue. Edit metadata here; commands remain in their note headings.
+- ref: active-directory/tool-preparation#review-the-source-revision
+  tools: [Git]
+  services: [Local files]
+  phase: Setup
+- ref: active-directory/tool-preparation#windows-release-build
+  tools: [Git, MSBuild]
+  services: [Windows]
+  phase: Setup
+- ref: active-directory/tool-preparation#verify-and-return-the-binary
+  tools: [PowerShell, SCP, Linux shell]
+  services: [File transfer, SSH]
+  phase: Setup
+- ref: passwords/cracking#john-dictionary-job
+  tools: [John the Ripper]
+  services: [Authentication]
+  phase: Credential access
+- ref: active-directory/ad-enumeration#identify-domain-and-dc
+  tools:
+    - NetExec
+    - dig
+  services:
+    - Active Directory
+    - SMB
+    - DNS
+  phase: Enumeration
+- ref: active-directory/ad-enumeration#enumerate-accounts-without-credentials
+  tools:
+    - NetExec
+    - Kerbrute
+    - ldapsearch
+    - rpcclient
+  services:
+    - Active Directory
+    - SMB
+    - LDAP
+    - Kerberos
+    - RPC
+  phase: Enumeration
+- ref: active-directory/ad-enumeration#enumerate-accounts-with-credentials
+  tools:
+    - NetExec
+  services:
+    - Active Directory
+    - SMB
+    - LDAP
+  phase: Enumeration
+- ref: active-directory/ad-enumeration#enumerate-groups-and-members
+  tools:
+    - NetExec
+  services:
+    - Active Directory
+    - LDAP
+  phase: Enumeration
+- ref: active-directory/ad-enumeration#password-policy-and-kerberos-controls
+  tools:
+    - NetExec
+  services:
+    - Active Directory
+    - SMB
+    - LDAP
+  phase: Enumeration
+- ref: active-directory/ad-enumeration#bloodhound-ce-collection
+  tools:
+    - NetExec
+  services:
+    - Active Directory
+    - LDAP
+  phase: Enumeration
+- ref: active-directory/ad-enumeration#tls-certificate-identity
+  tools:
+    - OpenSSL
+  services:
+    - Active Directory
+    - TLS
+    - HTTP
+    - LDAP
+  phase: Enumeration
+- ref: active-directory/attack-paths#acl-abuse-operations
+  tools:
+    - Impacket
+  services:
+    - Active Directory
+    - LDAP
+  phase: Domain operations
+- ref: active-directory/attack-paths#restore-a-recorded-dacl
+  tools:
+    - Impacket
+  services:
+    - Active Directory
+    - LDAP
+  phase: Domain operations
+- ref: active-directory/attack-paths#group-membership-operation
+  tools:
+    - bloodyAD
+  services:
+    - Active Directory
+    - LDAP
+  phase: Domain operations
+- ref: active-directory/attack-paths#resource-based-constrained-delegation
+  tools:
+    - Impacket
+    - Kerberos utilities
+  services:
+    - Active Directory
+    - LDAP
+    - SMB
+    - Kerberos
+  phase: Domain operations
+- ref: active-directory/attack-paths#gpo-permissions
+  tools:
+    - SharpGPOAbuse
+  services:
+    - Active Directory
+    - LDAP
+    - SMB
+    - Windows
+  phase: Domain operations
+- ref: active-directory/attack-paths#capture-coerced-authentication
+  tools:
+    - Responder
+  services:
+    - Active Directory
+    - NTLM
+    - SMB
+    - HTTP
+  phase: Domain operations
+- ref: active-directory/attack-paths#enumerate-ad-cs-with-certipy
+  tools:
+    - Certipy
+  services:
+    - Active Directory
+    - AD CS
+  phase: Domain operations
+- ref: active-directory/attack-paths#request-and-use-an-esc1-certificate
+  tools:
+    - Certipy
+  services:
+    - Active Directory
+    - AD CS
+  phase: Domain operations
+- ref: active-directory/attack-paths#esc4-template-modification
+  tools:
+    - Certipy
+  services:
+    - Active Directory
+    - AD CS
+  phase: Domain operations
+- ref: active-directory/attack-paths#esc7-ca-management
+  tools:
+    - Certipy
+  services:
+    - Active Directory
+    - AD CS
+  phase: Domain operations
+- ref: active-directory/attack-paths#esc8-relay-conditions
+  tools:
+    - Certipy
+  services:
+    - Active Directory
+    - AD CS
+  phase: Domain operations
+- ref: active-directory/attack-paths#certificate-schannel-fallback
+  tools:
+    - Certipy
+  services:
+    - Active Directory
+    - AD CS
+  phase: Domain operations
+- ref: active-directory/attack-paths#shadow-credentials-with-certipy
+  tools:
+    - Certipy
+  services:
+    - Active Directory
+    - AD CS
+  phase: Domain operations
+- ref: active-directory/credential-access#domain-or-local-login
+  tools:
+    - NetExec
+  services:
+    - Active Directory
+    - SMB
+  phase: Credential access
+- ref: active-directory/credential-access#remote-execution
+  tools:
+    - NetExec
+    - Impacket
+  services:
+    - Active Directory
+    - SMB
+    - WMI
+  phase: Lateral movement
+- ref: active-directory/credential-access#dcom-execution
+  tools:
+    - Impacket
+  services:
+    - Active Directory
+    - DCOM
+    - RPC
+  phase: Lateral movement
+- ref: active-directory/credential-access#kerberos-authentication
+  tools:
+    - NetExec
+  services:
+    - Active Directory
+    - SMB
+    - Kerberos
+  phase: Lateral movement
+- ref: active-directory/credential-access#password-spraying
+  tools:
+    - NetExec
+  services:
+    - Active Directory
+    - SMB
+    - WinRM
+  phase: Credential access
+- ref: active-directory/credential-access#pass-the-hash
+  tools:
+    - Impacket
+  services:
+    - Active Directory
+    - SMB
+    - WMI
+  phase: Lateral movement
+- ref: active-directory/credential-access#kerberos-password-spraying
+  tools:
+    - Kerbrute
+  services:
+    - Active Directory
+    - Kerberos
+  phase: Credential access
+- ref: active-directory/credential-access#crack-a-captured-netntlmv2-response
+  tools:
+    - Hashcat
+  services:
+    - Active Directory
+    - NTLM
+    - SMB
+  phase: Credential access
+- ref: active-directory/credential-dumping#enable-remote-dumping
+  tools:
+    - Windows native
+  services:
+    - Active Directory
+    - Windows
+  phase: Credential access
+- ref: active-directory/credential-dumping#secretsdump-remotely
+  tools:
+    - Impacket
+  services:
+    - Active Directory
+    - SMB
+    - RPC
+  phase: Credential access
+- ref: active-directory/credential-dumping#secretsdump-cheat-sheet
+  tools:
+    - Impacket
+  services:
+    - Active Directory
+    - SMB
+    - RPC
+    - Windows
+  phase: Credential access
+- ref: active-directory/credential-dumping#ntds-and-backup-collection
+  tools:
+    - Impacket
+  services:
+    - Active Directory
+    - Windows
+    - SMB
+  phase: Credential access
+- ref: active-directory/credential-dumping#mimikatz-logon-passwords
+  tools:
+    - Mimikatz
+  services:
+    - Active Directory
+    - Windows
+  phase: Credential access
+- ref: active-directory/credential-dumping#secretsdump-from-hives
+  tools:
+    - Impacket
+  services:
+    - Active Directory
+    - Windows
+  phase: Credential access
+- ref: active-directory/credential-dumping#crack-cached-logons
+  tools:
+    - Hashcat
+  services:
+    - Active Directory
+  phase: Credential access
+- ref: active-directory/credential-dumping#read-gmsa-managed-passwords
+  tools:
+    - NetExec
+  services:
+    - Active Directory
+    - LDAP
+  phase: Credential access
+- ref: active-directory/credential-dumping#crack-a-protected-archive
+  tools:
+    - John the Ripper
+  services:
+    - Active Directory
+  phase: Credential access
+- ref: active-directory/credential-dumping#dcsync-through-the-domain-controller
+  tools:
+    - Impacket
+  services:
+    - Active Directory
+    - RPC
+  phase: Credential access
+- ref: active-directory/credential-dumping#read-laps-passwords
+  tools:
+    - NetExec
+  services:
+    - Active Directory
+    - LDAP
+  phase: Credential access
+- ref: active-directory/delegation#discover-delegation
+  tools:
+    - Impacket
+  services:
+    - Active Directory
+    - Kerberos
+  phase: Domain operations
+- ref: active-directory/delegation#constrained-delegation
+  tools:
+    - Impacket
+  services:
+    - Active Directory
+    - Kerberos
+  phase: Domain operations
+- ref: active-directory/delegation#unconstrained-delegation
+  tools:
+    - Rubeus
+  services:
+    - Active Directory
+    - Kerberos
+  phase: Domain operations
+- ref: active-directory/kerberos#as-rep-roasting
+  tools:
+    - NetExec
+    - Hashcat
+  services:
+    - Active Directory
+    - Kerberos
+    - LDAP
+  phase: Credential access
+- ref: active-directory/kerberos#kerberoasting
+  tools:
+    - NetExec
+    - Hashcat
+  services:
+    - Active Directory
+    - Kerberos
+    - LDAP
+  phase: Credential access
+- ref: active-directory/kerberos#kerberos-hash-modes
+  tools:
+    - Hashcat
+  services:
+    - Active Directory
+    - Kerberos
+  phase: Credential access
+- ref: active-directory/kerberos#kerberos-dns-or-clock-failure
+  tools:
+    - ntpdig
+  services:
+    - Active Directory
+    - Kerberos
+  phase: Credential access
+- ref: active-directory/relay#relay-to-smb
+  tools:
+    - Impacket
+  services:
+    - Active Directory
+    - SMB
+    - NTLM
+  phase: Domain operations
+- ref: active-directory/relay#listener-and-relay-recovery
+  tools:
+    - Linux shell
+  services:
+    - Active Directory
+    - SMB
+  phase: Domain operations
+- ref: active-directory/smb-enumeration#smb-login-and-share-access
+  tools:
+    - NetExec
+    - smbclient
+  services:
+    - Active Directory
+    - SMB
+  phase: Enumeration
+- ref: active-directory/smb-enumeration#gpp-and-autologin-credentials
+  tools:
+    - NetExec
+  services:
+    - Active Directory
+    - SMB
+  phase: Enumeration
+- ref: active-directory/tickets#obtain-a-tgt-with-a-password
+  tools:
+    - Impacket
+    - Kerberos utilities
+  services:
+    - Active Directory
+    - Kerberos
+  phase: Lateral movement
+- ref: active-directory/tickets#overpass-the-hash
+  tools:
+    - Impacket
+  services:
+    - Active Directory
+    - Kerberos
+  phase: Lateral movement
+- ref: active-directory/tickets#pass-the-ticket-from-kali
+  tools:
+    - Impacket
+    - Kerberos utilities
+  services:
+    - Active Directory
+    - Kerberos
+    - WMI
+  phase: Lateral movement
+- ref: active-directory/tickets#ticket-format-conversion
+  tools:
+    - Impacket
+  services:
+    - Active Directory
+    - Kerberos
+  phase: Lateral movement
+- ref: active-directory/tickets#windows-ticket-inspection-and-reuse
+  tools:
+    - Rubeus
+    - Kerberos utilities
+  services:
+    - Active Directory
+    - Kerberos
+  phase: Lateral movement
+- ref: active-directory/tickets#silver-tickets
+  tools:
+    - Impacket
+  services:
+    - Active Directory
+    - Kerberos
+  phase: Domain operations
+- ref: active-directory/tickets#golden-tickets
+  tools:
+    - Impacket
+  services:
+    - Active Directory
+    - Kerberos
+  phase: Domain operations
+- ref: active-directory/tickets#ticket-cleanup-and-failure-recovery
+  tools:
+    - Kerberos utilities
+  services:
+    - Active Directory
+    - Kerberos
+  phase: Lateral movement
+- ref: active-directory/windows-enumeration#native-domain-enumeration
+  tools:
+    - Windows native
+  services:
+    - Active Directory
+    - Windows
+  phase: Enumeration
+- ref: active-directory/windows-enumeration#directory-search-with-net
+  tools:
+    - PowerShell
+  services:
+    - Active Directory
+    - Windows
+    - LDAP
+  phase: Enumeration
+- ref: active-directory/windows-enumeration#powerview-enumeration
+  tools:
+    - PowerView
+  services:
+    - Active Directory
+    - Windows
+    - LDAP
+  phase: Enumeration
+- ref: active-directory/windows-enumeration#sharphound-ce-collection
+  tools:
+    - SharpHound CE
+  services:
+    - Active Directory
+    - Windows
+    - LDAP
+  phase: Enumeration
+- ref: exploitation/payloads#inspect-msfvenom-options
+  tools:
+    - msfvenom
+  services:
+    - Payloads
+  phase: Exploitation
+- ref: exploitation/public-exploits#search-the-local-index
+  tools:
+    - SearchSploit
+  services:
+    - Local files
+  phase: Exploitation
+- ref: exploitation/public-exploits#inspect-executable-format
+  tools:
+    - Linux shell
+  services:
+    - Local files
+  phase: Exploitation
+- ref: exploitation/public-exploits#capture-the-modification
+  tools:
+    - Linux shell
+  services:
+    - Local files
+  phase: Exploitation
+- ref: linux/credential-hunting#user-and-application-context
+  tools:
+    - Linux shell
+  services:
+    - Linux
+  phase: Credential access
+- ref: linux/credential-hunting#targeted-configuration-search
+  tools:
+    - Linux shell
+  services:
+    - Linux
+  phase: Credential access
+- ref: linux/credential-hunting#history-and-ssh-material
+  tools:
+    - Linux shell
+  services:
+    - Linux
+  phase: Credential access
+- ref: linux/linux-privesc#situational-awareness
+  tools:
+    - Linux shell
+  services:
+    - Linux
+  phase: Privilege escalation
+- ref: linux/linux-privesc#automated-enumeration
+  tools:
+    - LinPEAS
+  services:
+    - Linux
+  phase: Privilege escalation
+- ref: linux/linux-privesc#sudo-permissions
+  tools:
+    - Linux shell
+  services:
+    - Linux
+  phase: Privilege escalation
+- ref: linux/linux-privesc#sudo-find-shell
+  tools:
+    - Linux shell
+  services:
+    - Linux
+  phase: Privilege escalation
+- ref: linux/linux-privesc#suid-binaries
+  tools:
+    - Linux shell
+  services:
+    - Linux
+  phase: Privilege escalation
+- ref: linux/linux-privesc#file-capabilities
+  tools:
+    - Linux shell
+  services:
+    - Linux
+  phase: Privilege escalation
+- ref: linux/linux-privesc#cron-jobs
+  tools:
+    - Linux shell
+  services:
+    - Linux
+  phase: Privilege escalation
+- ref: linux/linux-privesc#systemd-timers
+  tools:
+    - Linux shell
+  services:
+    - Linux
+  phase: Privilege escalation
+- ref: linux/linux-privesc#version-based-exploits
+  tools:
+    - SearchSploit
+  services:
+    - Linux
+  phase: Privilege escalation
+- ref: linux/linux-privesc#credential-files
+  tools:
+    - Linux shell
+  services:
+    - Linux
+  phase: Privilege escalation
+- ref: linux/permissions-and-jobs#inspect-sudo-precisely
+  tools:
+    - Linux shell
+  services:
+    - Linux
+  phase: Privilege escalation
+- ref: linux/permissions-and-jobs#suid-and-sgid-candidates
+  tools:
+    - Linux shell
+  services:
+    - Linux
+  phase: Privilege escalation
+- ref: linux/permissions-and-jobs#file-capabilities
+  tools:
+    - Linux shell
+  services:
+    - Linux
+  phase: Privilege escalation
+- ref: linux/permissions-and-jobs#cron-and-timers
+  tools:
+    - Linux shell
+  services:
+    - Linux
+  phase: Privilege escalation
+- ref: linux/permissions-and-jobs#trace-path-permissions
+  tools:
+    - Linux shell
+  services:
+    - Linux
+  phase: Privilege escalation
+- ref: linux/permissions-and-jobs#local-services-and-mounts
+  tools:
+    - Linux shell
+  services:
+    - Linux
+  phase: Privilege escalation
+- ref: passwords/cracking#hashcat-dictionary-job
+  tools:
+    - Hashcat
+  services:
+    - Authentication
+  phase: Credential access
+- ref: passwords/cracking#rules-results-and-resume
+  tools:
+    - Hashcat
+  services:
+    - Authentication
+  phase: Credential access
+- ref: passwords/cracking#protected-archive-extraction
+  tools:
+    - John the Ripper
+  services:
+    - Authentication
+  phase: Credential access
+- ref: passwords/cracking#ssh-private-key-extraction
+  tools:
+    - John the Ripper
+  services:
+    - Authentication
+    - SSH
+  phase: Credential access
+- ref: passwords/cracking#keepass-database-extraction
+  tools:
+    - John the Ripper
+  services:
+    - Authentication
+  phase: Credential access
+- ref: passwords/online#ssh-password-check
+  tools:
+    - Hydra
+  services:
+    - Authentication
+    - SSH
+  phase: Credential access
+- ref: passwords/online#http-form-validation
+  tools:
+    - Hydra
+  services:
+    - Authentication
+    - HTTP
+  phase: Credential access
+- ref: passwords/online#validate-one-recovered-credential
+  tools:
+    - NetExec
+  services:
+    - Authentication
+    - SMB
+  phase: Credential access
+- ref: pivoting/forwarding#ssh-local-forward
+  tools:
+    - SSH
+  services:
+    - Network
+    - SSH
+  phase: Pivoting
+- ref: pivoting/forwarding#ssh-remote-forward
+  tools:
+    - SSH
+  services:
+    - Network
+    - SSH
+  phase: Pivoting
+- ref: pivoting/forwarding#ssh-dynamic-socks
+  tools:
+    - curl
+    - SSH
+  services:
+    - Network
+    - SSH
+  phase: Pivoting
+- ref: pivoting/forwarding#socat-tcp-relay
+  tools:
+    - socat
+  services:
+    - Network
+  phase: Pivoting
+- ref: pivoting/forwarding#windows-portproxy-inspection
+  tools:
+    - Windows native
+  services:
+    - Network
+  phase: Pivoting
+- ref: pivoting/tunnelling#port-forwarding
+  tools:
+    - SSH
+  services:
+    - Network
+    - SSH
+  phase: Pivoting
+- ref: pivoting/tunnelling#socks-proxies
+  tools:
+    - SSH
+  services:
+    - Network
+    - SSH
+  phase: Pivoting
+- ref: pivoting/tunnelling#chisel-reverse-socks
+  tools:
+    - Chisel
+  services:
+    - Network
+  phase: Pivoting
+- ref: pivoting/tunnelling#tunnel-troubleshooting
+  tools:
+    - curl
+  services:
+    - Network
+  phase: Pivoting
+- ref: pivoting/tunnelling#static-route
+  tools:
+    - Linux shell
+  services:
+    - Network
+  phase: Pivoting
+- ref: pivoting/tunnelling#ligolo-ng-tunnel
+  tools:
+    - Nmap
+    - Ligolo-ng
+  services:
+    - Network
+  phase: Pivoting
+- ref: pivoting/tunnelling#scan-through-a-tunnel
+  tools:
+    - Nmap
+    - Proxychains
+  services:
+    - Network
+  phase: Pivoting
+- ref: recon/scanning#host-discovery
+  tools:
+    - Nmap
+  services:
+    - Network
+  phase: Discovery
+- ref: recon/scanning#port-scanning
+  tools:
+    - Nmap
+  services:
+    - Network
+  phase: Discovery
+- ref: recon/scanning#service-detection
+  tools:
+    - Nmap
+  services:
+    - Network
+  phase: Discovery
+- ref: recon/scanning#udp-scanning
+  tools:
+    - Nmap
+  services:
+    - Network
+  phase: Discovery
+- ref: recon/workspace#target-directories
+  tools:
+    - Linux shell
+  services:
+    - Network
+  phase: Discovery
+- ref: recon/workspace#check-the-operator-route
+  tools:
+    - Linux shell
+  services:
+    - Network
+  phase: Discovery
+- ref: recon/workspace#capture-a-terminal-session
+  tools:
+    - Linux shell
+  services:
+    - Network
+  phase: Discovery
+- ref: services/common-services#ftp
+  tools:
+    - Nmap
+  services:
+    - FTP
+  phase: Enumeration
+- ref: services/common-services#ssh
+  tools:
+    - SSH
+  services:
+    - SSH
+  phase: Enumeration
+- ref: services/common-services#smb
+  tools:
+    - smbclient
+  services:
+    - SMB
+  phase: Enumeration
+- ref: services/common-services#password-brute-force
+  tools:
+    - Hydra
+  services:
+    - Authentication
+    - SSH
+    - FTP
+  phase: Enumeration
+- ref: services/common-services#sysvol
+  tools:
+    - smbclient
+  services:
+    - SMB
+  phase: Enumeration
+- ref: services/databases#mssql
+  tools:
+    - Impacket
+    - SQL client
+  services:
+    - MSSQL
+  phase: Enumeration
+- ref: services/databases#mssql-command-execution
+  tools:
+    - SQL client
+  services:
+    - MSSQL
+  phase: Enumeration
+- ref: services/databases#mysql
+  tools:
+    - MySQL client
+    - SQL client
+  services:
+    - MySQL
+  phase: Enumeration
+- ref: services/databases#postgresql
+  tools:
+    - psql
+  services:
+    - PostgreSQL
+  phase: Enumeration
+- ref: services/databases#mssql-unc-authentication
+  tools:
+    - SQL client
+  services:
+    - MSSQL
+  phase: Enumeration
+- ref: services/extra-services#http-proxy-check
+  tools:
+    - curl
+  services:
+    - HTTP proxy
+  phase: Enumeration
+- ref: services/extra-services#redis-inspection
+  tools:
+    - Redis CLI
+  services:
+    - Redis
+  phase: Enumeration
+- ref: services/extra-services#rsync-modules
+  tools:
+    - rsync
+  services:
+    - rsync
+  phase: Enumeration
+- ref: services/extra-services#tftp-transfer
+  tools:
+    - TFTP client
+  services:
+    - TFTP
+  phase: Enumeration
+- ref: services/mail#smtp-capabilities
+  tools:
+    - Nmap
+  services:
+    - SMTP
+  phase: Enumeration
+- ref: services/mail#smtp-starttls
+  tools:
+    - OpenSSL
+  services:
+    - SMTP
+  phase: Enumeration
+- ref: services/mail#pop3-session
+  tools:
+    - OpenSSL
+  services:
+    - POP3
+  phase: Enumeration
+- ref: services/mail#imap-capabilities
+  tools:
+    - OpenSSL
+  services:
+    - IMAP
+  phase: Enumeration
+- ref: services/network-services#dns-zone-transfer
+  tools:
+    - dig
+  services:
+    - DNS
+  phase: Enumeration
+- ref: services/network-services#snmp-community-walk
+  tools:
+    - SNMP tools
+  services:
+    - SNMP
+  phase: Enumeration
+- ref: services/network-services#snmp-extend-scripts
+  tools:
+    - SNMP tools
+  services:
+    - SNMP
+  phase: Enumeration
+- ref: services/network-services#nfs-exports
+  tools:
+    - showmount
+  services:
+    - NFS
+  phase: Enumeration
+- ref: services/remote-access#winrm-checks-and-shell
+  tools:
+    - NetExec
+    - Evil-WinRM
+  services:
+    - WinRM
+  phase: Enumeration
+- ref: services/remote-access#rdp
+  tools:
+    - FreeRDP
+  services:
+    - RDP
+  phase: Enumeration
+- ref: services/remote-access#winrm-hash-and-certificate-authentication
+  tools:
+    - Evil-WinRM
+    - OpenSSL
+  services:
+    - WinRM
+  phase: Enumeration
+- ref: services/winrm#inspect-the-client
+  tools:
+    - Evil-WinRM
+  services:
+    - WinRM
+  phase: Enumeration
+- ref: services/winrm#password-and-endpoint-selection
+  tools:
+    - Evil-WinRM
+  services:
+    - WinRM
+  phase: Enumeration
+- ref: services/winrm#nt-hash-authentication
+  tools:
+    - Evil-WinRM
+  services:
+    - WinRM
+  phase: Enumeration
+- ref: services/winrm#kerberos-ticket-authentication
+  tools:
+    - Evil-WinRM
+    - Kerberos utilities
+  services:
+    - WinRM
+  phase: Enumeration
+- ref: services/winrm#client-certificate-authentication
+  tools:
+    - Evil-WinRM
+  services:
+    - WinRM
+  phase: Enumeration
+- ref: services/winrm#identify-the-remote-session
+  tools:
+    - PowerShell
+  services:
+    - WinRM
+  phase: Enumeration
+- ref: services/winrm#upload-and-download-direction
+  tools:
+    - Evil-WinRM
+  services:
+    - WinRM
+  phase: Enumeration
+- ref: services/winrm#local-script-and-assembly-directories
+  tools:
+    - Evil-WinRM
+  services:
+    - WinRM
+  phase: Enumeration
+- ref: services/winrm#connection-diagnostics
+  tools:
+    - PowerShell
+  services:
+    - WinRM
+  phase: Enumeration
+- ref: shells/file-transfers#serving-files
+  tools:
+    - Python
+  services:
+    - Shell
+    - File transfer
+    - HTTP
+  phase: Shells and transfer
+- ref: shells/file-transfers#downloading-on-linux
+  tools:
+    - curl
+  services:
+    - Shell
+    - File transfer
+    - HTTP
+  phase: Shells and transfer
+- ref: shells/file-transfers#downloading-on-windows
+  tools:
+    - PowerShell
+  services:
+    - Shell
+    - File transfer
+    - HTTP
+  phase: Shells and transfer
+- ref: shells/file-transfers#verify-a-transferred-file
+  tools:
+    - PowerShell
+  services:
+    - Shell
+    - File transfer
+  phase: Shells and transfer
+- ref: shells/shells#listeners
+  tools:
+    - Netcat
+  services:
+    - Shell
+  phase: Shells and transfer
+- ref: shells/shells#bash-reverse-shell
+  tools:
+    - Linux shell
+  services:
+    - Shell
+  phase: Shells and transfer
+- ref: shells/shells#upgrading-a-shell
+  tools:
+    - Python
+  services:
+    - Shell
+  phase: Shells and transfer
+- ref: shells/shells#windows-reverse-payload
+  tools:
+    - msfvenom
+  services:
+    - Shell
+  phase: Shells and transfer
+- ref: shells/shells#php-reverse-shell
+  tools:
+    - Linux shell
+  services:
+    - Shell
+  phase: Shells and transfer
+- ref: troubleshooting/identity#inspect-before-retrying
+  tools:
+    - Kerberos utilities
+  services:
+    - Network
+    - Authentication
+    - Active Directory
+    - Kerberos
+  phase: Troubleshooting
+- ref: troubleshooting/network#operator-route-inspection
+  tools:
+    - dig
+  services:
+    - Network
+  phase: Troubleshooting
+- ref: troubleshooting/shells#inspect-a-linux-file
+  tools:
+    - Linux shell
+  services:
+    - Network
+  phase: Troubleshooting
+- ref: troubleshooting/shells#recover-the-local-terminal
+  tools:
+    - Linux shell
+  services:
+    - Network
+  phase: Troubleshooting
+- ref: troubleshooting/tunnels#test-a-proxied-application
+  tools:
+    - curl
+  services:
+    - Network
+  phase: Troubleshooting
+- ref: web/file-and-command-input#traversal-baseline
+  tools:
+    - curl
+  services:
+    - HTTP
+  phase: Web testing
+- ref: web/file-and-command-input#php-filter-read
+  tools:
+    - curl
+  services:
+    - HTTP
+  phase: Web testing
+- ref: web/file-and-command-input#command-injection-baseline
+  tools:
+    - curl
+  services:
+    - HTTP
+  phase: Web testing
+- ref: web/file-and-command-input#upload-storage-and-execution
+  tools:
+    - curl
+  services:
+    - HTTP
+  phase: Web testing
+- ref: web/http-workflow#baseline-request
+  tools:
+    - curl
+  services:
+    - HTTP
+  phase: Web testing
+- ref: web/http-workflow#cookie-backed-requests
+  tools:
+    - curl
+  services:
+    - HTTP
+  phase: Web testing
+- ref: web/http-workflow#parameter-encoding
+  tools:
+    - curl
+  services:
+    - HTTP
+  phase: Web testing
+- ref: web/input-tests#parameter-discovery
+  tools:
+    - ffuf
+  services:
+    - HTTP
+  phase: Web testing
+- ref: web/input-tests#sql-injection-comparison
+  tools:
+    - curl
+  services:
+    - HTTP
+  phase: Web testing
+- ref: web/input-tests#sqlmap
+  tools:
+    - SQLMap (labs)
+  services:
+    - HTTP
+  phase: Web testing
+- ref: web/input-tests#local-file-inclusion
+  tools:
+    - curl
+  services:
+    - HTTP
+  phase: Web testing
+- ref: web/manual-sqli#boolean-comparison
+  tools:
+    - curl
+  services:
+    - HTTP
+  phase: Web testing
+- ref: web/manual-sqli#union-column-and-display-checks
+  tools:
+    - SQL client
+  services:
+    - HTTP
+  phase: Web testing
+- ref: web/manual-sqli#mysql-context-and-schema
+  tools:
+    - SQL client
+  services:
+    - HTTP
+    - MySQL
+  phase: Web testing
+- ref: web/manual-sqli#mssql-context-and-schema
+  tools:
+    - SQL client
+  services:
+    - HTTP
+    - MSSQL
+  phase: Web testing
+- ref: web/manual-sqli#postgresql-context-and-schema
+  tools:
+    - SQL client
+  services:
+    - HTTP
+    - PostgreSQL
+  phase: Web testing
+- ref: web/web-enumeration#content-discovery
+  tools:
+    - ffuf
+  services:
+    - HTTP
+  phase: Web testing
+- ref: web/web-enumeration#virtual-hosts
+  tools:
+    - ffuf
+  services:
+    - HTTP
+  phase: Web testing
+- ref: web/web-enumeration#technology-fingerprinting
+  tools:
+    - curl
+  services:
+    - HTTP
+  phase: Web testing
+- ref: web/web-enumeration#https-hostname-and-sni
+  tools:
+    - curl
+  services:
+    - HTTP
+  phase: Web testing
+- ref: windows/credential-harvesting#first-pass-credential-hunt
+  tools:
+    - PowerShell
+  services:
+    - Windows
+  phase: Credential access
+- ref: windows/credential-harvesting#common-locations
+  tools:
+    - Windows native
+  services:
+    - Windows
+  phase: Credential access
+- ref: windows/credential-harvesting#application-data-files
+  tools:
+    - Windows native
+  services:
+    - Windows
+  phase: Credential access
+- ref: windows/credential-harvesting#strings-on-binaries
+  tools:
+    - Linux shell
+  services:
+    - Windows
+  phase: Credential access
+- ref: windows/credential-harvesting#powershell-history-and-transcripts
+  tools:
+    - PowerShell
+  services:
+    - Windows
+  phase: Credential access
+- ref: windows/credential-harvesting#autologon-registry-credentials
+  tools:
+    - Windows native
+  services:
+    - Windows
+  phase: Credential access
+- ref: windows/services-and-tasks#inventory-service-execution
+  tools:
+    - PowerShell
+  services:
+    - Windows
+  phase: Privilege escalation
+- ref: windows/services-and-tasks#check-executable-and-directory-acls
+  tools:
+    - PowerShell
+  services:
+    - Windows
+  phase: Privilege escalation
+- ref: windows/services-and-tasks#verify-a-changeable-service
+  tools:
+    - Windows native
+  services:
+    - Windows
+  phase: Privilege escalation
+- ref: windows/services-and-tasks#scheduled-task-inspection
+  tools:
+    - PowerShell
+  services:
+    - Windows
+  phase: Privilege escalation
+- ref: windows/services-and-tasks#installer-policy-check
+  tools:
+    - Windows native
+  services:
+    - Windows
+  phase: Privilege escalation
+- ref: windows/services-and-tasks#architecture-and-execution-context
+  tools:
+    - PowerShell
+  services:
+    - Windows
+  phase: Privilege escalation
+- ref: windows/windows-privesc#situational-awareness
+  tools:
+    - Windows native
+  services:
+    - Windows
+  phase: Privilege escalation
+- ref: windows/windows-privesc#token-privileges
+  tools:
+    - Windows native
+  services:
+    - Windows
+  phase: Privilege escalation
+- ref: windows/windows-privesc#privilege-escalation-decision
+  tools:
+    - Windows native
+  services:
+    - Windows
+  phase: Privilege escalation
+- ref: windows/windows-privesc#server-operators-service-control
+  tools:
+    - Windows native
+  services:
+    - Windows
+  phase: Privilege escalation
+- ref: windows/windows-privesc#dnsadmins-plugin-dll
+  tools:
+    - Windows native
+  services:
+    - Windows
+  phase: Privilege escalation
+- ref: windows/windows-privesc#backup-operators-registry-and-ifm
+  tools:
+    - Windows native
+  services:
+    - Windows
+  phase: Privilege escalation
+- ref: windows/windows-privesc#impersonation-escalation
+  tools:
+    - Evil-WinRM
+    - PrintSpoofer
+    - GodPotato
+  services:
+    - Windows
+  phase: Privilege escalation
+- ref: windows/windows-privesc#printspoofer
+  tools:
+    - PrintSpoofer
+  services:
+    - Windows
+  phase: Privilege escalation
+- ref: windows/windows-privesc#godpotato
+  tools:
+    - GodPotato
+  services:
+    - Windows
+  phase: Privilege escalation
+- ref: windows/windows-privesc#sigmapotato
+  tools:
+    - SigmaPotato
+  services:
+    - Windows
+  phase: Privilege escalation
+- ref: windows/windows-privesc#create-a-local-administrator
+  tools:
+    - PowerShell
+  services:
+    - Windows
+  phase: Privilege escalation
+- ref: windows/windows-privesc#host-winpeas-on-kali
+  tools:
+    - Python
+  services:
+    - Windows
+  phase: Privilege escalation
+- ref: windows/windows-privesc#download-winpeas-in-powershell
+  tools:
+    - WinPEAS
+  services:
+    - Windows
+  phase: Privilege escalation
+- ref: windows/windows-privesc#run-winpeas
+  tools:
+    - WinPEAS
+  services:
+    - Windows
+  phase: Privilege escalation
+- ref: windows/windows-privesc#service-paths-and-accounts
+  tools:
+    - PowerShell
+  services:
+    - Windows
+  phase: Privilege escalation
+- ref: windows/windows-privesc#file-and-directory-acls
+  tools:
+    - Windows native
+  services:
+    - Windows
+  phase: Privilege escalation
+- ref: windows/windows-privesc#scheduled-tasks
+  tools:
+    - Windows native
+  services:
+    - Windows
+  phase: Privilege escalation

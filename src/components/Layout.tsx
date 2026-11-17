@@ -1,5 +1,15 @@
-import { useEffect, useRef, useState } from 'react'
-import { Crosshair, Keyboard, Menu as MenuIcon, Pin, Search, Terminal, X } from 'lucide-react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import {
+  BookOpen,
+  ChevronDown,
+  Crosshair,
+  Keyboard,
+  Menu as MenuIcon,
+  Pin,
+  Search,
+  Terminal,
+  X,
+} from 'lucide-react'
 import {
   IconButton,
   Sidebar,
@@ -18,7 +28,7 @@ import {
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router'
 import type { Content } from '../lib/content'
 import type { Tools } from '../tools-source'
-import { TOOL_LINKS } from '../tools-nav'
+import { UTILITY_LINKS, WORKFLOW_LINKS } from '../tools-nav'
 import { pageHref } from '../lib/links'
 import { useHotkeys } from '../hooks'
 import { useAppState } from '../state'
@@ -82,8 +92,8 @@ function Navigation({ content, open, onClose }: { content: Content; open: boolea
           <Brand onNavigate={onClose} />
         </SidebarHeader>
         <SidebarContent>
-          <SidebarSection label="Tools">
-            {TOOL_LINKS.map((tool, index) => (
+          <SidebarSection label="Workflow">
+            {WORKFLOW_LINKS.map((tool, index) => (
               <SidebarItem
                 key={tool.to}
                 ref={index === 0 ? firstLink : undefined}
@@ -113,22 +123,48 @@ function Navigation({ content, open, onClose }: { content: Content; open: boolea
               ))}
             </SidebarSection>
           ) : null}
-          {content.sections.map((section) => (
-            <SidebarSection key={section.id} label={section.title}>
-              {section.pages.map((page) => (
-                <SidebarItem
-                  key={page.slug}
-                  as={NavLink}
-                  to={pageHref(page.slug)}
-                  active={pathname === `/${page.slug}`}
-                  onClick={onClose}
-                  title={page.title}
-                >
-                  {page.title}
-                </SidebarItem>
-              ))}
-            </SidebarSection>
-          ))}
+          <SidebarSection label="Reference">
+            {content.sections.map((section) => (
+              <details key={section.id} className="group" open={pathname.startsWith(`/${section.id}/`)}>
+                <summary className="flex cursor-pointer list-none items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-teal-on-surface-variant hover:bg-teal-surface-container-high hover:text-teal-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-primary">
+                  <BookOpen aria-hidden="true" className="size-3.5 shrink-0" />
+                  <span className="flex-1">{section.title}</span>
+                  <ChevronDown
+                    aria-hidden="true"
+                    className="size-3.5 transition-transform group-open:rotate-180"
+                  />
+                </summary>
+                <div className="ml-3 border-l border-teal-outline-variant/30 pl-1">
+                  {section.pages.map((page) => (
+                    <SidebarItem
+                      key={page.slug}
+                      as={NavLink}
+                      to={pageHref(page.slug)}
+                      active={pathname === `/${page.slug}`}
+                      onClick={onClose}
+                      title={page.title}
+                    >
+                      {page.title}
+                    </SidebarItem>
+                  ))}
+                </div>
+              </details>
+            ))}
+          </SidebarSection>
+          <SidebarSection label="Utilities">
+            {UTILITY_LINKS.map((tool) => (
+              <SidebarItem
+                key={tool.to}
+                as={NavLink}
+                to={tool.to}
+                active={pathname === tool.to || pathname.startsWith(`${tool.to}/`)}
+                onClick={onClose}
+                icon={<tool.icon aria-hidden="true" className="size-4" />}
+              >
+                {tool.label}
+              </SidebarItem>
+            ))}
+          </SidebarSection>
         </SidebarContent>
       </Sidebar>
     </>
@@ -136,11 +172,8 @@ function Navigation({ content, open, onClose }: { content: Content; open: boolea
 }
 
 function VariablesButton({ onClick }: { onClick: () => void }) {
-  const { variables, activeTarget, defaultProfile } = useAppState()
-  const target = variables.RHOST?.trim()
-  const label = activeTarget
-    ? `${activeTarget.name}${target && target !== activeTarget.name ? ` ${target}` : ''}`
-    : target
+  const { variables, defaultProfile } = useAppState()
+  const label = variables.RHOST?.trim()
   return (
     <button
       type="button"
@@ -163,7 +196,14 @@ export function Layout({ content, tools }: { content: Content; tools: Tools }) {
   const [variablesOpen, setVariablesOpen] = useState(false)
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const navigate = useNavigate()
+  const { pathname } = useLocation()
   const { togglePin } = useAppState()
+
+  // Start a new page before paint. Note-heading and companion-step effects run
+  // afterward; query-only navigation keeps its existing scroll behavior.
+  useLayoutEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' })
+  }, [pathname])
 
   // Read the page from the URL at keypress time, not from the last render:
   // router navigations commit asynchronously, so a quick "] [" would

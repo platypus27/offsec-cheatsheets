@@ -1,0 +1,14 @@
+sections:
+  - id: application
+    title: Application setup
+    description: Install the offline workspace.
+    items:
+      - id: app
+        title: OffSec Cheatsheets
+        description: Build the single-file application.
+        destination: /home/kali/tools/offsec-cheatsheets
+        command: |
+          git clone https://github.com/platypus27/offsec-cheatsheets.git /home/kali/tools/offsec-cheatsheets
+          cd /home/kali/tools/offsec-cheatsheets
+          npm ci && npm run build
+        verify: test -f /home/kali/tools/offsec-cheatsheets/dist/index.html

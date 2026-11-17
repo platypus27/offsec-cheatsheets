@@ -5,34 +5,42 @@ description: Work back through enumeration when nothing has worked.
 start: scanned
 nodes:
   scanned:
+    phase: Workflow
     prompt: Have you scanned every TCP port, and the top UDP ports?
     options:
       - { label: 'Yes', next: services }
       - { label: 'No', next: scan }
   scan:
+    phase: Workflow
     prompt: Scan all TCP ports and sample UDP, then identify the services.
+    commands: [recon/scanning#port-scanning, recon/scanning#udp-scanning, recon/scanning#service-detection]
     links: [recon/scanning#host-discovery, recon/scanning#port-scanning, recon/scanning#udp-scanning, recon/scanning#service-detection, recon/scanning#save-nmap-output]
     options:
       - { label: Done, next: services }
   services:
+    phase: Workflow
     prompt: Is there a web service?
     options:
       - { label: 'Yes', next: web }
       - { label: 'No', next: other }
   web:
+    phase: Workflow
     prompt: Enumerate the web service, then return to the remaining services.
     links: [web/web-enumeration#content-discovery, web/web-enumeration#virtual-hosts]
     options:
       - { label: Continue, next: other }
   other:
+    phase: Workflow
     prompt: Enumerate each service in turn.
     links: [services/common-services#ftp, services/common-services#ssh, services/common-services#smb, services/common-services#http, services/common-services#databases]
     options:
       - { label: Obtained a shell, next: foothold }
       - { label: Still no path, next: stuck }
   foothold:
+    phase: Workflow
     prompt: Stabilize access and enumerate privilege escalation paths.
-    links: [methodology/checklist#initial-access, methodology/checklist#privilege-escalation, methodology/checklist#post-exploitation]
+    links: [shells/shells#upgrading-a-shell, linux/linux-privesc#situational-awareness, windows/windows-privesc#situational-awareness, active-directory/credential-access#domain-or-local-login]
   stuck:
+    phase: Workflow
     prompt: Revisit untested leads and record the next concrete check.
-    links: [methodology/checklist#recon, methodology/checklist#stuck-with-no-new-leads]
+    links: [troubleshooting/start, field-guide/methodology#compare-leads]

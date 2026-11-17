@@ -25,5 +25,21 @@ const playbookFiles = import.meta.glob<string>('@content/_playbooks/*.{yaml,yml}
   import: 'default',
   eager: true,
 })
+const setupFiles = import.meta.glob<string>('@content/_setup.yaml', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+})
+const recipeFiles = import.meta.glob<string>('@content/_recipes.yaml', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+})
 
-export const tools = buildTools(Object.values(ruleFiles)[0] ?? '', playbookFiles, content)
+export const tools = buildTools(
+  Object.values(ruleFiles)[0] ?? '',
+  playbookFiles,
+  content,
+  Object.values(setupFiles)[0] ?? '',
+  Object.values(recipeFiles)[0] ?? '',
+)

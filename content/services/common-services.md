@@ -35,7 +35,7 @@ Use an enumerated share name when connecting. [Source](https://www.samba.org/sam
 
 ## Password brute force
 
-Slow and loud; check the [password policy](active-directory/ad-enumeration#password-policy) for a lockout threshold first and prefer credential reuse.
+Slow and loud; check the [password policy](active-directory/ad-enumeration#password-policy-and-kerberos-controls) for a lockout threshold first and prefer credential reuse.
 
 ```bash
 hydra -l '{{USER}}' -P passwords.txt {{RHOST}} ssh -s {{RPORT}}

