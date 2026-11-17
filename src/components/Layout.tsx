@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import {
   BookOpen,
   ChevronDown,
@@ -196,7 +196,14 @@ export function Layout({ content, tools }: { content: Content; tools: Tools }) {
   const [variablesOpen, setVariablesOpen] = useState(false)
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const navigate = useNavigate()
+  const { pathname } = useLocation()
   const { togglePin } = useAppState()
+
+  // Start a new page before paint. Note-heading and companion-step effects run
+  // afterward; query-only navigation keeps its existing scroll behavior.
+  useLayoutEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' })
+  }, [pathname])
 
   // Read the page from the URL at keypress time, not from the last render:
   // router navigations commit asynchronously, so a quick "] [" would

@@ -216,6 +216,9 @@ test('unknown routes show a not-found page', async ({ page }) => {
 
 for (const scheme of ['light', 'dark'] as const) {
   test(`has no accessibility violations (${scheme})`, async ({ page }) => {
+    // This journey runs five full Axe scans, including two dialogs. Keep their
+    // total budget separate from the default single-interaction test budget.
+    test.setTimeout(60_000)
     await page.emulateMedia({ colorScheme: scheme })
     for (const route of ['./', './#/alpha', './#/alpha/first']) {
       await page.goto(route)

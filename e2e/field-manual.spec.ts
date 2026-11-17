@@ -1,6 +1,25 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test } from '@playwright/test'
 
+test('new workspace pages open at the top after leaving a long page', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('./#/workflow/commands')
+  await page.evaluate(() =>
+    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }),
+  )
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(300)
+  await page.getByRole('button', { name: 'Open navigation' }).click()
+  const nav = page.getByRole('navigation', { name: 'Cheatsheet sections' })
+  await nav.getByRole('link', { name: 'Lab notebook', exact: true }).click()
+  await expect(page.getByRole('heading', { name: 'Lab notebook', exact: true })).toBeInViewport()
+  await page.evaluate(() =>
+    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }),
+  )
+  await page.getByRole('button', { name: 'Open navigation' }).click()
+  await nav.getByRole('link', { name: 'OffSec Cheatsheets OSCP / PEN-200' }).click()
+  await expect(page.getByRole('heading', { name: 'Your OSCP field workspace', exact: true })).toBeInViewport()
+})
+
 test('home offers the field manual and command workspace as direct entry points', async ({ page }) => {
   await page.goto('./')
   const main = page.getByRole('main')
@@ -32,6 +51,7 @@ test('command explorer combines filters, retains context and opens the exact sou
   await page.getByRole('checkbox', { name: 'Verify ticket principal', exact: true }).check()
   await page.getByRole('link', { name: 'Open full note' }).click()
   await expect(page).toHaveURL(/#\/workflow\/context\?h=ticket-access$/)
+  await expect(page.getByRole('heading', { level: 1, name: 'Command context', exact: true })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Ticket access', exact: true })).toBeInViewport()
   const tasks = page.getByRole('checkbox', { name: 'Verify ticket principal', exact: true })
   await expect(tasks.first()).toBeChecked()
