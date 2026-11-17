@@ -1,5 +1,10 @@
 # AD reference checkpoint
 
+This historical checkpoint was continued on 2026-11-18. See
+[the completed field manual validation and review](../research/notion-field-manual-validation.md)
+for the resulting application and current evidence; the original checkpoint below
+records the state at the earlier pause.
+
 Paused at the user's explicit request on 2026-11-16 so they can restart their computer.
 Resume only when asked. This is unfinished work, not an accepted release.
 

@@ -94,3 +94,9 @@ Commands were compared with references, not executed against AD services or lab
 targets. Browser tests prove application behavior, content checks prove reference
 integrity, and neither proves target exploitability. See the in-app
 `field-guide/coverage` page for retained study gaps and contextual source material.
+
+The review follow-up added a pinned Rubeus build/staging procedure, retained John
+extractor format on its own recovery branch, audited cross-protocol catalogue
+labels and made all ESC7 CA-management targets explicit. The upstream Rubeus
+project/solution and Certipy target resolver were inspected for those corrections.
+See [final validation and the separate review axes](notion-field-manual-validation.md).
