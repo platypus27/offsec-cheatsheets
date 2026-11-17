@@ -1,0 +1,12 @@
+- ref: workflow/commands#scan-the-target
+  tools: [Nmap]
+  services: [Network]
+  phase: Discovery
+- ref: workflow/commands#smb-shares
+  tools: [NetExec]
+  services: [SMB]
+  phase: Enumeration
+- ref: workflow/context#ticket-access
+  tools: [Impacket]
+  services: [SMB, Kerberos]
+  phase: Lateral movement

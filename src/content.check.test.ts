@@ -27,7 +27,13 @@ for (const root of ['content', 'e2e/fixtures/content']) {
     const playbooks = Object.fromEntries(
       Object.entries(files).filter(([path]) => /^_playbooks\/[^/]+\.ya?ml$/.test(path)),
     )
-    const tools = buildTools(files['_rules.yaml'] ?? '', playbooks, content, files['_setup.yaml'] ?? '')
+    const tools = buildTools(
+      files['_rules.yaml'] ?? '',
+      playbooks,
+      content,
+      files['_setup.yaml'] ?? '',
+      files['_recipes.yaml'] ?? '',
+    )
 
     it('has pages', () => {
       expect(content.pages.length).toBeGreaterThan(0)

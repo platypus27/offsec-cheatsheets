@@ -10,7 +10,16 @@ identifies this scope on desktop and mobile, including when opening a note direc
 
 ## Features
 
-- **Workflow navigation**: Setup and Companions stay primary; reference sections
+- **Field manual**: a task index connecting setup, discovery, services, web,
+  exploits, passwords, host and AD escalation, pivoting, reporting and labs.
+  Symptom tables and Windows/Linux path references support quick recovery.
+- **Command explorer**: combine text, tool, service and phase filters. Bookmark
+  the selection, open a group for its source context and copyable commands, or
+  jump to the full note. Metadata references the original heading.
+- **Lab notebook**: save status, entry point, privilege path, evidence, working
+  notes and next action per profile and target address. Export the selected
+  target as Markdown; companion findings remain visible beside the notes.
+- **Workflow navigation**: Field manual, command lookup, lab notes, Setup and Companions stay primary; reference sections
   are collapsible and the parser/encoders sit under Utilities.
 - **Kali setup**: copyable installation and verification commands with fixed
   `/home/kali/tools/...` destinations for the app, third-party tools, payloads
@@ -33,9 +42,12 @@ identifies this scope on desktop and mobile, including when opening a note direc
 - **Encoders**: Base64, PowerShell `-EncodedCommand`, URL, hex, HTML entities
   and ROT13, all offline.
 - **Checklists**: Markdown task lists become checkboxes with saved progress.
+- **Command values**: advanced placeholders are editable inside code blocks and
+  saved to the working profile. Page-level context and heading prose accompany
+  commands in companions and explorer groups. Long notes have a mobile section index.
 
 Everything personal (profile values, imported ports, checks, companion sessions,
-findings, pins) is stored in this browser's localStorage only.
+findings, lab notes, pins) is stored in this browser's localStorage only.
 
 When hosted, visitors keep independent settings in their own browser profiles
 for that site address. Personal values are not sent to the hosting server or
@@ -62,6 +74,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the complete authoring guide:
 - Suggestion rules: `content/_rules.yaml`.
 - Companions: `content/_playbooks/*.yaml`.
 - Setup catalog: `content/_setup.yaml`.
+- Command catalogue: `content/_recipes.yaml`, referencing the original headings.
+- Task index and coverage: `content/field-guide/`.
 
 The section name `tools` and folders starting with `_` are reserved.
 

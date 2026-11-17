@@ -7,11 +7,12 @@ nodes:
     prompt: Do you already have a working shell?
     options:
       - { label: 'Yes', next: terminal }
-      - { label: No, target can run Bash, next: reverse }
-      - { label: No, known remote logon credentials, next: remote }
+      - { label: 'No, target can run Bash', next: reverse }
+      - { label: 'No, known remote logon credentials', next: remote }
   reverse:
     phase: Workflow
     prompt: Start a listener, then connect from the target.
+    commands: [shells/shells#listeners, shells/shells#bash-reverse-shell]
     links: [shells/shells#listeners, shells/shells#bash-reverse-shell]
     options:
       - { label: Connected, next: terminal }
@@ -36,6 +37,7 @@ nodes:
   upgrade:
     phase: Workflow
     prompt: Spawn a pseudo-terminal when supported.
+    commands: [shells/shells#upgrading-a-shell]
     links: [shells/shells#upgrading-a-shell]
     options:
       - { label: Ready, next: transfer }
@@ -49,6 +51,7 @@ nodes:
   linux:
     phase: Workflow
     prompt: Download, then compare the file hash.
+    commands: [shells/file-transfers#downloading-on-linux, shells/file-transfers#verify-a-transferred-file]
     links: [shells/file-transfers#downloading-on-linux, shells/file-transfers#verify-a-transferred-file]
   windows:
     phase: Workflow

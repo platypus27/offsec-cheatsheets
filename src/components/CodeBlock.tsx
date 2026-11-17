@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Check, Copy } from 'lucide-react'
 import { IconButton, Input, toast } from '@kryv/teal'
 import { fillVariables, highlightMasked, resolveLanguage } from '../lib/highlight'
-import { findPlaceholders, resolveVariable, substitute } from '../lib/variables'
+import { resolveVariable, substitute } from '../lib/variables'
 import { useAppState } from '../state'
 
 interface CodeBlockProps {
@@ -24,12 +24,12 @@ export function CodeBlock({ code, language, accessibleLabel }: CodeBlockProps) {
   const [copied, setCopied] = useState(false)
   const timer = useRef<number | undefined>(undefined)
   const source = trimNewlines(code)
-  const names = findPlaceholders(source)
+  const highlighted = useMemo(() => highlightMasked(source, language), [source, language])
+  const names = [...new Set(highlighted.names)]
   const basic = new Set(['RHOST', 'DOMAIN', 'USER', 'PASS', 'DC', 'LHOST'])
   const advanced = names.filter((name) => !basic.has(name))
   const missing = names.filter((name) => resolveVariable(variables, name) === undefined)
   const label = language || 'text'
-  const highlighted = useMemo(() => highlightMasked(source, language), [source, language])
   const html = useMemo(() => fillVariables(highlighted, variables), [highlighted, variables])
 
   useEffect(() => () => window.clearTimeout(timer.current), [])

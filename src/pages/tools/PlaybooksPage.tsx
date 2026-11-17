@@ -90,9 +90,11 @@ export function PlaybookPage({ content, tools }: { content: Content; tools: Tool
   useEffect(() => {
     if (!playbook || stored?.path.join('.') === pathKey) return
     updateCompanionSession(sessionKey, playbook.start, (session) => ({ ...session, path }))
-    // pathKey is the stable representation of the validated path.
+    // Only navigation synchronizes a URL into storage. A stored-session update
+    // can commit before the router's pending URL, so observing stored.path here
+    // would overwrite a just-saved transition with the previous URL's path.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playbook, sessionKey, pathKey, stored?.path, updateCompanionSession])
+  }, [playbook, sessionKey, pathKey, updateCompanionSession])
 
   if (!playbook) return <NotFound />
   const node = playbook.nodes[path[path.length - 1]!]!

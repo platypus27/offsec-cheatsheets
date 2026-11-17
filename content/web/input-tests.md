@@ -28,6 +28,10 @@ A difference is a lead. Repeat and establish a consistent SQL-dependent result b
 
 ## SQLMap
 
+Lab reference: automatic SQL injection/exploitation tools are restricted by the
+OSCP exam rules. Use [manual SQL testing](web/manual-sqli) for the exam workflow
+and recheck the [official guide](https://help.offsec.com/hc/en-us/articles/360040165632-OSCP-Exam-Guide).
+
 Save the browser request to req.txt, then enumerate and confirm:
 
 ```bash

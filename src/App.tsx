@@ -7,6 +7,8 @@ import { NotFound } from './pages/NotFound'
 import { SectionPage } from './pages/SectionPage'
 import { SetupPage } from './pages/SetupPage'
 import { EncodersPage } from './pages/tools/EncodersPage'
+import { CommandsPage } from './pages/tools/CommandsPage'
+import { NotebookPage } from './pages/tools/NotebookPage'
 import { ParserPage } from './pages/tools/ParserPage'
 import { PlaybookPage, PlaybooksPage } from './pages/tools/PlaybooksPage'
 import type { Tools } from './tools-source'
@@ -32,6 +34,8 @@ export function App({ content, tools }: { content: Content; tools: Tools }) {
         <Route path="tools/playbooks" element={<Navigate replace to="/companions" />} />
         <Route path="tools/playbooks/:id" element={<LegacyPlaybookRedirect />} />
         <Route path="tools/encode" element={<EncodersPage />} />
+        <Route path="tools/commands" element={<CommandsPage content={content} tools={tools} />} />
+        <Route path="tools/notebook" element={<NotebookPage />} />
         <Route path=":section" element={<SectionPage content={content} />} />
         <Route path=":section/:page" element={<CheatPage content={content} />} />
         <Route path="*" element={<NotFound />} />

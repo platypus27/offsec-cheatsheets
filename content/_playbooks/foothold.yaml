@@ -13,6 +13,7 @@ nodes:
   scan:
     phase: Workflow
     prompt: Scan all TCP ports and sample UDP, then identify the services.
+    commands: [recon/scanning#port-scanning, recon/scanning#udp-scanning, recon/scanning#service-detection]
     links: [recon/scanning#host-discovery, recon/scanning#port-scanning, recon/scanning#udp-scanning, recon/scanning#service-detection, recon/scanning#save-nmap-output]
     options:
       - { label: Done, next: services }
@@ -42,4 +43,4 @@ nodes:
   stuck:
     phase: Workflow
     prompt: Revisit untested leads and record the next concrete check.
-    links: [recon/scanning#save-nmap-output, services/common-services#smb, shells/file-transfers#verify-a-transferred-file]
+    links: [troubleshooting/start, field-guide/methodology#compare-leads]

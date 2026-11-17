@@ -5,6 +5,8 @@ nodes:
   inspect:
     phase: Workflow
     prompt: Have you inspected headers, redirects, source and the app itself?
+    commands: [web/http-workflow#baseline-request]
+    why: A working baseline separates application state and hostname selection from the later payload test.
     links: [web/web-enumeration#technology-fingerprinting]
     options:
       - { label: Ready, next: names }
@@ -17,13 +19,15 @@ nodes:
   vhosts:
     phase: Workflow
     prompt: Compare virtual hosts and verify HTTPS hostname routing where relevant.
+    commands: [web/web-enumeration#virtual-hosts, web/web-enumeration#https-hostname-and-sni]
     links: [web/web-enumeration#virtual-hosts, web/web-enumeration#https-hostname-and-sni]
     options:
       - { label: Ready, next: content }
   content:
     phase: Workflow
     prompt: Discover relevant paths and confirm results against missing-page behavior.
-    links: [web/web-enumeration#content-discovery]
+    commands: [web/web-enumeration#content-discovery]
+    links: [web/http-workflow#calibrate-content-discovery, web/web-enumeration#content-discovery]
     options:
       - { label: Input or query parameter, next: inputs }
       - { label: File selection feature, next: lfi }
@@ -32,14 +36,17 @@ nodes:
   inputs:
     phase: Workflow
     prompt: Confirm a parameter, then compare controlled SQL conditions if relevant.
-    links: [web/input-tests#parameter-discovery, web/input-tests#sql-injection-comparison]
+    commands: [web/input-tests#parameter-discovery, web/manual-sqli#boolean-comparison]
+    links: [web/manual-sqli, web/http-workflow#save-and-replay-in-burp]
   lfi:
     phase: Workflow
     prompt: Test the observed file parameter and verify returned file content.
+    commands: [web/file-and-command-input#traversal-baseline, web/file-and-command-input#php-filter-read]
     links: [web/input-tests#local-file-inclusion]
   upload:
     phase: Workflow
     prompt: Verify storage, retrieval and execution as separate outcomes.
+    commands: [web/file-and-command-input#upload-storage-and-execution]
     links: [web/input-tests#file-upload-checks]
   credentials:
     phase: Workflow

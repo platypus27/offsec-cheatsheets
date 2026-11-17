@@ -7,7 +7,7 @@ nodes:
     prompt: Can you establish SSH to the pivot with forwarding permitted?
     options:
       - { label: 'Yes', next: forwarding }
-      - { label: No, pivot can connect back, next: reverse }
+      - { label: 'No, pivot can connect back', next: reverse }
       - { label: Neither confirmed, next: diagnose }
   forwarding:
     phase: Workflow
@@ -18,16 +18,19 @@ nodes:
   local:
     phase: Workflow
     prompt: Forward the remote loopback service and test with its local client.
+    commands: [pivoting/forwarding#ssh-local-forward]
     links: [pivoting/tunnelling#port-forwarding]
   socks:
     phase: Workflow
     prompt: Start SSH dynamic forwarding and configure the local client.
+    commands: [pivoting/forwarding#ssh-dynamic-socks]
     links: [pivoting/tunnelling#socks-proxies]
     options:
       - { label: Verify, next: diagnose }
   reverse:
     phase: Workflow
     prompt: Use Chisel reverse SOCKS with separate control and proxy ports.
+    commands: [pivoting/tunnelling#chisel-reverse-socks]
     links: [pivoting/tunnelling#chisel-reverse-socks]
     options:
       - { label: Verify, next: diagnose }

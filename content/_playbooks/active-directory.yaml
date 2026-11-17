@@ -12,6 +12,7 @@ nodes:
     options:
       - { label: "No usable service map - scan this host", next: scan }
       - { label: "Scan output or service evidence already available", next: domain }
+      - { label: "I have supplied domain credentials", next: services }
       - { label: "Already have a host session", next: host-enum }
   scan:
     phase: Discover
@@ -166,7 +167,7 @@ nodes:
     why: Coercion can expose a service or machine credential, but capture, relay and cracking are separate paths with different prerequisites.
     lookFor: The connecting account, NetNTLMv2 format, cleartext LDAP/HTTP credentials, signing, channel binding and a viable relay target.
     record: Save the capture and trigger, then crack NetNTLMv2 with mode 5600 or assess relay conditions independently.
-    commands: [active-directory/attack-paths#capture-coerced-authentication, services/databases#mssql-unc-authentication, active-directory/credential-access#crack-a-captured-netntlmv2-response]
+    commands: [active-directory/attack-paths#capture-coerced-authentication, services/databases#mssql-unc-authentication, active-directory/credential-access#crack-a-captured-netntlmv2-response, active-directory/relay#relay-to-smb]
     links: [active-directory/attack-paths#smb-signing-prerequisites, active-directory/attack-paths#ldap-signing-and-channel-binding]
     options:
       - { label: "Credential recovered - verify it", next: reuse }
@@ -178,7 +179,8 @@ nodes:
     why: Relationship analysis can reveal ACL, delegation, LAPS and certificate paths that service-by-service enumeration misses.
     lookFor: Effective control of users, groups or computers; DCSync rights; shadow-credential write access; machine-account quota; LAPS read rights and AD CS objects.
     record: Save collection output, controlled principal, target object, exact permission and any collection gaps.
-    commands: [active-directory/ad-enumeration#bloodhound-ce-collection, active-directory/ad-enumeration#enumerate-accounts-with-credentials]
+    commands: [active-directory/ad-enumeration#bloodhound-ce-collection, active-directory/ad-enumeration#enumerate-accounts-with-credentials, active-directory/windows-enumeration#sharphound-ce-collection]
+    links: [active-directory/windows-enumeration#interpret-a-graph-path]
     options:
       - { label: "ACL or object-control path", next: path }
       - { label: "AD CS or certificate path", next: certificates }
@@ -192,7 +194,7 @@ nodes:
     why: Authentication success alone is not enough; the resulting identity and host establish the actual foothold.
     lookFor: Working execution or desktop session, correct account, hostname, architecture and access level.
     record: Save the working command, identity and hostname. Capture required proof before changing target.
-    commands: [services/remote-access#winrm-checks-and-shell, services/remote-access#winrm-hash-and-certificate-authentication, services/remote-access#rdp]
+    commands: [services/remote-access#winrm-checks-and-shell, services/remote-access#winrm-hash-and-certificate-authentication, services/remote-access#rdp, active-directory/credential-access#dcom-execution]
     options:
       - { label: "Host session working - enumerate manually", next: host-enum }
       - { label: "Access failed - return to service evidence", next: services }
@@ -205,6 +207,11 @@ nodes:
     record: Save the full identity and a concrete lead with its evidence. Stabilize the shell and preserve useful files.
     commands: [windows/windows-privesc#situational-awareness, windows/windows-privesc#token-privileges, windows/windows-privesc#privilege-escalation-decision, windows/credential-harvesting#first-pass-credential-hunt, windows/credential-harvesting#common-locations, windows/credential-harvesting#powershell-history-and-transcripts, windows/credential-harvesting#autologon-registry-credentials, windows/windows-privesc#service-paths-and-accounts, windows/windows-privesc#scheduled-tasks]
     links: [windows/windows-privesc#privileged-group-and-host-specific-leads, shells/shells#upgrading-a-shell]
+    services:
+      - id: native-domain
+        title: Native domain queries from Windows
+        body: Select only on a domain-joined Windows foothold. PowerView needs a reviewed script; .NET and net queries use the current session.
+        commands: [active-directory/windows-enumeration#native-domain-enumeration, active-directory/windows-enumeration#directory-search-with-net, active-directory/windows-enumeration#powerview-enumeration]
     options:
       - { label: "Concrete local privilege or privileged-group lead", next: privesc }
       - { label: "Credential or admin access recovered", next: dump }
@@ -244,7 +251,7 @@ nodes:
     why: BloodHound edges describe possible control, not a universal command or guaranteed path.
     lookFor: GenericAll, WriteOwner, WriteDacl, force-change-password, group membership, replication rights and msDS-KeyCredentialLink write access.
     record: Save before/after state, object names, exact operation and verification. Reverse modifications when required by the engagement.
-    commands: [active-directory/attack-paths#acl-abuse-operations, active-directory/attack-paths#shadow-credentials-with-certipy]
+    commands: [active-directory/attack-paths#acl-abuse-operations, active-directory/attack-paths#restore-a-recorded-dacl, active-directory/attack-paths#group-membership-operation, active-directory/attack-paths#shadow-credentials-with-certipy]
     links: [active-directory/attack-paths#acl-abuse, active-directory/attack-paths#gpo-permissions]
     options:
       - { label: "Certificate or shadow-credential path", next: certificates }
@@ -259,7 +266,7 @@ nodes:
     why: Delegation abuse depends on object control, ticket semantics and target restrictions; a graph edge alone is insufficient.
     lookFor: Allowed SPNs, controlled computer objects, machine-account quota, usable TGT evidence and target service permissions.
     record: Save the controlled account, target SPN, delegation change, ticket request and resulting identity.
-    commands: [active-directory/attack-paths#resource-based-constrained-delegation]
+    commands: [active-directory/delegation#discover-delegation, active-directory/attack-paths#resource-based-constrained-delegation, active-directory/delegation#constrained-delegation, active-directory/delegation#unconstrained-delegation]
     links: [active-directory/attack-paths#delegation-prerequisites]
     options:
       - { label: "Delegation produced a usable credential or ticket", next: reuse }
@@ -312,7 +319,12 @@ nodes:
     why: Controlled reuse confirms access without assuming that a credential works everywhere or causing avoidable lockouts.
     lookFor: Valid authentication, actual execution rights, administrator access and a new host or identity worth enumerating.
     record: Save the successful host, service, account and command. Enumerate again from every new foothold.
-    commands: [active-directory/credential-access#domain-or-local-login, active-directory/credential-access#remote-execution, active-directory/credential-access#kerberos-authentication, active-directory/credential-access#pass-the-hash, services/remote-access#winrm-hash-and-certificate-authentication]
+    commands: [active-directory/credential-access#domain-or-local-login, active-directory/credential-access#remote-execution, active-directory/credential-access#kerberos-authentication, active-directory/credential-access#pass-the-hash, services/remote-access#winrm-hash-and-certificate-authentication, active-directory/tickets#overpass-the-hash, active-directory/tickets#pass-the-ticket-from-kali]
+    services:
+      - id: ticket-forgery
+        title: Ticket forgery in a controlled lab
+        body: Select only with the exact service or KRBTGT key, domain SID and verified target identity. File creation does not prove accepted access.
+        commands: [active-directory/tickets#silver-tickets, active-directory/tickets#golden-tickets]
     links: [active-directory/credential-access#reuse-one-known-credential]
     options:
       - { label: "WinRM or RDP access confirmed", next: access }

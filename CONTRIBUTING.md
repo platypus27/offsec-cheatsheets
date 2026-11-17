@@ -38,6 +38,32 @@ Supported languages include `bash`, `powershell`, `cmd`, `python`, `sql`,
 `http`, `php`, `c`, `csharp`, `json` and `yaml`. Markdown task lists retain
 saved check state, so renaming a task changes its storage identity.
 
+### Field manual and command catalogue
+
+Keep `content/field-guide/start.md` as the task index and
+`content/field-guide/coverage.md` as the source/coverage ledger. Adapt supplied
+examples into original concise prose with explicit host roles, prerequisites,
+result interpretation and cleanup. Source inspection and application checks do
+not establish live-target validation. Retain `TODO: verify` for unresolved details.
+
+`content/_recipes.yaml` indexes heading references with `tools`, `services` and
+`phase` metadata. Each entry must resolve to a heading containing a fenced command.
+Unknown fields, duplicate references and broken/commandless headings fail checks.
+Do not duplicate the commands in the catalogue. Review labels against the actual
+commands so combined filters are useful. A recipe is a command group, not a count
+of unique command lines or independently verified techniques.
+
+Companions and explorer groups render the note's page introduction and heading
+excerpt, preserving source context and checklist identity. Keep page introductions
+short and place technique-specific prerequisites directly under their heading.
+Advanced command inputs are saved with the default profile; values substitute
+literally and are not shell-escaped. Long notes expose a mobile heading index.
+
+The lab notebook stores manual status and notes per profile and trimmed target
+address. Its Markdown export includes the selected target's notebook fields;
+screenshots and original output files stay on disk. Companion findings are visible
+separately and are not silently included in exports.
+
 `content/_rules.yaml` maps open ports, service names and versions to note
 headings for the scan parser. Folders starting with `_` and
 the section name `tools` are reserved.

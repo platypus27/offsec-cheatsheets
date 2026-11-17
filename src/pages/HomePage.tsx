@@ -1,4 +1,15 @@
-import { ArrowRight, Crosshair, History, Pin, Search, Signpost, Wrench } from 'lucide-react'
+import {
+  ArrowRight,
+  BookOpen,
+  Crosshair,
+  History,
+  NotebookPen,
+  Pin,
+  Search,
+  Signpost,
+  Terminal,
+  Wrench,
+} from 'lucide-react'
 import { Badge } from '@kryv/teal'
 import { Key } from '../components/Key'
 import { Link } from 'react-router'
@@ -57,9 +68,53 @@ export function HomePage({ content, tools }: { content: Content; tools: Tools })
         Your OSCP field workspace
       </h1>
       <p className="mt-3 max-w-2xl leading-7 text-teal-on-surface-variant">
-        Prepare Kali, choose a target, and let a companion guide the next concrete step. Reference notes and
-        utilities stay close without getting in the way.
+        A task-based field manual, source-linked commands and a place to keep your lab evidence. Choose a
+        target and continue from what you already know.
       </p>
+
+      <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-4 border-y border-teal-outline-variant/30 py-4 sm:grid-cols-4">
+        {[
+          ['Reference pages', content.pages.length],
+          ['Command groups', tools.recipes.length],
+          ['Tools indexed', new Set(tools.recipes.flatMap((recipe) => recipe.tools)).size],
+          ['Guided workflows', tools.playbooks.length],
+        ].map(([label, value]) => (
+          <div key={label} className="flex min-w-0 flex-col">
+            <dt className="order-2 mt-1 text-xs font-semibold text-teal-on-surface-variant">{label}</dt>
+            <dd className="order-1 font-teal-headline text-2xl font-extrabold text-teal-primary">{value}</dd>
+          </div>
+        ))}
+      </dl>
+
+      <section aria-label="Choose your task" className="mt-6 grid min-w-0 gap-3 sm:grid-cols-3">
+        <Link to="/field-guide/start" className="card-link items-start p-4">
+          <BookOpen aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-teal-primary" />
+          <span className="min-w-0">
+            <span className="block font-bold">Start from your task</span>
+            <span className="mt-1 block text-xs leading-5 text-teal-on-surface-variant">
+              Workflow index, service map and troubleshooting.
+            </span>
+          </span>
+        </Link>
+        <Link to="/tools/commands" className="card-link items-start p-4">
+          <Terminal aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-teal-primary" />
+          <span className="min-w-0">
+            <span className="block font-bold">Explore commands</span>
+            <span className="mt-1 block text-xs leading-5 text-teal-on-surface-variant">
+              Filter by tool, service, phase or a phrase.
+            </span>
+          </span>
+        </Link>
+        <Link to="/tools/notebook" className="card-link items-start p-4">
+          <NotebookPen aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-teal-primary" />
+          <span className="min-w-0">
+            <span className="block font-bold">Open lab notebook</span>
+            <span className="mt-1 block text-xs leading-5 text-teal-on-surface-variant">
+              Access chain, evidence and your next action.
+            </span>
+          </span>
+        </Link>
+      </section>
 
       <div className="mt-6 flex flex-wrap items-center gap-3 rounded-xl border border-teal-outline-variant/40 px-4 py-3">
         <Crosshair aria-hidden="true" className="size-4 text-teal-primary" />

@@ -90,7 +90,22 @@ Cached domain logons (`$DCC2$` lines from secretsdump) crack like any other hash
 hashcat -m 2100 dcc2.txt /home/kali/tools/wordlists/rockyou.txt
 ```
 
-TODO: verify the exact `$DCC2$` line format hashcat expects before running. [Hashcat example hashes](https://github.com/hashcat/hashcat/blob/main/docs/hashcat-example-hashes.md).
+Mode 2100 expects `$DCC2$10240#username#hash` for the 10240-iteration format.
+Preserve the original username, iteration count and hash; extract the `$DCC2$`
+portion from surrounding tool labels without changing it. DCC2 is an offline
+cached-logon verifier, not an NT hash for pass-the-hash. [Hashcat format examples](https://github.com/hashcat/hashcat/blob/master/docs/hashcat-example-hashes.md).
+
+## Read gMSA managed passwords
+
+On Kali, use an account with verified permission to read the managed-password
+attribute. NetExec's gMSA workflow uses LDAPS; a domain login alone is insufficient.
+
+```bash
+nxc ldap '{{DC}}' -d '{{DOMAIN}}' -u '{{USER}}' -p '{{PASS}}' --gmsa
+```
+
+Record the gMSA name, permitted reader and returned material. Confirm the account's
+actual service/host rights before reuse. [NetExec gMSA](https://www.netexec.wiki/ldap-protocol/dump-gmsa).
 
 ## Crack a protected archive
 

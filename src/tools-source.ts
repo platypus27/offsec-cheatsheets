@@ -2,11 +2,13 @@ import type { Content } from './lib/content'
 import { parsePlaybook, validatePlaybookLinks, type Playbook } from './lib/playbooks'
 import { parseRules, validateRules, type Rule } from './lib/rules'
 import { parseSetup, type SetupSection } from './lib/setup'
+import { parseRecipes, type Recipe } from './lib/recipes'
 
 export interface Tools {
   rules: Rule[]
   playbooks: Playbook[]
   setup: SetupSection[]
+  recipes: Recipe[]
   /** Problems in rule or playbook files, shown on the tool pages and failing the content check. */
   problems: string[]
 }
@@ -16,13 +18,16 @@ export function buildTools(
   playbookSources: Record<string, string>,
   content: Content,
   setupSource = '',
+  recipesSource = '',
 ): Tools {
   const { rules, errors: ruleErrors } = parseRules(rulesSource)
   const { sections: setup, errors: setupErrors } = parseSetup(setupSource)
+  const { recipes, errors: recipeErrors } = parseRecipes(recipesSource, content)
   const problems = [
     ...ruleErrors.map((error) => `_rules.yaml: ${error}`),
     ...validateRules(rules, content).map((error) => `_rules.yaml: ${error}`),
     ...(setupSource.trim() ? setupErrors.map((error) => `_setup.yaml: ${error}`) : []),
+    ...recipeErrors.map((error) => `_recipes.yaml: ${error}`),
   ]
   const playbooks: Playbook[] = []
   for (const [path, source] of Object.entries(playbookSources).sort(([a], [b]) => a.localeCompare(b))) {
@@ -39,5 +44,5 @@ export function buildTools(
       )
     }
   }
-  return { rules, playbooks, setup, problems }
+  return { rules, playbooks, setup, recipes, problems }
 }

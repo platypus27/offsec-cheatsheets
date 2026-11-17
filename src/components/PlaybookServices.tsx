@@ -54,7 +54,7 @@ export function PlaybookServices({
           >
             <details open>
               <summary className="cursor-pointer font-teal-headline text-xl font-bold">
-                {service.title}
+                <h3 className="inline">{service.title}</h3>
               </summary>
               {service.body ? (
                 <p className="mt-2 whitespace-pre-line text-sm text-teal-on-surface-variant">

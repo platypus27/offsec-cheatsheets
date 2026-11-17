@@ -6,6 +6,15 @@ There is no backend or runtime content fetch.
 
 ## Where to make changes
 
+Command catalogue metadata lives in `content/_recipes.yaml`. `src/lib/recipes.ts`
+validates it against parsed real content; `src/pages/tools/CommandsPage.tsx` owns
+URL-backed filters and lazy command-group expansion. Catalogue entries reference
+the source heading and reuse `PlaybookCommands`; they do not contain command text.
+
+`src/lib/notebook.ts` owns the versioned lab-note format, target key and Markdown
+export. `src/pages/tools/NotebookPage.tsx` uses existing persistent storage and the
+working profile. It does not alter companion sessions or export other targets.
+
 | Change                                 | Start here                                                                      | Existing checks                                               |
 | -------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------- |
 | Notes and section order                | `content/`, `CONTRIBUTING.md`                                                   | `src/content.check.test.ts`                                   |
@@ -48,6 +57,12 @@ There is no backend or runtime content fetch.
 - `src/lib/companions.ts` validates the versioned `companion-sessions` entry.
   Paths, completed nodes and findings are keyed by companion, profile and host;
   an explicit URL path remains bookmarkable and browser history stays authoritative.
+- `PlaybookCommands` renders page-level context once per source page in a command
+  list, followed by each heading excerpt. Excerpt source-line offsets preserve
+  the original checklist identities. Code blocks use the working profile's
+  advanced values for both display and copy.
+- Notebook entries use `[profileId, trimmedAddress]` keys in the new version 1
+  `lab-notebook` entry. The existing profile/companion storage formats are unchanged.
 
 ## Invariants to preserve
 

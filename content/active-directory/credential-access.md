@@ -40,6 +40,19 @@ impacket-smbexec '{{USER}}:{{PASS}}'@{{RHOST}}
 
 Use the method that matches the host and recovered credential. NetExec's admin indicator is a lead; check the command result itself. [NetExec execution](https://www.netexec.wiki/smb-protocol/command-execution/execute-remote-command), [Impacket examples](https://github.com/fortra/impacket/tree/master/examples).
 
+## DCOM execution
+
+On **Kali**, use a verified account with remote administrator/DCOM rights on the
+target. RPC endpoint mapping and negotiated RPC ports must be reachable.
+
+```bash
+impacket-dcomexec -object MMC20 '{{DOMAIN}}/{{USER}}:{{PASS}}@{{RHOST}}' 'whoami'
+```
+
+Confirm the returned identity and hostname. DCOM activation restrictions,
+firewall rules and UAC filtering can prevent execution despite valid credentials.
+[Impacket dcomexec](https://github.com/fortra/impacket/blob/master/examples/dcomexec.py).
+
 ## Kerberos authentication
 
 Set RHOST to the target's FQDN and DC to the KDC address.
