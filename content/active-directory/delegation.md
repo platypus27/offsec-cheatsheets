@@ -43,6 +43,8 @@ are missing. [getST supported flows](https://github.com/fortra/impacket/blob/mas
 On the **controlled Windows host**, confirm unconstrained delegation and the
 ability to inspect the relevant logon sessions. A useful inbound delegated TGT
 must actually arrive; Protected Users and sensitive accounts can prevent this.
+Use the [reviewed build and staging procedure](active-directory/tool-preparation)
+before transferring Rubeus to this host.
 
 ```powershell
 .\Rubeus.exe triage

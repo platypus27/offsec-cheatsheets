@@ -1,4 +1,20 @@
 # Authored command catalogue. Edit metadata here; commands remain in their note headings.
+- ref: active-directory/tool-preparation#review-the-source-revision
+  tools: [Git]
+  services: [Local files]
+  phase: Setup
+- ref: active-directory/tool-preparation#windows-release-build
+  tools: [Git, MSBuild]
+  services: [Windows]
+  phase: Setup
+- ref: active-directory/tool-preparation#verify-and-return-the-binary
+  tools: [PowerShell, SCP, Linux shell]
+  services: [File transfer, SSH]
+  phase: Setup
+- ref: passwords/cracking#john-dictionary-job
+  tools: [John the Ripper]
+  services: [Authentication]
+  phase: Credential access
 - ref: active-directory/ad-enumeration#identify-domain-and-dc
   tools:
     - NetExec
@@ -6,6 +22,7 @@
   services:
     - Active Directory
     - SMB
+    - DNS
   phase: Enumeration
 - ref: active-directory/ad-enumeration#enumerate-accounts-without-credentials
   tools:
@@ -17,6 +34,8 @@
     - Active Directory
     - SMB
     - LDAP
+    - Kerberos
+    - RPC
   phase: Enumeration
 - ref: active-directory/ad-enumeration#enumerate-accounts-with-credentials
   tools:
@@ -53,6 +72,9 @@
     - OpenSSL
   services:
     - Active Directory
+    - TLS
+    - HTTP
+    - LDAP
   phase: Enumeration
 - ref: active-directory/attack-paths#acl-abuse-operations
   tools:
@@ -91,13 +113,17 @@
   services:
     - Active Directory
     - LDAP
+    - SMB
+    - Windows
   phase: Domain operations
 - ref: active-directory/attack-paths#capture-coerced-authentication
   tools:
     - Responder
   services:
     - Active Directory
-    - LDAP
+    - NTLM
+    - SMB
+    - HTTP
   phase: Domain operations
 - ref: active-directory/attack-paths#enumerate-ad-cs-with-certipy
   tools:
@@ -170,6 +196,7 @@
   services:
     - Active Directory
     - DCOM
+    - RPC
   phase: Lateral movement
 - ref: active-directory/credential-access#kerberos-authentication
   tools:
@@ -177,6 +204,7 @@
   services:
     - Active Directory
     - SMB
+    - Kerberos
   phase: Lateral movement
 - ref: active-directory/credential-access#password-spraying
   tools:
@@ -199,48 +227,61 @@
     - Kerbrute
   services:
     - Active Directory
+    - Kerberos
   phase: Credential access
 - ref: active-directory/credential-access#crack-a-captured-netntlmv2-response
   tools:
     - Hashcat
   services:
     - Active Directory
+    - NTLM
+    - SMB
   phase: Credential access
 - ref: active-directory/credential-dumping#enable-remote-dumping
   tools:
     - Windows native
   services:
     - Active Directory
+    - Windows
   phase: Credential access
 - ref: active-directory/credential-dumping#secretsdump-remotely
   tools:
     - Impacket
   services:
     - Active Directory
+    - SMB
+    - RPC
   phase: Credential access
 - ref: active-directory/credential-dumping#secretsdump-cheat-sheet
   tools:
     - Impacket
   services:
     - Active Directory
+    - SMB
+    - RPC
+    - Windows
   phase: Credential access
 - ref: active-directory/credential-dumping#ntds-and-backup-collection
   tools:
     - Impacket
   services:
     - Active Directory
+    - Windows
+    - SMB
   phase: Credential access
 - ref: active-directory/credential-dumping#mimikatz-logon-passwords
   tools:
     - Mimikatz
   services:
     - Active Directory
+    - Windows
   phase: Credential access
 - ref: active-directory/credential-dumping#secretsdump-from-hives
   tools:
     - Impacket
   services:
     - Active Directory
+    - Windows
   phase: Credential access
 - ref: active-directory/credential-dumping#crack-cached-logons
   tools:
@@ -266,6 +307,7 @@
     - Impacket
   services:
     - Active Directory
+    - RPC
   phase: Credential access
 - ref: active-directory/credential-dumping#read-laps-passwords
   tools:
@@ -333,6 +375,7 @@
   services:
     - Active Directory
     - SMB
+    - NTLM
   phase: Domain operations
 - ref: active-directory/relay#listener-and-relay-recovery
   tools:
@@ -429,6 +472,7 @@
   services:
     - Active Directory
     - Windows
+    - LDAP
   phase: Enumeration
 - ref: active-directory/windows-enumeration#powerview-enumeration
   tools:
@@ -436,6 +480,7 @@
   services:
     - Active Directory
     - Windows
+    - LDAP
   phase: Enumeration
 - ref: active-directory/windows-enumeration#sharphound-ce-collection
   tools:
@@ -443,6 +488,7 @@
   services:
     - Active Directory
     - Windows
+    - LDAP
   phase: Enumeration
 - ref: exploitation/payloads#inspect-msfvenom-options
   tools:
@@ -454,19 +500,19 @@
   tools:
     - SearchSploit
   services:
-    - Payloads
+    - Local files
   phase: Exploitation
 - ref: exploitation/public-exploits#inspect-executable-format
   tools:
     - Linux shell
   services:
-    - Payloads
+    - Local files
   phase: Exploitation
 - ref: exploitation/public-exploits#capture-the-modification
   tools:
     - Linux shell
   services:
-    - Payloads
+    - Local files
   phase: Exploitation
 - ref: linux/credential-hunting#user-and-application-context
   tools:
@@ -605,6 +651,7 @@
     - John the Ripper
   services:
     - Authentication
+    - SSH
   phase: Credential access
 - ref: passwords/cracking#keepass-database-extraction
   tools:
@@ -624,6 +671,7 @@
     - Hydra
   services:
     - Authentication
+    - HTTP
   phase: Credential access
 - ref: passwords/online#validate-one-recovered-credential
   tools:
@@ -970,24 +1018,31 @@
     - Python
   services:
     - Shell
+    - File transfer
+    - HTTP
   phase: Shells and transfer
 - ref: shells/file-transfers#downloading-on-linux
   tools:
     - curl
   services:
     - Shell
+    - File transfer
+    - HTTP
   phase: Shells and transfer
 - ref: shells/file-transfers#downloading-on-windows
   tools:
     - PowerShell
   services:
     - Shell
+    - File transfer
+    - HTTP
   phase: Shells and transfer
 - ref: shells/file-transfers#verify-a-transferred-file
   tools:
     - PowerShell
   services:
     - Shell
+    - File transfer
   phase: Shells and transfer
 - ref: shells/shells#listeners
   tools:
@@ -1024,6 +1079,9 @@
     - Kerberos utilities
   services:
     - Network
+    - Authentication
+    - Active Directory
+    - Kerberos
   phase: Troubleshooting
 - ref: troubleshooting/network#operator-route-inspection
   tools:
@@ -1132,18 +1190,21 @@
     - SQL client
   services:
     - HTTP
+    - MySQL
   phase: Web testing
 - ref: web/manual-sqli#mssql-context-and-schema
   tools:
     - SQL client
   services:
     - HTTP
+    - MSSQL
   phase: Web testing
 - ref: web/manual-sqli#postgresql-context-and-schema
   tools:
     - SQL client
   services:
     - HTTP
+    - PostgreSQL
   phase: Web testing
 - ref: web/web-enumeration#content-discovery
   tools:

@@ -27,6 +27,7 @@ offline; opening external source links requires a network connection.
 
 | Task | Working reference |
 | --- | --- |
+| Windows tool build and staging | [Rubeus, collectors and PowerView](active-directory/tool-preparation) |
 | Domain/DC, users, policy and groups | [Kali enumeration](active-directory/ad-enumeration) |
 | Native Windows, .NET and PowerView | [Windows enumeration](active-directory/windows-enumeration) |
 | SharpHound CE and graph interpretation | [Collection](active-directory/windows-enumeration#sharphound-ce-collection), [edge verification](active-directory/windows-enumeration#interpret-a-graph-path) |

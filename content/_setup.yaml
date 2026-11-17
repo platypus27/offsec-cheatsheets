@@ -95,6 +95,25 @@ sections:
           powerview_source=$(dpkg -L powersploit | sed -n '/\/Recon\/PowerView.ps1$/p' | head -n 1)
           test -n "$powerview_source" && cp "$powerview_source" /home/kali/tools/binaries/PowerView.ps1
         verify: test -s /home/kali/tools/sharphound/SharpHound.exe && test -s /home/kali/tools/binaries/PowerView.ps1
+      - id: rubeus-source
+        title: Rubeus reviewed source
+        description: Pin the reviewed source before building on a Windows operator VM. See Active Directory / Prepare Windows AD tools for build prerequisites and commands.
+        destination: /home/kali/tools/Rubeus
+        command: |
+          if [ ! -d /home/kali/tools/Rubeus/.git ]; then
+            git clone https://github.com/GhostPack/Rubeus.git /home/kali/tools/Rubeus
+          fi
+          git -C /home/kali/tools/Rubeus fetch origin 74215f68ea70bd6a66c008da91bf5fe21d20b154
+          git -C /home/kali/tools/Rubeus checkout --detach 74215f68ea70bd6a66c008da91bf5fe21d20b154
+        verify: git -C /home/kali/tools/Rubeus rev-parse HEAD && test -s /home/kali/tools/Rubeus/Rubeus/Rubeus.csproj
+      - id: rubeus-binary
+        title: Stage your locally built Rubeus
+        description: Build and hash the reviewed source in the Windows operator VM, then copy it back as /home/kali/tools/Rubeus-built.exe. This step stages that actual output; source checkout alone is insufficient.
+        destination: /home/kali/tools/binaries/Rubeus.exe
+        command: |
+          install -m 0644 /home/kali/tools/Rubeus-built.exe /home/kali/tools/binaries/Rubeus.exe
+          sha256sum /home/kali/tools/binaries/Rubeus.exe
+        verify: test -s /home/kali/tools/binaries/Rubeus.exe && sha256sum /home/kali/tools/binaries/Rubeus.exe
       - id: bloodhound-ce
         title: BloodHound Community Edition
         description: Optional local graph interface. Follow the setup output for its initial account, then download the compatible collector from that instance.

@@ -17,7 +17,3 @@ impacket-wmiexec -k -no-pass '{{DOMAIN}}/{{USER}}'@'{{TARGET_COMPUTER}}'
 ## Ticket cleanup
 
 - [ ] Verify ticket principal
-
-```bash
-klist
-```

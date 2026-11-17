@@ -70,7 +70,8 @@ Check the resulting type and principal before reuse. [ticketConverter](https://g
 ## Windows ticket inspection and reuse
 
 On the **Windows foothold**, inspect the current logon session before importing a
-ticket. Stage a reviewed Rubeus build matching the target runtime.
+ticket. [Build and stage Rubeus](active-directory/tool-preparation#windows-release-build)
+with the runtime required by the reviewed source revision.
 
 ```powershell
 klist

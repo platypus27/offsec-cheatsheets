@@ -67,6 +67,21 @@ Inspect converter errors and archive type. A ZIP verifier is not an arbitrary
 Hashcat mode input. Keep the original archive unchanged.
 [John jumbo documentation](https://github.com/openwall/john/tree/bleeding-jumbo/doc).
 
+## John dictionary job
+
+Continue with input confirmed to match John, including the converters above.
+Keep their original format labels and review the extractor's warnings.
+
+```bash
+john --wordlist=/home/kali/tools/wordlists/rockyou.txt '{{HASH_FILE}}'
+john --show '{{HASH_FILE}}'
+```
+
+If John cannot identify the format, inspect `john --list=formats` and select
+`--format` only from the actual file and extractor evidence. Do not send the same
+file to Hashcat without verifying its required input representation and mode.
+[John jumbo usage](https://github.com/openwall/john/blob/bleeding-jumbo/doc/README).
+
 ## SSH private-key extraction
 
 ```bash
