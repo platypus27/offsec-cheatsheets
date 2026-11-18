@@ -39,6 +39,10 @@ Use Scan parser for suggestions and Command explorer for tool variants.
 | 6379 | [Redis](services/extra-services#redis-inspection) | Authentication, ACLs and selected database; no write assumption |
 | 3128 / 8080 | [HTTP proxy](services/extra-services#http-proxy-check) | Proxy protocol, auth policy and permitted destinations |
 
+For [H2](services/extra-services#h2-database-and-console) and
+[FreeSWITCH](services/extra-services#freeswitch-signaling-and-management), identify
+the actual interface and its purpose from the owning service configuration.
+
 ## Directory services
 
 | Common port | Service | First useful evidence |

@@ -28,6 +28,7 @@ against a particular target.
 | An internal-only service | [Draw the tunnel endpoints](pivoting/forwarding), then test the destination. |
 | An error or no progress | Use [troubleshooting by symptom](troubleshooting/start). |
 | A proof or completed target | [Capture evidence](reporting/report) and update Lab notebook. |
+| A course module to revise | Use the [PEN-200 study map](field-guide/study-map) and [practice review](exam-day/practice-review). |
 
 ## Workflow index
 
@@ -35,20 +36,20 @@ against a particular target.
 | --- | --- |
 | 00 - Attack flow | [Methodology and lead selection](field-guide/methodology) |
 | 01 - Setup and listeners | [Workspace](recon/workspace), [listeners](shells/shells#listeners) |
-| 02 - Scanning | [Recon passes and interpretation](recon/scanning) |
+| 02 - Scanning | [Recon passes and interpretation](recon/scanning), [vulnerability finding review](recon/vulnerability-review) |
 | 03 - Services | [Ports and service matrix](services/service-matrix) |
-| 04 - Web | [HTTP/Burp workflow](web/http-workflow), [input tests](web/input-tests), [manual SQL](web/manual-sqli) |
-| 05 - Exploits and client-side | [Exploit assessment](exploitation/public-exploits), [payloads and interaction](exploitation/payloads) |
+| 04 - Web | [HTTP/Burp workflow](web/http-workflow), [input tests](web/input-tests), [manual SQL](web/manual-sqli), [browser trust](web/client-side-security) |
+| 05 - Exploits and client-side | [Exploit assessment](exploitation/public-exploits), [payload prerequisites](exploitation/payloads), [endpoint protections](windows/endpoint-protections) |
 | 06 - Shells and transfer | [Shells](shells/shells), [file transfers](shells/file-transfers), [WinRM](services/winrm) |
 | 07 - Passwords | [Format, extract and crack](passwords/cracking), [online checks](passwords/online) |
 | 08 - Credential hunting | [Linux](linux/credential-hunting), [Windows](windows/credential-harvesting) |
 | 09 - Linux privilege escalation | [Baseline](linux/linux-privesc), [permissions and jobs](linux/permissions-and-jobs) |
 | 10 - Windows privilege escalation | [Baseline and token paths](windows/windows-privesc), [services/tasks](windows/services-and-tasks) |
-| 11 - AD enumeration | [Kali](active-directory/ad-enumeration), [Windows and graphs](active-directory/windows-enumeration) |
+| 11 - AD enumeration | [Kali](active-directory/ad-enumeration), [Windows and graphs](active-directory/windows-enumeration), [control review](active-directory/defensive-review) |
 | 12 - AD attacks and movement | [Access](active-directory/credential-access), [tickets](active-directory/tickets), [ACLs/AD CS](active-directory/attack-paths), [delegation](active-directory/delegation), [relay](active-directory/relay) |
 | 13 - Pivoting | [Tunnels](pivoting/tunnelling), [forwarding and endpoint roles](pivoting/forwarding) |
-| 14 - Reporting | [Evidence and reproduction](reporting/report) |
-| 15 - Lab tracker | Open Lab notebook in the sidebar; [session discipline](field-guide/methodology#close-a-session) |
+| 14 - Reporting | [Evidence and upload](reporting/report), [blank outline](reporting/report-template) |
+| 15 - Lab tracker | Open Lab notebook in the sidebar and use the [practice review](exam-day/practice-review#review-a-challenge-session). |
 | 16 - Commands by tool | Open Command explorer and choose Tool. |
 | 17 - Commands by service | Open Command explorer and choose Service. |
 | 18 - Troubleshooting | [Symptom index](troubleshooting/start) |

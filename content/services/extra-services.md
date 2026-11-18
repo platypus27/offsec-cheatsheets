@@ -59,3 +59,25 @@ TFTP generally does not provide a directory listing. Check the installed client'
 help and transfer mode for binary data; do not guess sensitive filenames from a
 port result. Verify size and checksum after transfer.
 [tftp-hpa manual](https://manpages.debian.org/stable/tftp-hpa/tftp.1.en.html).
+
+## H2 database and console
+
+H2 is a Java SQL database that can run inside the application process, as a
+server, or in mixed mode. The browser-based H2 Console is a separate interface.
+A Java application using H2 locally need not expose a TCP database or a console.
+
+Record the installed library version, connection mode and whether the console is
+enabled. Keep optional administrative interfaces limited to expected operators,
+and use the database owner's configuration to confirm the service boundary.
+See [H2 connection modes](https://h2database.com/html/features.html#connection_modes).
+
+## FreeSWITCH signaling and management
+
+FreeSWITCH handles calls through signaling and media components. The Event Socket
+is a management interface for events and API operations, separate from SIP
+signaling or RTP media. Exposure of one interface says little about the others.
+
+Record the interface owner, bind address and expected clients. Keep management
+access on loopback or a dedicated administrator network as appropriate, enforce
+a narrow inbound ACL, and manage its authentication secret independently from
+SIP credentials. See [FreeSWITCH Event Socket](https://developer.signalwire.com/freeswitch/integration/event-socket/).
