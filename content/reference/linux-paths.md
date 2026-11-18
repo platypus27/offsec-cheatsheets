@@ -75,7 +75,7 @@ A known path does not imply read access or that a file exists.
 | `/etc/apache2/`, `/etc/nginx/` | Common Debian-family web configuration |
 | `/etc/mysql/`, `/etc/postgresql/` | Common distro database configuration |
 | `{APP}/.env`, `{APP}/config*` | App-selected configuration; validate the active consumer |
-| `/var/backups/`, `{APP}/*.bak` | Possible backups; not guaranteed or necessarily current |
+| `{APP}/*.bak` | Possible application backups; not guaranteed or necessarily current |
 | `/etc/crontab`, `/etc/cron.d/` | System scheduling definitions |
 | `/var/spool/cron/`, `/var/spool/cron/crontabs/` | User crontabs; distro/permission dependent |
 | `/tmp/`, `/var/tmp/`, `/dev/shm/` | Temporary/shared-memory files; mount options vary |

@@ -83,6 +83,13 @@ test('a cold load of a heading link scrolls to it', async ({ page }) => {
   await expect.poll(() => inViewport(page, 'zebra-target')).toBe(true)
 })
 
+test('long reference paths leave the explanation readable at 320px', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 780 })
+  await page.goto('./#/beta/second?h=path-and-purpose')
+  const purpose = page.getByRole('cell', { name: 'Shared application settings' })
+  await expect(purpose).toBeInViewport({ ratio: 1 })
+})
+
 test('re-selecting the heading you are already on scrolls back to it', async ({ page }) => {
   await page.goto('./#/beta/second?h=zebra-target')
   await expect.poll(() => inViewport(page, 'zebra-target')).toBe(true)
