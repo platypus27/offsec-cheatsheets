@@ -84,6 +84,12 @@ Filler paragraph 38 keeps this page long enough to need scrolling.
 
 Filler paragraph 39 keeps this page long enough to need scrolling.
 
+## Path and purpose
+
+| Path | Purpose |
+| --- | --- |
+| `%ProgramData%\ExampleVendor\ExampleApplication\Configuration\defaults.json` | Shared application settings |
+
 ## Zebra target
 
 The unique quokka term lives here.

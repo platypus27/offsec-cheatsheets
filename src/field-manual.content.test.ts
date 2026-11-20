@@ -1,8 +1,16 @@
 import { describe, expect, it } from 'vitest'
 import { content, tools } from './content-source'
 import { commandChunk } from './lib/playbooks'
+import { createSearch } from './lib/search'
 
 describe('field manual workflows', () => {
+  it('finds exam packaging requirements by what the candidate needs to do', () => {
+    const results = createSearch(content)('report archive upload checksum')
+    expect(results.slice(0, 5)).toContainEqual(
+      expect.objectContaining({ pageSlug: 'reporting/report', headingId: 'package-and-upload' }),
+    )
+  })
+
   it('targets the CA host explicitly for every ESC7 management action', () => {
     const commands = commandChunk('active-directory/attack-paths#esc7-ca-management', content)!
       .code.split('\n')

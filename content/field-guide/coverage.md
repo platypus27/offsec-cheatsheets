@@ -4,9 +4,9 @@ order: 2
 tags: [coverage, sources, evidence, oscp, ad, index]
 ---
 
-The [task index](field-guide/start#workflow-index) maps all numbered phases in the
-supplied Field Manual to this app. This is an adapted working reference, not a
-mirror of the Notion workspace or a claim to cover every tool and target.
+The [task index](field-guide/start#workflow-index) maps the Field Manual's 21
+numbered phases. The [PEN-200 study map](field-guide/study-map) connects the course
+topic families, theory, module exercises and challenge practice to this guide.
 
 ## Sources and adaptation
 
@@ -17,11 +17,23 @@ with its linked subject references. The manual's own
 [coverage page](https://app.notion.com/413bbf9f0e7481a4aba7fbc6e4fd3b2c)
 distinguishes imported, source-checked and needs-correction material.
 
-This app uses original concise prose, explicit host roles and retargetable
-commands. It does not import lab answers, course programs, terminal transcripts,
-personal progress or stale concrete credentials as generic recipes. Primary tool
-documentation is linked where syntax or behavior is important. Runtime use is
-offline; opening external source links requires a network connection.
+The review snapshot contained 148 page records and 18,851 blocks, including
+archives and repeated references. That inventory is limited to the captured
+trees. It does not establish the contents of every database view or gallery, and
+the current pass used that snapshot. Primary sources establish tool behavior and
+exam requirements. Opening external source links requires a network connection.
+
+## What each source contributes
+
+| Source area | Guide coverage | Scope |
+| --- | --- | --- |
+| Field Manual phases 00-15 and 18-20 | [Workflow index](field-guide/start#workflow-index), [troubleshooting](troubleshooting/start), [path references](reference) | Section mappings, not a one-to-one import of each example |
+| Field Manual tool and service cards, phases 16-17 | Command explorer and [service index](services/service-matrix) | The app groups existing commands by its own headings. Source card counts do not measure equivalence. |
+| Root path tables | [Windows paths](reference/windows-paths), [Linux paths](reference/linux-paths) | System, storage, configuration, applications, development and desktop defaults with local caveats |
+| Course theory and notes | [PEN-200 study map](field-guide/study-map#course-topic-map) | Topic map and original conceptual notes, including browser, endpoint, service and directory controls |
+| Module labs, quizzes and challenge labs | [Practice review](exam-day/practice-review) and Lab notebook | Study prompts, response evidence and self-review. Exercises and answers stay in their original source. |
+| Exam Desk and reporting template | [Exam day](exam-day/exam-day), [report outline](reporting/report-template), [submission checklist](reporting/report#package-and-upload) | Original template and checklist, with the current exam guide as authority |
+| Archives, imports and study-only examples | Current notes and primary references | Historical layouts, duplicate examples, personal progress, transcripts and operational programs stay out of the guide. |
 
 ## AD task coverage
 
@@ -61,11 +73,14 @@ your own target/build/tool version and result before treating a recipe as lab te
 
 - The source's numbered 19/20 pages were empty or nearly empty. The useful path
   material comes from its root path tables; reminders come from its workflow pages.
-- Client-side and antivirus theory gaps are retained in
-  [payload prerequisites](exploitation/payloads#source-study-gap), not silently certified.
-- Full source programs, GUI-only workflows, niche H2/FreeSWITCH examples and
-  lab-specific chains remain contextual in the original notes until a complete,
-  versioned generic procedure can be verified.
+- The [browser](web/client-side-security) and [endpoint](windows/endpoint-protections)
+  pages explain client-side and antivirus concepts. They cover trust, observable
+  behavior and defensive controls. Payload and evasion procedures are outside
+  this expansion.
+- [H2 and FreeSWITCH](services/extra-services#h2-database-and-console) now have
+  service and management context. BloodHound's [control review](active-directory/defensive-review)
+  covers UI interpretation and data quality. Lab-specific chains, query libraries
+  and full source programs remain outside this expansion.
 - PowerSploit/PowerView is archived; native and CE-compatible alternatives are
   provided. Collector and tool compatibility must be checked locally.
 - Exam rules and scoring can change. Check the
