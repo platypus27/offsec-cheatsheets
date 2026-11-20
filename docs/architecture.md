@@ -78,7 +78,8 @@ working profile. It does not alter companion sessions or export other targets.
 - **Variable precedence:** the shared LHOST value applies to every profile;
   the default profile supplies its own values, and DC01's IP address supplies DC.
   Editing another profile does not change the default. Display and copy resolve
-  values consistently. Substitution is plain text, not shell quoting or escaping.
+  values consistently. Plain placeholders substitute literally. Placeholders
+  ending in `|sh` generate a quoted POSIX shell argument.
 - **Untrusted text:** keep raw Markdown HTML disabled and escape variable values
   before inserting highlighted HTML. Treat pasted scans and persisted JSON as
   external input.

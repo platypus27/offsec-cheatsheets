@@ -2,17 +2,36 @@ import { isRecord } from './guards'
 
 export type Variables = Record<string, string>
 
-/** The one definition of `{{NAME}}` placeholder syntax; display and copy both go through it. */
-export const PLACEHOLDER = /\{\{\s*([A-Z][A-Z0-9_]*)\s*\}\}/g
+const PLACEHOLDER = /\{\{\s*([A-Z][A-Z0-9_]*)(?:\s*\|\s*(sh))?\s*\}\}/g
 
-/** The value a placeholder resolves to, or undefined when unset or blank. */
-export function resolveVariable(variables: Variables, name: string): string | undefined {
-  return variables[name]?.trim() || undefined
+export interface Placeholder {
+  name: string
+  source: string
+  shellQuoted: boolean
 }
 
-/** Swaps `{{NAME}}` placeholders for their set values; unset ones stay visible as a prompt. */
+export function replacePlaceholders(code: string, replace: (placeholder: Placeholder) => string): string {
+  return code.replace(PLACEHOLDER, (source, name: string, format?: string) =>
+    replace({ name, source, shellQuoted: format === 'sh' }),
+  )
+}
+
+/** Resolve the authored format, preserving exact values for quoted arguments. */
+export function resolvePlaceholder(
+  { name, shellQuoted }: Placeholder,
+  variables: Variables,
+): string | undefined {
+  const value = variables[name]
+  if (!shellQuoted) return (name === 'PASS' ? value : value?.trim()) || undefined
+  return value ? "'" + value.replaceAll("'", "'\\''") + "'" : undefined
+}
+
+/** Substitute entered values, keeping unfilled placeholders visible. */
 export function substitute(code: string, variables: Variables): string {
-  return code.replace(PLACEHOLDER, (match, name: string) => resolveVariable(variables, name) ?? match)
+  return replacePlaceholders(
+    code,
+    (placeholder) => resolvePlaceholder(placeholder, variables) ?? placeholder.source,
+  )
 }
 
 export function findPlaceholders(code: string): string[] {

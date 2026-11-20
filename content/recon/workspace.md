@@ -9,11 +9,11 @@ in a separate working directory. Adapted from [Setup and Listeners](https://app.
 
 ## Target directories
 
-Choose a simple target label, such as `dc01`, without shell metacharacters.
+Set `WORKDIR` to the directory path for this target.
 
 ```bash
-mkdir -p '{{WORKDIR}}'/scans '{{WORKDIR}}'/files '{{WORKDIR}}'/exploits '{{WORKDIR}}'/evidence
-cd '{{WORKDIR}}'
+mkdir -p -- {{WORKDIR|sh}}/scans {{WORKDIR|sh}}/files {{WORKDIR|sh}}/exploits {{WORKDIR|sh}}/evidence
+cd -- {{WORKDIR|sh}}
 pwd
 ```
 
@@ -35,7 +35,7 @@ present does not establish a working route. [ip route](https://man7.org/linux/ma
 ## Capture a terminal session
 
 ```bash
-script -q -a '{{WORKDIR}}/evidence/session.log'
+script -q -a -O {{WORKDIR|sh}}/evidence/session.log
 ```
 
 Run `exit` to close the recorded subshell. The log can contain credentials and

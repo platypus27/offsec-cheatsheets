@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Check, Copy } from 'lucide-react'
 import { IconButton, Input, toast } from '@kryv/teal'
 import { fillVariables, highlightMasked, resolveLanguage } from '../lib/highlight'
-import { resolveVariable, substitute } from '../lib/variables'
+import { resolvePlaceholder, substitute } from '../lib/variables'
 import { useAppState } from '../state'
 
 interface CodeBlockProps {
@@ -25,10 +25,16 @@ export function CodeBlock({ code, language, accessibleLabel }: CodeBlockProps) {
   const timer = useRef<number | undefined>(undefined)
   const source = trimNewlines(code)
   const highlighted = useMemo(() => highlightMasked(source, language), [source, language])
-  const names = [...new Set(highlighted.names)]
+  const names = [...new Set(highlighted.placeholders.map(({ name }) => name))]
   const basic = new Set(['RHOST', 'DOMAIN', 'USER', 'PASS', 'DC', 'LHOST'])
   const advanced = names.filter((name) => !basic.has(name))
-  const missing = names.filter((name) => resolveVariable(variables, name) === undefined)
+  const missing = [
+    ...new Set(
+      highlighted.placeholders
+        .filter((placeholder) => resolvePlaceholder(placeholder, variables) === undefined)
+        .map(({ name }) => name),
+    ),
+  ]
   const label = language || 'text'
   const html = useMemo(() => fillVariables(highlighted, variables), [highlighted, variables])
 
@@ -63,7 +69,8 @@ export function CodeBlock({ code, language, accessibleLabel }: CodeBlockProps) {
           </summary>
           <p className="mt-2 text-xs text-teal-on-surface-variant">
             Saved with {defaultProfile.name}. Basic addresses and credentials come from Machine variables.
-            Values substitute literally; preserve the command's shell quoting.
+            Enter the values as they should be passed to the command. The preview shows any quoting added by
+            the template.
           </p>
           <div className="my-3 grid gap-3 sm:grid-cols-2">
             {advanced.map((name) => (

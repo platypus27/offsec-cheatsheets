@@ -12,7 +12,7 @@ import 'prismjs/components/prism-php'
 import 'prismjs/components/prism-c'
 import 'prismjs/components/prism-csharp'
 import 'prismjs/components/prism-ini'
-import { PLACEHOLDER, resolveVariable, type Variables } from './variables'
+import { replacePlaceholders, resolvePlaceholder, type Placeholder, type Variables } from './variables'
 
 const ALIASES: Record<string, string> = {
   sh: 'bash',
@@ -46,7 +46,7 @@ const SENTINEL = /QXPH(\d+)QX/g
 
 export interface MaskedHighlight {
   html: string
-  names: string[]
+  placeholders: Placeholder[]
 }
 
 /**
@@ -55,20 +55,22 @@ export interface MaskedHighlight {
  * The result depends only on the code, so it is computed once per block.
  */
 export function highlightMasked(code: string, language: string | undefined): MaskedHighlight {
-  const names: string[] = []
-  const masked = code.replace(PLACEHOLDER, (_match, name: string) => sentinel(names.push(name) - 1))
+  const placeholders: Placeholder[] = []
+  const masked = replacePlaceholders(code, (placeholder) => sentinel(placeholders.push(placeholder) - 1))
   const lang = resolveLanguage(language)
   const grammar = Prism.languages[lang]
-  return { html: grammar ? Prism.highlight(masked, grammar, lang) : escapeHtml(masked), names }
+  return { html: grammar ? Prism.highlight(masked, grammar, lang) : escapeHtml(masked), placeholders }
 }
 
 /** Cheap per-keystroke step: fills sentinels with `.var-set` values or `.var-unset` prompts. */
-export function fillVariables({ html, names }: MaskedHighlight, variables: Variables): string {
-  return html.replace(SENTINEL, (_match, index: string) => {
-    const name = names[Number(index)] ?? ''
-    const value = resolveVariable(variables, name)
+export function fillVariables({ html, placeholders }: MaskedHighlight, variables: Variables): string {
+  return html.replace(SENTINEL, (match, index: string) => {
+    const placeholder = placeholders[Number(index)]
+    if (!placeholder) return match
+    const { name, source } = placeholder
+    const value = resolvePlaceholder(placeholder, variables)
     return value === undefined
-      ? `<span class="var-unset" title="Set ${name} in Variables">${escapeHtml(`{{${name}}}`)}</span>`
+      ? `<span class="var-unset" title="Set ${name} in Variables">${escapeHtml(source)}</span>`
       : `<span class="var-set" title="${name}">${escapeHtml(value)}</span>`
   })
 }

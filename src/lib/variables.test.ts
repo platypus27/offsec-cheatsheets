@@ -12,6 +12,16 @@ describe('substitute', () => {
     expect(substitute('echo {{PASS}}', { PASS: 'a$&b$1' })).toBe('echo a$&b$1')
   })
 
+  it('keeps edge whitespace in shell arguments and still trims plain placeholders', () => {
+    expect(
+      substitute('{{WORKDIR|sh}} {{LABEL|sh}} {{RHOST}}', {
+        WORKDIR: " owner's reports ",
+        LABEL: ' ',
+        RHOST: ' 192.0.2.55 ',
+      }),
+    ).toBe(String.raw`' owner'\''s reports ' ' ' 192.0.2.55`)
+  })
+
   it('ignores lowercase or malformed braces', () => {
     expect(substitute('{{rhost}} {{ }} {RHOST}', { RHOST: 'x', rhost: 'y' })).toBe('{{rhost}} {{ }} {RHOST}')
   })
