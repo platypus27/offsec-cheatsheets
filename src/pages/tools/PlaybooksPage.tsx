@@ -98,6 +98,7 @@ export function PlaybookPage({ content, tools }: { content: Content; tools: Tool
 
   if (!playbook) return <NotFound />
   const node = playbook.nodes[path[path.length - 1]!]!
+  const hasOutcomes = node.options.length > 0
   const completed = stored?.completed ?? []
   const findings = stored?.findings[node.id] ?? ''
   const phases = [...new Set(Object.values(playbook.nodes).map((item) => item.phase))]
@@ -225,17 +226,19 @@ export function PlaybookPage({ content, tools }: { content: Content; tools: Tool
           >
             Jump to findings
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              const outcomes = document.getElementById('step-outcomes')
-              outcomes?.focus({ preventScroll: true })
-              outcomes?.scrollIntoView({ block: 'start', behavior: 'instant' })
-            }}
-          >
-            Choose outcome
-          </Button>
+          {hasOutcomes ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                const outcomes = document.getElementById('step-outcomes')
+                outcomes?.focus({ preventScroll: true })
+                outcomes?.scrollIntoView({ block: 'start', behavior: 'instant' })
+              }}
+            >
+              Choose outcome
+            </Button>
+          ) : null}
         </nav>
 
         {node.why || node.lookFor || node.record ? (
@@ -290,7 +293,7 @@ export function PlaybookPage({ content, tools }: { content: Content; tools: Tool
           className="mt-6 min-h-24 scroll-mt-36 font-mono text-xs"
         />
 
-        {node.options.length > 0 ? (
+        {hasOutcomes ? (
           <div id="step-outcomes" tabIndex={-1} className="mt-6 grid scroll-mt-36 gap-2 outline-none">
             <p className="text-xs font-bold uppercase tracking-wider text-teal-on-surface-variant">
               Choose the outcome
