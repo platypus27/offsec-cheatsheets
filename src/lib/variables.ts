@@ -5,9 +5,10 @@ export type Variables = Record<string, string>
 /** The one definition of `{{NAME}}` placeholder syntax; display and copy both go through it. */
 export const PLACEHOLDER = /\{\{\s*([A-Z][A-Z0-9_]*)\s*\}\}/g
 
-/** The value a placeholder resolves to, or undefined when unset or blank. */
+/** Resolve a placeholder, preserving whitespace in passwords. */
 export function resolveVariable(variables: Variables, name: string): string | undefined {
-  return variables[name]?.trim() || undefined
+  const value = variables[name]
+  return (name === 'PASS' ? value : value?.trim()) || undefined
 }
 
 /** Swaps `{{NAME}}` placeholders for their set values; unset ones stay visible as a prompt. */
