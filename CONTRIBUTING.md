@@ -34,6 +34,9 @@ Use `{{NAME}}` placeholders in fenced commands. The default machine profile,
 DC01-derived controller address and shared My IP value fill displayed and copied
 commands. The profile editor intentionally exposes only IP address,
 Domain, Username and Password; advanced placeholders may remain in commands.
+Use `{{NAME|sh}}` where a POSIX shell reads a literal argument, for example a path
+passed to Bash. Leave the placeholder unquoted in the source. The renderer adds
+shell quotes so spaces and apostrophes stay part of the argument.
 Supported languages include `bash`, `powershell`, `cmd`, `python`, `sql`,
 `http`, `php`, `c`, `csharp`, `json` and `yaml`. Markdown task lists retain
 saved check state, so renaming a task changes its storage identity.
@@ -56,8 +59,8 @@ of unique command lines or independently verified techniques.
 Companions and explorer groups render the note's page introduction and heading
 excerpt, preserving source context and checklist identity. Keep page introductions
 short and place technique-specific prerequisites directly under their heading.
-Advanced command inputs are saved with the default profile; values substitute
-literally and are not shell-escaped. Long notes expose a mobile heading index.
+Advanced command inputs are saved with the default profile. Plain `{{NAME}}`
+placeholders substitute literally. Long notes expose a mobile heading index.
 
 The lab notebook stores manual status and notes per profile and trimmed target
 address. Its Markdown export includes the selected target's notebook fields;

